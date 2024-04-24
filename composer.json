@@ -1,0 +1,33 @@
+{
+    "name": "sendamaphp/engine",
+    "description": "A simple game engine for make terminal/console games. Lovingly written in pure PHP.",
+    "require-dev": {
+        "pestphp/pest": "^2.34"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Sendama\\Engine\\": "src/"
+        },
+        "files": [
+            "src/Util/Constants.php",
+            "src/Util/Functions.php"
+        ]
+    },
+    "authors": [
+        {
+            "name": "Andrew Masiye",
+            "email": "amasiye313@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "assegaiphp/collections":  "^0.3.2",
+        "amasiye/figlet":  "^1.1"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
+}

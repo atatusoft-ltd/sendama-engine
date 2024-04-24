@@ -1,0 +1,7 @@
+<?php
+
+const DEFAULT_SCREEN_WIDTH = 170;
+const DEFAULT_SCREEN_HEIGHT = 36;
+const DEFAULT_FPS = 60;
+const DEFAULT_ASSETS_PATH = 'assets';
+const DEFAULT_LOGS_DIR = 'logs';
