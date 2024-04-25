@@ -11,9 +11,9 @@ interface SceneInterface extends CanStart, CanUpdate, CanRender, CanResume
    * Loads the scene settings.
    *
    * @param array|null $settings The scene settings.
-   * @return static
+   * @return self
    */
-  public function loadSceneSettings(?array $settings = null): static;
+  public function loadSceneSettings(?array $settings = null): self;
 
   /**
    * Starts the scene.
@@ -63,4 +63,9 @@ interface SceneInterface extends CanStart, CanUpdate, CanRender, CanResume
    * @return void
    */
   public function resume(): void;
+
+  /**
+   * @return array
+   */
+  public function getRootGameObjects(): array;
 }
