@@ -8,6 +8,11 @@ namespace Sendama\Engine\Core\Interfaces;
 interface SceneInterface extends CanStart, CanUpdate, CanRender, CanResume
 {
   /**
+   * @return string The name of the scene.
+   */
+  public function getName(): string;
+
+  /**
    * Loads the scene settings.
    *
    * @param array|null $settings The scene settings.
