@@ -10,25 +10,24 @@ interface ObservableInterface
   /**
    * Adds the given observers to the list of observers to notify for events.
    *
-   * @param ObserverInterface ...$observers The list of observers.
+   * @param ObserverInterface|StaticObserverInterface|string ...$observers
    * @return void
    */
-  public function addObservers(ObserverInterface ...$observers): void;
+  public function addObservers(ObserverInterface|StaticObserverInterface|string ...$observers): void;
 
   /**
    * Removes the given observers from the list of observers to notify for events.
    *
-   * @param ObserverInterface ...$observers The list of observers to de-register.
+   * @param ObserverInterface|StaticObserverInterface|string|null ...$observers
    * @return void
    */
-  public function removeObservers(ObserverInterface ...$observers): void;
+  public function removeObservers(ObserverInterface|StaticObserverInterface|string|null ...$observers): void;
 
   /**
    * Notifies an observer that the given event occurred.
    *
-   * @param ObserverInterface $observer The observer to be notified of the event.
    * @param EventInterface $event The event that occurred.
    * @return void
    */
-  public function notify(ObserverInterface $observer, EventInterface $event): void;
+  public function notify(EventInterface $event): void;
 }
