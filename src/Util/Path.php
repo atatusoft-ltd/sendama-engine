@@ -38,7 +38,7 @@ final class Path
       $result .= $path . DIRECTORY_SEPARATOR;
     }
 
-    return rtrim($result, DIRECTORY_SEPARATOR);
+    return self::normalize(rtrim($result, DIRECTORY_SEPARATOR));
   }
 
   /**
@@ -104,5 +104,58 @@ final class Path
   public static function getGameFileDirectory(): string
   {
     return self::$gameFileDirectory;
+  }
+
+  /**
+   * Returns the path the assets' directory.
+   *
+   * @return string The path to the assets' directory.
+   */
+  public static function getAssetsDirectory(): string
+  {
+    return self::join(self::getProjectRootPath(), 'assets');
+  }
+
+  /**
+   * Normalizes the given path.
+   *
+   * @param string $path The path to normalize.
+   * @return string The normalized path.
+   */
+  public static function normalize(string $path): string
+  {
+    // Replace backslashes with forward slashes
+    $path = str_replace('\\', '/', $path);
+
+    // Explode the path into segments
+    $segments = explode('/', $path);
+
+    // Initialize an array to hold normalized segments
+    $normalizedSegments = [];
+
+    foreach ($segments as $segment)
+    {
+      if ($segment === '..')
+      {
+        // If the segment is '..', pop the last segment from the array
+        array_pop($normalizedSegments);
+      }
+      elseif ($segment !== '' && $segment !== '.')
+      {
+        // If the segment is not empty and not '.', add it to the array
+        $normalizedSegments[] = $segment;
+      }
+    }
+
+    // Recombine the normalized segments into a path string
+    $normalizedPath = implode('/', $normalizedSegments);
+
+    // Determine if the path was originally absolute or relative and prepend accordingly
+    $isAbsolute = $path[0] === '/';
+    if ($isAbsolute) {
+      $normalizedPath = '/' . $normalizedPath;
+    }
+
+    return $normalizedPath;
   }
 }
