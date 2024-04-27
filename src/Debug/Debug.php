@@ -3,9 +3,14 @@
 namespace Sendama\Engine\Debug;
 
 use RuntimeException;
+use Sendama\Engine\Debug\Enumerations\LogLevel;
+use Sendama\Engine\Util\Path;
 
 class Debug
 {
+  private static ?string $logDirectory = null;
+  private static LogLevel $logLevel = LogLevel::DEBUG;
+
   /**
    * The Debug constructor.
    */
@@ -13,9 +18,39 @@ class Debug
   {
   }
 
+  /**
+   * @param string $logDirectory
+   * @return void
+   */
+  public static function setLogDirectory(string $logDirectory): void
+  {
+    self::$logDirectory = $logDirectory;
+  }
+
+  /**
+   * Returns the log directory.
+   *
+   * @return string The log directory.
+   */
   public static function getLogDirectory(): string
   {
-    return dirname(__FILE__, 3) . DEFAULT_LOGS_DIR;
+    if (self::$logDirectory === null)
+    {
+      self::$logDirectory = Path::join(dirname(__FILE__, 3), DEFAULT_LOGS_DIR);
+    }
+
+    return self::$logDirectory;
+  }
+
+  /**
+   * Sets the log level.
+   *
+   * @param LogLevel $level The log level to set.
+   * @return void
+   */
+  public static function setLogLevel(LogLevel $level): void
+  {
+    self::$logLevel = $level;
   }
 
   /**
@@ -27,11 +62,19 @@ class Debug
    */
   public static function log(string $message, string $prefix = '[DEBUG]'): void
   {
-    $filename = self::getLogDirectory() . '/debug.log';
+    $filename = Path::join(self::getLogDirectory(),  'debug.log');
 
     if (!file_exists($filename))
     {
-      $file = fopen($filename, 'w');
+      if (!is_writeable(self::getLogDirectory()))
+      {
+        throw new RuntimeException("The directory, " . self::getLogDirectory() . ", is not writable.");
+      }
+
+      if (false === $file = fopen($filename, 'w'))
+      {
+        throw new RuntimeException("Failed to create the debug log file.");
+      }
       fclose($file);
     }
 
@@ -51,11 +94,25 @@ class Debug
    */
   public static function error(string $message, string $prefix = '[ERROR]'): void
   {
-    $filename = self::getLogDirectory() . '/error.log';
+    if (self::$logLevel !== LogLevel::ERROR && self::$logLevel !== LogLevel::FATAL)
+    {
+      return;
+    }
+
+    $filename = Path::join(self::getLogDirectory(),  'error.log');
 
     if (!file_exists($filename))
     {
-      $file = fopen($filename, 'w');
+      if (!is_writeable(self::getLogDirectory()))
+      {
+        throw new RuntimeException("The directory, " . self::getLogDirectory() . ", is not writable.");
+      }
+
+      if (false === $file = fopen($filename, 'w'))
+      {
+        throw new RuntimeException("Failed to create the error log file.");
+      }
+
       fclose($file);
     }
 
