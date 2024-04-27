@@ -8,7 +8,8 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Sendama\\Engine\\": "src/"
+            "Sendama\\Engine\\": "src/",
+            "Sendama\\Examples\\Blasters\\": "examples/blasters/src/"
         },
         "files": [
             "src/Util/Constants.php",
