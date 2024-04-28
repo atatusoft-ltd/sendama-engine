@@ -2,11 +2,18 @@
 
 namespace Sendama\Engine\Core;
 
+use Sendama\Engine\Core\Traits\DimensionTrait;
+use Sendama\Engine\IO\Enumerations\Color;
+
 /**
  * Represents a 2D texture.
+ *
+ * @package Sendama\Engine\Core
  */
 class Texture2D
 {
+  use DimensionTrait;
+
   /**
    * The pixels of the texture.
    *
@@ -23,8 +30,9 @@ class Texture2D
    */
   public function __construct(
     private readonly string $path,
-    private readonly int    $width = 1,
-    private readonly int    $height = 1,
+    int    $width = 1,
+    int    $height = 1,
+    private ?Color $color = null,
   )
   {
     if (!file_exists($this->path))
@@ -32,8 +40,32 @@ class Texture2D
       throw new \InvalidArgumentException("The file '$this->path' does not exist.");
     }
 
+    $this->setWidth($width);
+    $this->setHeight($height);
+
     // Load the image.
     $this->loadImage();
+  }
+
+  /**
+   * Sets the color of the texture.
+   *
+   * @param Color|null $color The color to set.
+   * @return void
+   */
+  public function setColor(?Color $color): void
+  {
+    $this->color = $color;
+  }
+
+  /**
+   * Returns the pixels of the texture.
+   *
+   * @return string[] The pixels of the texture.
+   */
+  public function getPixels(): array
+  {
+    return $this->pixels;
   }
 
   /**
@@ -67,7 +99,14 @@ class Texture2D
       throw new \InvalidArgumentException("The pixel at ($x, $y) does not exist.");
     }
 
-    $this->pixels[$y][$x] = substr($pixel, 0, 1);
+    $output = $pixel;
+
+    if ($this->color)
+    {
+      $output = Color::apply($this->color, to: $output);
+    }
+
+    $this->pixels[$y][$x] = substr($output, 0, 1);
   }
 
   /**
@@ -77,6 +116,11 @@ class Texture2D
   {
     // Load the image.
     $image = file_get_contents($this->path);
+
+    if ($this->color)
+    {
+      $image = Color::apply($this->color, to: $image);
+    }
 
     // Convert the image to an array of pixels.
     $imageMatrix = explode("\n", $image);
