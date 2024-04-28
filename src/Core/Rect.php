@@ -16,35 +16,36 @@ class Rect
   /**
    * Create a new instance of the rect.
    *
-   * @param int $x The x position.
-   * @param int $y The y position.
-   * @param int $width The width.
-   * @param int $height The height.
-   * @return void
+   * @param Vector2 $position The position.
+   * @param Vector2 $size The size.
    */
-  public function __construct(int $x = 0, int $y = 0, int $width = 0, int $height = 0)
+  public function __construct(
+    Vector2 $position = new Vector2(0, 0),
+    Vector2 $size = new Vector2(0, 0),
+  )
   {
-    $this->setX($x);
-    $this->setY($y);
-    $this->setWidth($width);
-    $this->setHeight($height);
+    $this->setX($position->getX());
+    $this->setY($position->getY());
+    $this->setWidth($size->getX());
+    $this->setHeight($size->getY());
   }
 
   /**
    * Set the values of the rect.
    *
-   * @param int|null $x The x position.
-   * @param int|null $y The y position.
-   * @param int|null $width The width.
-   * @param int|null $height The height.
+   * @param Vector2|null $position The position.
+   * @param Vector2|null $size The size.
    * @return void
    */
-  public function set(?int $x = null, ?int $y = null, ?int $width = null, ?int $height = null): void
+  public function set(
+    ?Vector2 $position = null,
+    ?Vector2 $size = null,
+  ): void
   {
-    $this->setX($x ?? $this->x);
-    $this->setY($y ?? $this->y);
-    $this->setWidth($width ?? $this->width);
-    $this->setHeight($height ?? $this->height);
+    $this->setX($position->getX() ?? $this->x);
+    $this->setY($position->getY() ?? $this->y);
+    $this->setWidth($size->getX() ?? $this->width);
+    $this->setHeight($size->getY() ?? $this->height);
   }
 
   /**
