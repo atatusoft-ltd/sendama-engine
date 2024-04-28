@@ -2,13 +2,22 @@
 
 namespace Sendama\Engine\Core\Interfaces;
 
+use Sendama\Engine\Core\GameObject;
+
 /**
  * The interface for all components in the game engine.
  *
  * @template T
  */
-interface ComponentInterface extends ActivatableInterface, CanResume, CanUpdate, CanStart, CanCompare
+interface ComponentInterface extends ActivatableInterface, CanResume, CanUpdate, CanStart, CanCompare, CanEnable
 {
+  /**
+   * Returns the GameObject that this component is attached to.
+   *
+   * @return GameObject The GameObject that this component is attached to.
+   */
+  public function getGameObject(): GameObject;
+
   /**
    * Calls the method named $methodName on every component in this game object and its children.
    *
