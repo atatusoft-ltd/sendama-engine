@@ -34,8 +34,8 @@ class Texture2D
    */
   public function __construct(
     private readonly string $path,
-    int    $width = 1,
-    int    $height = 1,
+    int    $width = -1,
+    int    $height = -1,
     private ?Color $color = null,
   )
   {
@@ -135,7 +135,8 @@ class Texture2D
 
     foreach ($imageMatrix as $row)
     {
-      $chunks = str_split(substr($row, 0, $this->width));
+      $width = $this->width < 1 ? strlen($row) : $this->width;
+      $chunks = str_split(substr($row, 0, $width));
       $this->pixels[] = $chunks;
     }
   }

@@ -402,4 +402,88 @@ class GameObject implements CanCompare, CanResume, CanUpdate, CanStart, CanRende
 
     return -1;
   }
+
+  /**
+   * Gets a component of type $componentType from the game object.
+   *
+   * @param class-string $componentType
+   * @return ComponentInterface|null The component of type $componentType.
+   */
+  public function getComponent(string $componentType): ?ComponentInterface
+  {
+    $component = null;
+
+    foreach ($this->components as $component)
+    {
+      if ($component instanceof $componentType)
+      {
+        return $component;
+      }
+    }
+
+    return $component;
+  }
+
+  /**
+   * Returns the components attached to the game object.
+   *
+   * @return ComponentInterface[] The components attached to the game object.
+   */
+  public function getComponents(): array
+  {
+    return $this->components;
+  }
+
+  /**
+   * Clones the original game object and returns the clone.
+   *
+   * @param GameObject $original
+   * @param Vector2|null $position
+   * @param Vector2|null $rotation
+   * @param Vector2|null $scale
+   * @param Transform|null $parent
+   * @return GameObject
+   */
+  public static function instantiate(
+    GameObject $original,
+    ?Vector2 $position = null,
+    ?Vector2 $rotation = null,
+    ?Vector2 $scale = null,
+    ?Transform $parent = null
+  ): GameObject
+  {
+    $clone = clone $original;
+    if ($position)
+    {
+      $clone->transform->setPosition($position);
+    }
+
+    if ($rotation)
+    {
+      $clone->transform->setRotation($rotation);
+    }
+
+    if ($scale)
+    {
+      $clone->transform->setScale($scale);
+    }
+
+    if ($parent)
+    {
+      $clone->transform->setParent($parent);
+    }
+    return $clone;
+  }
+
+  /**
+   * Destroys the game object after the specified delay. This removes the game object from the scene.
+   *
+   * @param GameObject $gameObject The game object to destroy.
+   * @param float $delay The delay before destroying the game object.
+   * @return void
+   */
+  public static function destroy(GameObject $gameObject, float $delay = 0.0): void
+  {
+    // TODO: Implement destroy() method.
+  }
 }
