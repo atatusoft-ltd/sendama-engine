@@ -21,11 +21,11 @@ enum LogLevel: string
   public function getPriority(): int
   {
     return match ($this) {
-      LogLevel::DEBUG => 0,
-      LogLevel::INFO => 1,
+      LogLevel::FATAL => 0,
+      LogLevel::ERROR => 1,
       LogLevel::WARN => 2,
-      LogLevel::ERROR => 3,
-      LogLevel::FATAL => 4,
+      LogLevel::DEBUG => 3,
+      LogLevel::INFO => 4,
     };
   }
 }

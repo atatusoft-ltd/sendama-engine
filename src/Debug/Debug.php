@@ -63,7 +63,11 @@ class Debug
    * @param string $prefix The prefix to add to the message.
    * @throws RuntimeException Thrown if the debug log file cannot be written to.
    */
-  public static function log(string $message, string $prefix = '[DEBUG]', LogLevel $logLevel = LogLevel::DEBUG): void
+  public static function log(
+    string $message,
+    string $prefix = '[DEBUG]',
+    LogLevel $logLevel = LogLevel::DEBUG
+  ): void
   {
     if (self::$logLevel->getPriority() > $logLevel->getPriority())
     {
