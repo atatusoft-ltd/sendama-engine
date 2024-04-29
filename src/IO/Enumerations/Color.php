@@ -28,12 +28,12 @@ enum Color: string
   /**
    * Applies the color to the given string.
    *
-   * @param mixed $string The string to apply the color to.
    * @param Color $color The color to apply.
+   * @param string $to The string to apply the color to.
    * @return string
    */
-  public static function apply(string $string, Color $color): string
+  public static function apply(Color $color, string $to): string
   {
-    return $color->value . $string . Color::RESET->value;
+    return $color->value . $to . Color::RESET->value;
   }
 }
