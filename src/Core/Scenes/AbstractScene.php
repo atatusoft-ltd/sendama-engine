@@ -2,36 +2,69 @@
 
 namespace Sendama\Engine\Core\Scenes;
 
+use Sendama\Engine\Core\GameObject;
 use Sendama\Engine\Core\Interfaces\SceneInterface;
+use Sendama\Engine\Debug\Debug;
 
+/**
+ * The abstract scene class.
+ */
 class AbstractScene implements SceneInterface
 {
   /**
    * @var array<string, mixed> $settings
    */
   protected array $settings = [];
+
   /**
-   * @inheritDoc
+   * @var array<GameObject> $rootGameObjects
    */
-  public function renderAt(?int $x = null, ?int $y = null): void
+  public array $rootGameObjects = [];
+
+  /**
+   * Constructs a scene.
+   *
+   * @param string $name The name of the scene.
+   */
+  public function __construct(
+    protected string $name
+  )
   {
-    // TODO: Implement renderAt() method.
   }
 
   /**
    * @inheritDoc
    */
-  public function eraseAt(?int $x = null, ?int $y = null): void
+  public function getName(): string
   {
-    // TODO: Implement eraseAt() method.
+    return $this->name;
   }
 
   /**
    * @inheritDoc
    */
-  public function loadSceneSettings(?array $settings = null): self
+  public final function renderAt(?int $x = null, ?int $y = null): void
   {
-    // TODO: Implement loadSceneSettings() method.
+    // Do nothing.
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public final function eraseAt(?int $x = null, ?int $y = null): void
+  {
+    // Do nothing.
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public final function loadSceneSettings(?array $settings = null): self
+  {
+    foreach ($settings as $key => $value)
+    {
+      $this->settings[$key] = $value;
+    }
 
     return $this;
   }
@@ -41,7 +74,11 @@ class AbstractScene implements SceneInterface
    */
   public function start(): void
   {
-    // TODO: Implement start() method.
+    Debug::log("Scene started: " . $this->name);
+    foreach ($this->rootGameObjects as $rootGameObject)
+    {
+      $rootGameObject->start();
+    }
   }
 
   /**
@@ -49,7 +86,11 @@ class AbstractScene implements SceneInterface
    */
   public function stop(): void
   {
-    // TODO: Implement stop() method.
+    Debug::log("Scene stopped: " . $this->name);
+    foreach ($this->rootGameObjects as $rootGameObject)
+    {
+      $rootGameObject->stop();
+    }
   }
 
   /**
@@ -57,7 +98,13 @@ class AbstractScene implements SceneInterface
    */
   public function update(): void
   {
-    // TODO: Implement update() method.
+    foreach ($this->rootGameObjects as $rootGameObject)
+    {
+      if ($rootGameObject->isActive())
+      {
+        $rootGameObject->update();
+      }
+    }
   }
 
   /**
@@ -65,7 +112,13 @@ class AbstractScene implements SceneInterface
    */
   public function render(): void
   {
-    // TODO: Implement render() method.
+    foreach ($this->rootGameObjects as $rootGameObject)
+    {
+      if ($rootGameObject->isActive())
+      {
+        $rootGameObject->render();
+      }
+    }
   }
 
   /**
@@ -73,7 +126,13 @@ class AbstractScene implements SceneInterface
    */
   public function erase(): void
   {
-    // TODO: Implement erase() method.
+    foreach ($this->rootGameObjects as $rootGameObject)
+    {
+      if ($rootGameObject->isActive())
+      {
+        $rootGameObject->erase();
+      }
+    }
   }
 
   /**
@@ -81,7 +140,13 @@ class AbstractScene implements SceneInterface
    */
   public function suspend(): void
   {
-    // TODO: Implement suspend() method.
+    foreach ($this->rootGameObjects as $rootGameObject)
+    {
+      if ($rootGameObject->isActive())
+      {
+        $rootGameObject->suspend();
+      }
+    }
   }
 
   /**
@@ -89,6 +154,20 @@ class AbstractScene implements SceneInterface
    */
   public function resume(): void
   {
-    // TODO: Implement resume() method.
+    foreach ($this->rootGameObjects as $rootGameObject)
+    {
+      if ($rootGameObject->isActive())
+      {
+        $rootGameObject->resume();
+      }
+    }
+  }
+
+  /**
+   * @return object[] The list of root game objects in the scene.
+   */
+  public function getRootGameObjects(): array
+  {
+    return $this->rootGameObjects;
   }
 }

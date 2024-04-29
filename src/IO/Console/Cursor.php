@@ -72,8 +72,8 @@ class Cursor
       throw new InvalidArgumentException('The x and y coordinates must be greater than or equal to 0.');
     }
 
-    $x = max(1, $x);
-    $y = max(1, $y);
+    $x = max(0, $x);
+    $y = max(0, $y);
 
     echo "\033[{$y};{$x}H";
   }

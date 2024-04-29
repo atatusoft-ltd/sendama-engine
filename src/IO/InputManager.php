@@ -3,6 +3,7 @@
 namespace Sendama\Engine\IO;
 
 use RuntimeException;
+use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\Events\EventManager;
 use Sendama\Engine\Events\KeyboardEvent;
 use Sendama\Engine\IO\Enumerations\AxisName;

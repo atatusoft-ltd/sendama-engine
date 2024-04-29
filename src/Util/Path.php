@@ -117,6 +117,16 @@ final class Path
   }
 
   /**
+   * Returns the path to the working directory's assets.
+   *
+   * @return string The path to the working directory's assets.
+   */
+  public static function getWorkingDirectoryAssetsPath(): string
+  {
+    return self::join(getcwd(), 'assets');
+  }
+
+  /**
    * Normalizes the given path.
    *
    * @param string $path The path to normalize.
