@@ -1,9 +1,21 @@
 <?php
 
+use Sendama\Engine\Core\GameObject;
 use Sendama\Engine\Core\Vector2;
+use Sendama\Engine\Events\Enumerations\GameEventType;
+use Sendama\Engine\Events\EventManager;
+use Sendama\Engine\Events\GameEvent;
 use Sendama\Engine\Events\Interfaces\EventInterface;
 use Sendama\Engine\IO\Console\Console;
 
+
+/* Application */
+function quitGame(?int $code = null): void
+{
+  EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::QUIT, $code));
+}
+
+/* Math */
 /**
  * Returns the given value clamped between the given min and max values.
  *
@@ -204,4 +216,12 @@ function strip_ansi(string $input): string
 {
   $pattern = "/\e\[[0-9;]*m/";
   return preg_replace($pattern, '', $input);
+}
+
+/* Game Objects */
+function instantiate(GameObject $original, Vector2 $position): GameObject
+{
+  $newObject = clone $original;
+
+  return $newObject;
 }
