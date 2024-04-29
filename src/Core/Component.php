@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use Sendama\Engine\Core\Interfaces\CanCompare;
 use Sendama\Engine\Core\Interfaces\CanEquate;
 use Sendama\Engine\Core\Interfaces\ComponentInterface;
+use Sendama\Engine\Debug\Debug;
 
 abstract class Component implements ComponentInterface
 {
@@ -26,6 +27,8 @@ abstract class Component implements ComponentInterface
   public function __construct(protected GameObject $gameObject)
   {
     $this->hash = md5(__CLASS__) .  '-' . uniqid($this->gameObject->getName(), true);
+
+    $this->awake();
   }
 
   /**
@@ -208,17 +211,37 @@ abstract class Component implements ComponentInterface
   /**
    * @inheritDoc
    */
-  public function resume(): void
+  public final function resume(): void
   {
-    // TODO: Implement resume() method.
+    $this->onResume();
+  }
+
+  /**
+   * Called when the component is resumed.
+   *
+   * @return void
+   */
+  public function onResume(): void
+  {
+    // Do nothing
   }
 
   /**
    * @inheritDoc
    */
-  public function suspend(): void
+  public final function suspend(): void
   {
-    // TODO: Implement suspend() method.
+    $this->onSuspend();
+  }
+
+  /**
+   * Called when the component is suspended.
+   *
+   * @return void
+   */
+  public function onSuspend(): void
+  {
+    // Do nothing
   }
 
   /**
@@ -227,6 +250,7 @@ abstract class Component implements ComponentInterface
   public final function start(): void
   {
     $this->activate();
+    $this->enable();
     $this->onStart();
   }
 
@@ -243,9 +267,21 @@ abstract class Component implements ComponentInterface
   /**
    * @inheritDoc
    */
-  public function stop(): void
+  public final function stop(): void
   {
-    // TODO: Implement stop() method.
+    $this->deactivate();
+    $this->disable();
+    $this->onStop();
+  }
+
+  /**
+   * Called when the component is stopped.
+   *
+   * @return void
+   */
+  public function onStop(): void
+  {
+    // Do nothing
   }
 
   /**
@@ -265,6 +301,14 @@ abstract class Component implements ComponentInterface
    * @return void
    */
   public function onUpdate(): void
+  {
+    // Do nothing
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function awake(): void
   {
     // Do nothing
   }

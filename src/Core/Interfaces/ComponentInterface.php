@@ -9,7 +9,7 @@ use Sendama\Engine\Core\GameObject;
  *
  * @template T
  */
-interface ComponentInterface extends ActivatableInterface, CanResume, CanUpdate, CanStart, CanCompare, CanEnable
+interface ComponentInterface extends ActivatableInterface, CanResume, CanUpdate, CanStart, CanCompare, CanEnable, CanAwake
 {
   /**
    * Returns the GameObject that this component is attached to.

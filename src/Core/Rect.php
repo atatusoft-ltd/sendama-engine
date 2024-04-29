@@ -2,6 +2,7 @@
 
 namespace Sendama\Engine\Core;
 
+use InvalidArgumentException;
 use Sendama\Engine\Core\Traits\DimensionTrait;
 use Sendama\Engine\Core\Traits\PositionTrait;
 
@@ -28,6 +29,26 @@ class Rect
     $this->setY($position->getY());
     $this->setWidth($size->getX());
     $this->setHeight($size->getY());
+  }
+
+  /**
+   * Get the position of the rect.
+   *
+   * @return Vector2 The position of the rect.
+   */
+  public function getPosition(): Vector2
+  {
+    return new Vector2($this->getX(), $this->getY());
+  }
+
+  /**
+   * Get the size of the rect.
+   *
+   * @return Vector2 The size of the rect.
+   */
+  public function getSize(): Vector2
+  {
+    return new Vector2($this->getWidth(), $this->getHeight());
   }
 
   /**
@@ -72,5 +93,30 @@ class Rect
            $this->contains(new Vector2($other->getX() + $other->getWidth(), $other->getY())) ||
            $this->contains(new Vector2($other->getX(), $other->getY() + $other->getHeight())) ||
            $this->contains(new Vector2($other->getX() + $other->getWidth(), $other->getY() + $other->getHeight()));
+  }
+
+  /**
+   * Create a new instance of the rect from the specified array.
+   *
+   * @param array{x: int, y: int, width: int, height: int} $array The array.
+   * @return self
+   */
+  public static function fromArray(array $array): self
+  {
+    if (count($array) !== 4)
+    {
+      throw new InvalidArgumentException("The array must contain exactly 4 elements.");
+    }
+
+    if (array_is_list($array))
+    {
+      [$x, $y, $width, $height] = $array;
+    }
+    else
+    {
+      extract($array);
+    }
+
+    return new Rect(new Vector2($x, $y), new Vector2($width, $height));
   }
 }

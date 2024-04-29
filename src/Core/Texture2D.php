@@ -2,8 +2,10 @@
 
 namespace Sendama\Engine\Core;
 
+use InvalidArgumentException;
 use Sendama\Engine\Core\Traits\DimensionTrait;
 use Sendama\Engine\IO\Enumerations\Color;
+use Sendama\Engine\Util\Path;
 
 /**
  * Represents a 2D texture.
@@ -13,6 +15,8 @@ use Sendama\Engine\IO\Enumerations\Color;
 class Texture2D
 {
   use DimensionTrait;
+
+  const string TEXTURE_EXTENSION = '.texture';
 
   /**
    * The pixels of the texture.
@@ -35,15 +39,19 @@ class Texture2D
     private ?Color $color = null,
   )
   {
-    if (!file_exists($this->path))
+    if (! str_ends_with($this->getAbsolutePath(), self::TEXTURE_EXTENSION))
     {
-      throw new \InvalidArgumentException("The file '$this->path' does not exist.");
+      throw new InvalidArgumentException("The file '" . $this->getAbsolutePath() . "' is not a valid texture file.");
+    }
+
+    if (! file_exists($this->getAbsolutePath()) )
+    {
+      throw new InvalidArgumentException("The file '" . $this->getAbsolutePath() . "' does not exist.");
     }
 
     $this->setWidth($width);
     $this->setHeight($height);
 
-    // Load the image.
     $this->loadImage();
   }
 
@@ -79,7 +87,7 @@ class Texture2D
   {
     if (!isset($this->pixels[$y][$x]))
     {
-      throw new \InvalidArgumentException("The pixel at ($x, $y) does not exist.");
+      throw new InvalidArgumentException("The pixel at ($x, $y) does not exist.");
     }
 
     return $this->pixels[$y][$x];
@@ -96,7 +104,7 @@ class Texture2D
   {
     if ($x < 0 || $x >= $this->width || $y < 0 || $y >= $this->height)
     {
-      throw new \InvalidArgumentException("The pixel at ($x, $y) does not exist.");
+      throw new InvalidArgumentException("The pixel at ($x, $y) does not exist.");
     }
 
     $output = $pixel;
@@ -115,7 +123,7 @@ class Texture2D
   protected function loadImage(): void
   {
     // Load the image.
-    $image = file_get_contents($this->path);
+    $image = file_get_contents($this->getAbsolutePath());
 
     if ($this->color)
     {
@@ -127,7 +135,18 @@ class Texture2D
 
     foreach ($imageMatrix as $row)
     {
-      $this->pixels[] = str_split(substr($row, 0, $this->width));
+      $chunks = str_split(substr($row, 0, $this->width));
+      $this->pixels[] = $chunks;
     }
+  }
+
+  /**
+   * Returns the absolute path to the texture.
+   *
+   * @return string The absolute path to the texture.
+   */
+  private function getAbsolutePath(): string
+  {
+    return Path::join(Path::getWorkingDirectoryAssetsPath(), $this->path);
   }
 }

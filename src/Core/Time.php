@@ -226,4 +226,65 @@ class Time implements StaticObserverInterface
       }
     }
   }
+
+  /**
+   * Called when the game is quit.
+   *
+   * @return void
+   */
+  private static function onGameStop(): void
+  {
+    self::$stopTime = self::getSystemTime();
+  }
+
+  /**
+   * Called when the game is paused.
+   *
+   * @return void
+   */
+  private static function onGameRender(): void
+  {
+    // TODO: Implement onGameRender() method.
+  }
+
+  /**
+   * Called when the game is paused.
+   *
+   * @return void
+   */
+  private static function onGamePause(): void
+  {
+    // TODO: Implement onGamePause() method.
+  }
+
+  /**
+   * Called when the game is resumed.
+   *
+   * @return void
+   */
+  private static function onGameResume(): void
+  {
+    // TODO: Implement onGameResume() method.
+  }
+
+  /**
+   * Called when the game is suspended.
+   *
+   * @return void
+   */
+  private static function onGameSuspend(): void
+  {
+    // TODO: Implement onGameSuspend() method.
+  }
+
+  /**
+   * Called when the game is quit.
+   *
+   * @return void
+   */
+  private static function onGameQuit(): void
+  {
+    // TODO: Implement onGameQuit() method.
+  }
+
 }
