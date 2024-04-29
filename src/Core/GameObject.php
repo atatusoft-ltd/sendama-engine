@@ -434,6 +434,16 @@ class GameObject implements CanCompare, CanResume, CanUpdate, CanStart, CanRende
     return $this->components;
   }
 
+  /**
+   * Clones the original game object and returns the clone.
+   *
+   * @param GameObject $original
+   * @param Vector2|null $position
+   * @param Vector2|null $rotation
+   * @param Vector2|null $scale
+   * @param Transform|null $parent
+   * @return GameObject
+   */
   public static function instantiate(
     GameObject $original,
     ?Vector2 $position = null,
@@ -463,5 +473,17 @@ class GameObject implements CanCompare, CanResume, CanUpdate, CanStart, CanRende
       $clone->transform->setParent($parent);
     }
     return $clone;
+  }
+
+  /**
+   * Destroys the game object after the specified delay. This removes the game object from the scene.
+   *
+   * @param GameObject $gameObject The game object to destroy.
+   * @param float $delay The delay before destroying the game object.
+   * @return void
+   */
+  public static function destroy(GameObject $gameObject, float $delay = 0.0): void
+  {
+    // TODO: Implement destroy() method.
   }
 }
