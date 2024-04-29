@@ -18,7 +18,7 @@ class TitleScene extends AbstractScene
 
     $this->player = new GameObject('Player', position: new Vector2(2, 2));
     $this->player->addComponent(PlayerController::class);
-    $playerTexture = new Texture2D('Textures/player.texture', width: 4);
+    $playerTexture = new Texture2D('Textures/player.texture');
     $this->player
       ->getRenderer()
       ->setSprite(new Sprite($playerTexture, new Rect(Vector2::zero(), Vector2::one())));

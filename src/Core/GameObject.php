@@ -402,4 +402,66 @@ class GameObject implements CanCompare, CanResume, CanUpdate, CanStart, CanRende
 
     return -1;
   }
+
+  /**
+   * Gets a component of type $componentType from the game object.
+   *
+   * @param class-string $componentType
+   * @return ComponentInterface|null The component of type $componentType.
+   */
+  public function getComponent(string $componentType): ?ComponentInterface
+  {
+    $component = null;
+
+    foreach ($this->components as $component)
+    {
+      if ($component instanceof $componentType)
+      {
+        return $component;
+      }
+    }
+
+    return $component;
+  }
+
+  /**
+   * Returns the components attached to the game object.
+   *
+   * @return ComponentInterface[] The components attached to the game object.
+   */
+  public function getComponents(): array
+  {
+    return $this->components;
+  }
+
+  public static function instantiate(
+    GameObject $original,
+    ?Vector2 $position = null,
+    ?Vector2 $rotation = null,
+    ?Vector2 $scale = null,
+    ?Transform $parent = null
+  ): GameObject
+  {
+    $clone = clone $original;
+    if ($position)
+    {
+      $clone->transform->setPosition($position);
+    }
+
+    if ($rotation)
+    {
+      $clone->transform->setRotation($rotation);
+    }
+
+    if ($scale)
+    {
+      $clone->transform->setScale($scale);
+    }
+
+    if ($parent)
+    {
+      $clone->transform->setParent($parent);
+    }
+    return $clone;
+  }
 }

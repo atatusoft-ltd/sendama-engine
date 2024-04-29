@@ -5,11 +5,12 @@ namespace Sendama\Engine\Core\Scenes;
 use Sendama\Engine\Core\GameObject;
 use Sendama\Engine\Core\Interfaces\SceneInterface;
 use Sendama\Engine\Debug\Debug;
+use Serializable;
 
 /**
  * The abstract scene class.
  */
-class AbstractScene implements SceneInterface
+class AbstractScene implements SceneInterface, Serializable
 {
   /**
    * @var array<string, mixed> $settings
@@ -169,5 +170,31 @@ class AbstractScene implements SceneInterface
   public function getRootGameObjects(): array
   {
     return $this->rootGameObjects;
+  }
+
+  public function serialize(): void
+  {
+    // TODO: Implement serialize() method.
+  }
+
+  public function unserialize(string $data): void
+  {
+    // TODO: Implement unserialize() method.
+  }
+
+  public function __serialize(): array
+  {
+    return [
+      'name' => $this->name,
+      'settings' => $this->settings,
+      'rootGameObjects' => $this->rootGameObjects
+    ];
+  }
+
+  public function __unserialize(array $data): void
+  {
+    $this->name = $data['name'];
+    $this->settings = $data['settings'];
+    $this->rootGameObjects = $data['rootGameObjects'];
   }
 }
