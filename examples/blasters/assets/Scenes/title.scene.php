@@ -10,6 +10,7 @@ return [
   'game_objects' => [
       [
         'name' => 'Player',
+        'position' => [2, 2],
         'components' => [
           [
             'class' => \Sendama\Examples\Blasters\Scripts\PlayerController::class

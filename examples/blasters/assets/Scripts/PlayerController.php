@@ -34,7 +34,7 @@ class PlayerController extends Behaviour
     Debug::info("PlayerController started");
 
     // TODO: Move these to awake() method after it is fixed
-    $this->playerTexture    = new Texture2D('Textures/player.texture', width: 4);
+    $this->playerTexture    = new Texture2D('Textures/player.texture');
     $this->moveRightSprite  = new Sprite($this->playerTexture, ['x' => 0, 'y' => 0, 'width' => 1, 'height' => 1]);
     $this->moveLeftSprite   = new Sprite($this->playerTexture, ['x' => 1, 'y' => 0, 'width' => 1, 'height' => 1]);
     $this->moveUpSprite     = new Sprite($this->playerTexture, ['x' => 2, 'y' => 0, 'width' => 1, 'height' => 1]);
