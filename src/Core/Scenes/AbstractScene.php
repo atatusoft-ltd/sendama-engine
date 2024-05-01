@@ -5,6 +5,7 @@ namespace Sendama\Engine\Core\Scenes;
 use Sendama\Engine\Core\GameObject;
 use Sendama\Engine\Core\Interfaces\SceneInterface;
 use Sendama\Engine\Debug\Debug;
+use Sendama\Engine\Physics\Physics;
 use Serializable;
 
 /**
@@ -21,6 +22,7 @@ class AbstractScene implements SceneInterface, Serializable
    * @var array<GameObject> $rootGameObjects
    */
   public array $rootGameObjects = [];
+  protected Physics $physics;
 
   /**
    * Constructs a scene.
@@ -31,6 +33,7 @@ class AbstractScene implements SceneInterface, Serializable
     protected string $name
   )
   {
+    $this->physics = Physics::getInstance();
   }
 
   /**
@@ -99,6 +102,8 @@ class AbstractScene implements SceneInterface, Serializable
    */
   public function update(): void
   {
+    $this->physics->simulate();
+
     foreach ($this->rootGameObjects as $rootGameObject)
     {
       if ($rootGameObject->isActive())

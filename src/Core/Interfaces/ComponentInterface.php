@@ -3,6 +3,7 @@
 namespace Sendama\Engine\Core\Interfaces;
 
 use Sendama\Engine\Core\GameObject;
+use Sendama\Engine\Core\Transform;
 
 /**
  * The interface for all components in the game engine.
@@ -17,6 +18,13 @@ interface ComponentInterface extends ActivatableInterface, CanResume, CanUpdate,
    * @return GameObject The GameObject that this component is attached to.
    */
   public function getGameObject(): GameObject;
+
+  /**
+   * Returns the Transform of the GameObject that this component is attached to.
+   *
+   * @return Transform The Transform of the GameObject that this component is attached to.
+   */
+  public function getTransform(): Transform;
 
   /**
    * Calls the method named $methodName on every component in this game object and its children.
