@@ -40,6 +40,14 @@ abstract class Component implements ComponentInterface
   }
 
   /**
+   * @inheritDoc
+   */
+  public final function getTransform(): Transform
+  {
+    return $this->gameObject->getTransform();
+  }
+
+  /**
    * Activates the component.
    *
    * @inheritDoc

@@ -117,7 +117,7 @@ class Vector2 implements CanEquate, Stringable
    * @param int $x The x coordinate.
    * @return Vector2
    */
-  public function setX(int $x): static
+  public function setX(int $x): self
   {
     $this->x = $x;
 
@@ -130,11 +130,59 @@ class Vector2 implements CanEquate, Stringable
    * @param int $y The y coordinate.
    * @return Vector2
    */
-  public function setY(int $y): static
+  public function setY(int $y): self
   {
     $this->y = $y;
 
     return $this;
+  }
+
+  /**
+   * Returns the length of this vector.
+   *
+   * @return float
+   */
+  public function getMagnitude(): float
+  {
+    return sqrt($this->getSquareMagnitude());
+  }
+
+  /**
+   * Gets the square magnitude of this vector.
+   *
+   * @return float The square magnitude of this vector.
+   */
+  public function getSquareMagnitude(): float
+  {
+    return $this->x * $this->x + $this->y * $this->y;
+  }
+
+  /**
+   * Returns a new vector that is the normalized version of this vector.
+   *
+   * @return Vector2 The normalized vector.
+   */
+  public function getNormalized(): Vector2
+  {
+    $length = $this->getMagnitude();
+
+    if (abs($length) > PHP_FLOAT_MIN)
+    {
+      return new Vector2($this->x / $length, $this->y / $length);
+    }
+
+    return new Vector2();
+  }
+
+  public function normalize(): void
+  {
+    $length = $this->getMagnitude();
+
+    if (abs($length) > PHP_FLOAT_MIN)
+    {
+      $this->x /= $length;
+      $this->y /= $length;
+    }
   }
 
   /* Static methods */
@@ -142,9 +190,9 @@ class Vector2 implements CanEquate, Stringable
    * Gets a clone of the given vector.
    *
    * @param Vector2 $original The original vector.
-   * @return Vector2 The clone.
+   * @return self The clone.
    */
-  public static function getClone(Vector2 $original): Vector2
+  public static function getClone(Vector2 $original): self
   {
     return new Vector2($original->getX(), $original->getY());
   }
@@ -153,9 +201,9 @@ class Vector2 implements CanEquate, Stringable
    * Calculates the sum of the given vectors. The first vector is the augend, the rest are the addends.
    *
    * @param Vector2 ...$vectors
-   * @return Vector2
+   * @return self This vector.
    */
-  public static function sum(Vector2 ...$vectors): Vector2
+  public static function sum(Vector2 ...$vectors): self
   {
     $result = new Vector2();
 
@@ -171,9 +219,9 @@ class Vector2 implements CanEquate, Stringable
    * Calculates the difference of the given vectors. The first vector is the minuend, the rest are the subtrahends.
    *
    * @param Vector2 ...$vectors The vectors to subtract.
-   * @return Vector2 The difference.
+   * @return self The difference.
    */
-  public static function difference(Vector2 ...$vectors): Vector2
+  public static function difference(Vector2 ...$vectors): self
   {
     $result = new Vector2();
 
@@ -189,9 +237,9 @@ class Vector2 implements CanEquate, Stringable
    * Calculates the product of the given vectors. The first vector is the multiplicand, the rest are the multipliers.
    *
    * @param Vector2 ...$vectors The vectors to multiply.
-   * @return Vector2 The product.
+   * @return self The product.
    */
-  public static function product(Vector2 ...$vectors): Vector2
+  public static function product(Vector2 ...$vectors): self
   {
     $result = new Vector2();
 
@@ -207,9 +255,9 @@ class Vector2 implements CanEquate, Stringable
    * Calculates the quotient of the given vectors. The first vector is the dividend, the rest are the divisors.
    *
    * @param Vector2 ...$vectors The vectors to divide.
-   * @return Vector2 The quotient.
+   * @return self The quotient.
    */
-  public static function quotient(Vector2 ...$vectors): Vector2
+  public static function quotient(Vector2 ...$vectors): self
   {
     $result = new Vector2();
 
@@ -219,6 +267,18 @@ class Vector2 implements CanEquate, Stringable
     }
 
     return $result;
+  }
+
+  /**
+   * Calculates the distance between two vectors. It is the same as ($a - $b).getMagnitude().
+   *
+   * @param Vector2 $a The first vector.
+   * @param Vector2 $b The second vector.
+   * @return float The distance between the two vectors.
+   */
+  public static function distance(Vector2 $a, Vector2 $b): float
+  {
+    return Vector2::difference($a, $b)->getMagnitude();
   }
 
   /* Operator methods */
