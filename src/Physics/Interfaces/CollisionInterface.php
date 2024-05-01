@@ -4,8 +4,11 @@ namespace Sendama\Engine\Physics\Interfaces;
 
 use Sendama\Engine\Core\GameObject;
 use Sendama\Engine\Core\Transform;
-use Sendama\Engine\Core\Vector2;
+use Sendama\Engine\Physics\ContactPoint;
 
+/**
+ * Interface CollisionInterface. Represents a collision between two colliders.
+ */
 interface CollisionInterface
 {
   /**
@@ -22,5 +25,18 @@ interface CollisionInterface
    */
   public function getTransform(): Transform;
 
-  public function getContact(int $index): Vector2;
+  /**
+   * Get the contact point of the collision.
+   *
+   * @param int $index The index of the contact point.
+   * @return ContactPoint|null The contact point of the collision.
+   */
+  public function getContact(int $index): ?ContactPoint;
+
+  /**
+   * Get all the contact points of the collision.
+   *
+   * @return ContactPoint[] The contact points of the collision.
+   */
+  public function getContacts(): array;
 }
