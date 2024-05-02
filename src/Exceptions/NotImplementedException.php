@@ -2,7 +2,12 @@
 
 namespace Sendama\Engine\Exceptions;
 
-class NotImplementedException
-{
+use RuntimeException;
 
+class NotImplementedException extends RuntimeException
+{
+  public function __construct(string $feature)
+  {
+    parent::__construct("$feature is not implemented yet.");
+  }
 }
