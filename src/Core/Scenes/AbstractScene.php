@@ -28,9 +28,9 @@ class AbstractScene implements SceneInterface, Serializable
   protected Physics $physics;
 
   /**
-   * @var array<array<int>> $wordsSpace
+   * @var array<array<int>> $worldsSpace
    */
-  protected array $wordsSpace = [];
+  protected array $worldsSpace = [];
 
   /**
    * Constructs a scene.
@@ -187,14 +187,28 @@ class AbstractScene implements SceneInterface, Serializable
     return $this->rootGameObjects;
   }
 
-  public function serialize(): void
+  /**
+   * @inheritDoc
+   */
+  public function serialize(): string
   {
-    // TODO: Implement serialize() method.
+    return json_encode([
+      'name' => $this->name,
+      'settings' => $this->settings,
+      'rootGameObjects' => $this->rootGameObjects
+    ]);
   }
 
+  /**
+   * @inheritDoc
+   */
   public function unserialize(string $data): void
   {
-    // TODO: Implement unserialize() method.
+    $data = json_decode($data, true);
+
+    $this->name = $data['name'];
+    $this->settings = $data['settings'];
+    $this->rootGameObjects = $data['rootGameObjects'];
   }
 
   public function __serialize(): array
@@ -223,7 +237,7 @@ class AbstractScene implements SceneInterface, Serializable
 
     for ($y = 0; $y < $height; $y++)
     {
-      $this->wordsSpace[$y] = array_fill(0, $width, 0);
+      $this->worldsSpace[$y] = array_fill(0, $width, 0);
     }
   }
 }
