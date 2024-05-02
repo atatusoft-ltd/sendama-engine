@@ -49,6 +49,11 @@ class PlayerController extends Behaviour
     {
       Game::quit();
     }
+
+    if (Input::GetButtonDown('Fire'))
+    {
+      $this->fire();
+    }
   }
 
   private function move(float $horizontal, float $vertical): void
@@ -77,5 +82,10 @@ class PlayerController extends Behaviour
       $this->gameObject->getTransform()->translate(new Vector2($horizontal, $vertical));
 //      Debug::log("New Position: " . $this->gameObject->getTransform()->getPosition());
     }
+  }
+
+  private function fire(): void
+  {
+    Debug::log("Player fired");
   }
 }
