@@ -10,6 +10,12 @@ use Sendama\Engine\IO\Console\Console;
 
 
 /* Application */
+/**
+ * Quits the game with the given exit code.
+ *
+ * @param int|null $code The exit code. Defaults to null.
+ * @return void
+ */
 function quitGame(?int $code = null): void
 {
   EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::QUIT, $code));
@@ -219,9 +225,17 @@ function strip_ansi(string $input): string
 }
 
 /* Game Objects */
+/**
+ * Instantiates a new game object from the given original game object at the given position.
+ *
+ * @param GameObject $original The original game object.
+ * @param Vector2 $position The position to instantiate the new game object at.
+ * @return GameObject The new game object.
+ */
 function instantiate(GameObject $original, Vector2 $position): GameObject
 {
   $newObject = clone $original;
+  $newObject->getTransform()->setPosition($position);
 
   return $newObject;
 }
