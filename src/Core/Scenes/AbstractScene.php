@@ -22,7 +22,15 @@ class AbstractScene implements SceneInterface, Serializable
    * @var array<GameObject> $rootGameObjects
    */
   public array $rootGameObjects = [];
+  /**
+   * @var Physics
+   */
   protected Physics $physics;
+
+  /**
+   * @var array<array<int>> $wordsSpace
+   */
+  protected array $wordsSpace = [];
 
   /**
    * Constructs a scene.
@@ -79,6 +87,8 @@ class AbstractScene implements SceneInterface, Serializable
   public function start(): void
   {
     Debug::log("Scene started: " . $this->name);
+    $this->createWordsSpace();
+
     foreach ($this->rootGameObjects as $rootGameObject)
     {
       $rootGameObject->start();
@@ -201,5 +211,19 @@ class AbstractScene implements SceneInterface, Serializable
     $this->name = $data['name'];
     $this->settings = $data['settings'];
     $this->rootGameObjects = $data['rootGameObjects'];
+  }
+
+  /**
+   * Creates the words space.
+   */
+  private function createWordsSpace(): void
+  {
+    $width = $this->settings['screen_width'];
+    $height = $this->settings['screen_height'];
+
+    for ($y = 0; $y < $height; $y++)
+    {
+      $this->wordsSpace[$y] = array_fill(0, $width, 0);
+    }
   }
 }
