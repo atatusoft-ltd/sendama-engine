@@ -29,6 +29,13 @@ class InputManager
   private static string $keyPress = '';
 
   /**
+   * The virtual axes.
+   *
+   * @var VirtualAxis[] $axes The virtual axes.
+   */
+  private static array $axes = [];
+
+  /**
    * Initializes the InputManager.
    *
    * @return void
@@ -226,6 +233,31 @@ class InputManager
     $previousKey = self::getKey(self::$previousKeyPress);
 
     return empty($key) && $previousKey === $keyCode->value;
+  }
+
+  /**
+   * Adds an axis.
+   *
+   * @param VirtualAxis ...$axes The axis to add.
+   * @return void
+   */
+  public static function addAxes(VirtualAxis ...$axes): void
+  {
+    foreach ($axes as $axis)
+    {
+      self::$axes[] = $axis;
+    }
+  }
+
+  /**
+   * Finds an axis by name.
+   *
+   * @param string $axisName The name of the axis.
+   * @return VirtualAxis|null Returns the axis if found, null otherwise.
+   */
+  private static function findAxis(string $axisName): ?VirtualAxis
+  {
+    return array_filter(self::$axes, fn($axis) => $axis->getName() === $axisName)[0] ?? null;
   }
 
   /**
