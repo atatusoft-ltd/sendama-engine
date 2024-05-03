@@ -10,6 +10,8 @@ use Serializable;
 
 /**
  * The abstract scene class.
+ *
+ * @package Sendama\Engine\Core\Scenes
  */
 class AbstractScene implements SceneInterface, Serializable
 {
@@ -22,7 +24,15 @@ class AbstractScene implements SceneInterface, Serializable
    * @var array<GameObject> $rootGameObjects
    */
   public array $rootGameObjects = [];
+  /**
+   * @var Physics
+   */
   protected Physics $physics;
+
+  /**
+   * @var array<array<int>> $worldsSpace
+   */
+  protected array $worldsSpace = [];
 
   /**
    * Constructs a scene.
@@ -79,9 +89,11 @@ class AbstractScene implements SceneInterface, Serializable
   public function start(): void
   {
     Debug::log("Scene started: " . $this->name);
-    foreach ($this->rootGameObjects as $rootGameObject)
+    $this->createWordsSpace();
+
+    foreach ($this->rootGameObjects as $gameObject)
     {
-      $rootGameObject->start();
+      $gameObject->start();
     }
   }
 
@@ -91,9 +103,9 @@ class AbstractScene implements SceneInterface, Serializable
   public function stop(): void
   {
     Debug::log("Scene stopped: " . $this->name);
-    foreach ($this->rootGameObjects as $rootGameObject)
+    foreach ($this->rootGameObjects as $gameObject)
     {
-      $rootGameObject->stop();
+      $gameObject->stop();
     }
   }
 
@@ -104,11 +116,11 @@ class AbstractScene implements SceneInterface, Serializable
   {
     $this->physics->simulate();
 
-    foreach ($this->rootGameObjects as $rootGameObject)
+    foreach ($this->rootGameObjects as $gameObject)
     {
-      if ($rootGameObject->isActive())
+      if ($gameObject->isActive())
       {
-        $rootGameObject->update();
+        $gameObject->update();
       }
     }
   }
@@ -118,11 +130,11 @@ class AbstractScene implements SceneInterface, Serializable
    */
   public function render(): void
   {
-    foreach ($this->rootGameObjects as $rootGameObject)
+    foreach ($this->rootGameObjects as $gameObject)
     {
-      if ($rootGameObject->isActive())
+      if ($gameObject->isActive())
       {
-        $rootGameObject->render();
+        $gameObject->render();
       }
     }
   }
@@ -132,11 +144,11 @@ class AbstractScene implements SceneInterface, Serializable
    */
   public function erase(): void
   {
-    foreach ($this->rootGameObjects as $rootGameObject)
+    foreach ($this->rootGameObjects as $gameObject)
     {
-      if ($rootGameObject->isActive())
+      if ($gameObject->isActive())
       {
-        $rootGameObject->erase();
+        $gameObject->erase();
       }
     }
   }
@@ -146,11 +158,11 @@ class AbstractScene implements SceneInterface, Serializable
    */
   public function suspend(): void
   {
-    foreach ($this->rootGameObjects as $rootGameObject)
+    foreach ($this->rootGameObjects as $gameObject)
     {
-      if ($rootGameObject->isActive())
+      if ($gameObject->isActive())
       {
-        $rootGameObject->suspend();
+        $gameObject->suspend();
       }
     }
   }
@@ -160,31 +172,45 @@ class AbstractScene implements SceneInterface, Serializable
    */
   public function resume(): void
   {
-    foreach ($this->rootGameObjects as $rootGameObject)
+    foreach ($this->rootGameObjects as $gameObject)
     {
-      if ($rootGameObject->isActive())
+      if ($gameObject->isActive())
       {
-        $rootGameObject->resume();
+        $gameObject->resume();
       }
     }
   }
 
   /**
-   * @return object[] The list of root game objects in the scene.
+   * @return GameObject[] The list of root game objects in the scene.
    */
   public function getRootGameObjects(): array
   {
     return $this->rootGameObjects;
   }
 
-  public function serialize(): void
+  /**
+   * @inheritDoc
+   */
+  public function serialize(): string
   {
-    // TODO: Implement serialize() method.
+    return json_encode([
+      'name' => $this->name,
+      'settings' => $this->settings,
+      'rootGameObjects' => $this->rootGameObjects
+    ]);
   }
 
+  /**
+   * @inheritDoc
+   */
   public function unserialize(string $data): void
   {
-    // TODO: Implement unserialize() method.
+    $data = json_decode($data, true);
+
+    $this->name = $data['name'];
+    $this->settings = $data['settings'];
+    $this->rootGameObjects = $data['rootGameObjects'];
   }
 
   public function __serialize(): array
@@ -201,5 +227,19 @@ class AbstractScene implements SceneInterface, Serializable
     $this->name = $data['name'];
     $this->settings = $data['settings'];
     $this->rootGameObjects = $data['rootGameObjects'];
+  }
+
+  /**
+   * Creates the words space.
+   */
+  private function createWordsSpace(): void
+  {
+    $width = $this->settings['screen_width'];
+    $height = $this->settings['screen_height'];
+
+    for ($y = 0; $y < $height; $y++)
+    {
+      $this->worldsSpace[$y] = array_fill(0, $width, 0);
+    }
   }
 }

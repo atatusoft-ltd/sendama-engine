@@ -1,6 +1,6 @@
 <?php
 
-namespace Sendama\Engine\UI;
+namespace Sendama\Engine\UI\Modals;
 
 use Sendama\Engine\Core\Interfaces\CanRender;
 use Sendama\Engine\Core\Interfaces\CanResume;

@@ -22,10 +22,13 @@ use Sendama\Engine\Events\Interfaces\ObserverInterface;
 use Sendama\Engine\Events\Interfaces\StaticObserverInterface;
 use Sendama\Engine\Exceptions\InitializationException;
 use Sendama\Engine\Exceptions\Scenes\SceneNotFoundException;
+use Sendama\Engine\Interfaces\GameStateInterface;
 use Sendama\Engine\IO\Console\Console;
 use Sendama\Engine\IO\InputManager;
 use Sendama\Engine\Messaging\Notifications\NotificationsManager;
-use Sendama\Engine\UI\ModalManager;
+use Sendama\Engine\States\ModalState;
+use Sendama\Engine\States\SceneState;
+use Sendama\Engine\UI\Modals\ModalManager;
 use Sendama\Engine\UI\UIManager;
 use Sendama\Engine\Util\Path;
 use Throwable;
@@ -72,7 +75,7 @@ class Game implements ObservableInterface
    */
   private EventManager $eventManager;
   /**
-   * @var ModalManager $modalManager
+   * @var \Sendama\Engine\UI\Modals\ModalManager $modalManager
    */
   private ModalManager $modalManager;
   /**
@@ -93,6 +96,18 @@ class Game implements ObservableInterface
    * @var bool Determines if a modal is showing or not.
    */
   private bool $isShowingModal = false;
+  /**
+   * @var GameStateInterface $state
+   */
+  private GameStateInterface $state;
+  /**
+   * @var SceneState $sceneState
+   */
+  protected SceneState $sceneState;
+  /**
+   * @var ModalState $modalState
+   */
+  protected ModalState $modalState;
 
   /**
    * Game constructor.
@@ -130,6 +145,24 @@ class Game implements ObservableInterface
 
     // Load default settings
     $this->initializeSettings();
+
+    $this->sceneState = new SceneState(
+      $this,
+      $this->sceneManager,
+      $this->eventManager,
+      $this->modalManager,
+      $this->notificationsManager,
+      $this->uiManager
+    );
+    $this->modalState = new ModalState(
+      $this,
+      $this->sceneManager,
+      $this->eventManager,
+      $this->modalManager,
+      $this->notificationsManager,
+      $this->uiManager
+    );
+    $this->state = $this->sceneState;
 
     // Handle exceptions
     set_exception_handler(function (Throwable|Exception|Error $exception) {
@@ -361,15 +394,7 @@ class Game implements ObservableInterface
    */
   private function update(): void
   {
-    if ($this->isShowingModal)
-    {
-      $this->modalManager->update();
-    }
-    else
-    {
-      $this->sceneManager->update();
-      $this->notificationsManager->update();
-    }
+    $this->state->update();
 
     $this->uiManager->update();
 
@@ -385,14 +410,7 @@ class Game implements ObservableInterface
   {
     $this->frameCount++;
 
-    if ($this->isShowingModal)
-    {
-      $this->modalManager->render();
-    }
-    else
-    {
-      $this->sceneManager->render();
-    }
+    $this->state->render();
 
     $this->uiManager->render();
 
@@ -505,7 +523,9 @@ class Game implements ObservableInterface
   }
 
   /**
-   * @param SceneInterface ...$scenes
+   * Add scenes to the game.
+   *
+   * @param SceneInterface ...$scenes The scenes to add.
    * @return $this
    */
   public function addScenes(SceneInterface ...$scenes): self
@@ -516,6 +536,15 @@ class Game implements ObservableInterface
     }
 
     return $this;
+  }
+
+  /**
+   * @param GameStateInterface $state
+   * @return void
+   */
+  public function setState(GameStateInterface $state): void
+  {
+    $this->state = $state;
   }
 
   /**
