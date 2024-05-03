@@ -3,13 +3,13 @@
 namespace Sendama\Engine\UI\Windows\Enumerations;
 
 /**
- * Enumerates the possible horizontal alignments.
+ * Enumerates the possible vertical alignments.
  *
  * @package Sendama\Engine\UI\Windows\Enumerations
  */
-enum HorizontalAlignment
+enum VerticalAlignment
 {
-  case LEFT;
-  case CENTER;
-  case RIGHT;
+  case TOP;
+  case MIDDLE;
+  case BOTTOM;
 }
