@@ -28,7 +28,7 @@ use Sendama\Engine\IO\InputManager;
 use Sendama\Engine\Messaging\Notifications\NotificationsManager;
 use Sendama\Engine\States\ModalState;
 use Sendama\Engine\States\SceneState;
-use Sendama\Engine\UI\ModalManager;
+use Sendama\Engine\UI\Modals\ModalManager;
 use Sendama\Engine\UI\UIManager;
 use Sendama\Engine\Util\Path;
 use Throwable;
@@ -75,7 +75,7 @@ class Game implements ObservableInterface
    */
   private EventManager $eventManager;
   /**
-   * @var ModalManager $modalManager
+   * @var \Sendama\Engine\UI\Modals\ModalManager $modalManager
    */
   private ModalManager $modalManager;
   /**

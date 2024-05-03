@@ -7,7 +7,7 @@ use Sendama\Engine\Events\EventManager;
 use Sendama\Engine\Game;
 use Sendama\Engine\Interfaces\GameStateInterface;
 use Sendama\Engine\Messaging\Notifications\NotificationsManager;
-use Sendama\Engine\UI\ModalManager;
+use Sendama\Engine\UI\Modals\ModalManager;
 use Sendama\Engine\UI\UIManager;
 
 /**
