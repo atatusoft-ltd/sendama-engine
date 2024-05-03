@@ -12,7 +12,7 @@ use Sendama\Engine\Events\Interfaces\SubjectInterface;
  *
  * @package Sendama\Engine\UI\Menus\Interfaces
  */
-interface MenuInterface extends CanUpdate, CanRender, SubjectInterface
+interface MenuInterface extends CanUpdate, CanRender, SubjectInterface, MenuGraphNodeInterface
 {
   /**
    * Returns the title of the menu.

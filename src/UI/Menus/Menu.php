@@ -70,7 +70,7 @@ class Menu implements MenuInterface
    */
   public function renderAt(?int $x = null, ?int $y = null): void
   {
-    // TODO: Implement renderAt() method.
+    // Do nothing
   }
 
   /**

@@ -3,14 +3,12 @@
 namespace Sendama\Engine\UI\Menus;
 
 use Assegai\Collections\ItemList;
-use Sendama\Engine\Core\Interfaces\CanRender;
-use Sendama\Engine\Core\Interfaces\CanResume;
-use Sendama\Engine\Core\Interfaces\CanUpdate;
 use Sendama\Engine\Core\Interfaces\SingletonInterface;
-use Sendama\Engine\UI\Interfaces\CanFocus;
+use Sendama\Engine\UI\Menus\Interfaces\MenuGraphNodeInterface;
 use Sendama\Engine\UI\Menus\Interfaces\MenuInterface;
+use Sendama\Engine\UI\Menus\Interfaces\MenuManagerInterface;
 
-class MenuManager implements SingletonInterface, CanUpdate, CanResume, CanRender, CanFocus
+class MenuManager implements SingletonInterface, MenuManagerInterface
 {
   /**
    * @var MenuManager|null
@@ -21,6 +19,11 @@ class MenuManager implements SingletonInterface, CanUpdate, CanResume, CanRender
    * @var ItemList<MenuInterface> $menus
    */
   protected ItemList $menus;
+
+  /**
+   * @var MenuGraphNodeInterface|null $focused
+   */
+  protected MenuGraphNodeInterface|null $focused = null;
 
   /**
    * MenuManager constructor,
@@ -65,6 +68,14 @@ class MenuManager implements SingletonInterface, CanUpdate, CanResume, CanRender
   /**
    * @inheritDoc
    */
+  public function update(): void
+  {
+
+  }
+
+  /**
+   * @inheritDoc
+   */
   public function render(): void
   {
     // TODO: Implement render() method.
@@ -75,31 +86,38 @@ class MenuManager implements SingletonInterface, CanUpdate, CanResume, CanRender
    */
   public function renderAt(?int $x = null, ?int $y = null): void
   {
-    // TODO: Implement renderAt() method.
+    // Do nothing
   }
 
+  /**
+   * @inheritDoc
+   */
   public function erase(): void
   {
     // TODO: Implement erase() method.
   }
 
+  /**
+   * @inheritDoc
+   */
   public function eraseAt(?int $x = null, ?int $y = null): void
   {
-    // TODO: Implement eraseAt() method.
+    // Do nothing.
   }
 
-  public function resume(): void
+  /**
+   * @inheritDoc
+   */
+  public function isFocused(MenuGraphNodeInterface $target): bool
   {
-    // TODO: Implement resume() method.
+    return $this->focused === $target;
   }
 
-  public function suspend(): void
+  /**
+   * @inheritDoc
+   */
+  public function getFocused(): MenuGraphNodeInterface|null
   {
-    // TODO: Implement suspend() method.
-  }
-
-  public function update(): void
-  {
-    // TODO: Implement update() method.
+    return $this->focused;
   }
 }
