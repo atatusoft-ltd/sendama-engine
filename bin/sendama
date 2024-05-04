@@ -1,0 +1,28 @@
+#!/usr/bin/env php
+<?php
+
+use Sendama\Engine\CLI\Commands\CreateGameCommand;
+use Symfony\Component\Console\Application;
+
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+
+
+
+function bootstrap(): void
+{
+  try
+  {
+    $sendama = new Application('Sendama', '1.0.0');
+
+    $sendama
+      ->add(new CreateGameCommand());
+
+    $sendama->run();
+  }
+  catch(Exception $exception)
+  {
+      echo $exception->getMessage();
+  }
+}
+
+bootstrap();

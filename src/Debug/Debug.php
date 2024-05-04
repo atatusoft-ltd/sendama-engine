@@ -3,9 +3,17 @@
 namespace Sendama\Engine\Debug;
 
 use RuntimeException;
+use Sendama\Engine\Debug\Enumerations\LogLevel;
+use Sendama\Engine\Util\Path;
 
+/**
+ * Class Debug. A class for logging debug messages.
+ */
 class Debug
 {
+  private static ?string $logDirectory = null;
+  private static LogLevel $logLevel = LogLevel::DEBUG;
+
   /**
    * The Debug constructor.
    */
@@ -13,9 +21,39 @@ class Debug
   {
   }
 
+  /**
+   * @param string $logDirectory
+   * @return void
+   */
+  public static function setLogDirectory(string $logDirectory): void
+  {
+    self::$logDirectory = $logDirectory;
+  }
+
+  /**
+   * Returns the log directory.
+   *
+   * @return string The log directory.
+   */
   public static function getLogDirectory(): string
   {
-    return dirname(__FILE__, 3) . DEFAULT_LOGS_DIR;
+    if (self::$logDirectory === null)
+    {
+      self::$logDirectory = Path::join(getcwd(), DEFAULT_LOGS_DIR);
+    }
+
+    return self::$logDirectory;
+  }
+
+  /**
+   * Sets the log level.
+   *
+   * @param LogLevel $level The log level to set.
+   * @return void
+   */
+  public static function setLogLevel(LogLevel $level): void
+  {
+    self::$logLevel = $level;
   }
 
   /**
@@ -25,13 +63,30 @@ class Debug
    * @param string $prefix The prefix to add to the message.
    * @throws RuntimeException Thrown if the debug log file cannot be written to.
    */
-  public static function log(string $message, string $prefix = '[DEBUG]'): void
+  public static function log(
+    string $message,
+    string $prefix = '[DEBUG]',
+    LogLevel $logLevel = LogLevel::DEBUG
+  ): void
   {
-    $filename = self::getLogDirectory() . '/debug.log';
+    if (self::$logLevel->getPriority() > $logLevel->getPriority())
+    {
+      return;
+    }
+
+    $filename = Path::join(self::getLogDirectory(),  'debug.log');
 
     if (!file_exists($filename))
     {
-      $file = fopen($filename, 'w');
+      if (!is_writeable(self::getLogDirectory()))
+      {
+        throw new RuntimeException("The directory, " . self::getLogDirectory() . ", is not writable.");
+      }
+
+      if (false === $file = fopen($filename, 'w'))
+      {
+        throw new RuntimeException("Failed to create the debug log file.");
+      }
       fclose($file);
     }
 
@@ -51,11 +106,25 @@ class Debug
    */
   public static function error(string $message, string $prefix = '[ERROR]'): void
   {
-    $filename = self::getLogDirectory() . '/error.log';
+    if (self::$logLevel->getPriority() > LogLevel::ERROR->getPriority())
+    {
+      return;
+    }
+
+    $filename = Path::join(self::getLogDirectory(),  'error.log');
 
     if (!file_exists($filename))
     {
-      $file = fopen($filename, 'w');
+      if (!is_writeable(self::getLogDirectory()))
+      {
+        throw new RuntimeException("The directory, " . self::getLogDirectory() . ", is not writable.");
+      }
+
+      if (false === $file = fopen($filename, 'w'))
+      {
+        throw new RuntimeException("Failed to create the error log file.");
+      }
+
       fclose($file);
     }
 
@@ -70,23 +139,21 @@ class Debug
    * Logs a warning message to the warning log.
    *
    * @param string $message The message to log.
-   * @param string $prefix The prefix to add to the message.
-   * @throws RuntimeException Thrown if the warning log file cannot be written to.
+   * @param string|null $prefix The prefix to add to the message.
    */
-  public static function warn(string $message, string $prefix = '[WARN]'): void
+  public static function warn(string $message, ?string $prefix = null): void
   {
-    self::log($message, '[WARN]');
+    self::log($message, $prefix ?? '[WARN]', LogLevel::WARN);
   }
 
   /**
    * Logs an info message to the info log.
    *
    * @param string $message The message to log.
-   * @param string $prefix The prefix to add to the message.
-   * @throws RuntimeException Thrown if the info log file cannot be written to.
+   * @param string|null $prefix The prefix to add to the message.
    */
-  public static function info(string $message, string $prefix = '[INFO]'): void
+  public static function info(string $message, ?string $prefix = null): void
   {
-    self::log($message, '[INFO]');
+    self::log($message, $prefix ?? '[INFO]', LogLevel::INFO);
   }
 }
