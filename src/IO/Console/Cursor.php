@@ -67,11 +67,6 @@ class Cursor
    */
   public function moveTo(int $x, int $y): void
   {
-    if ($x < 0 || $y < 0)
-    {
-      throw new InvalidArgumentException('The x and y coordinates must be greater than or equal to 0.');
-    }
-
     $x = max(0, $x);
     $y = max(0, $y);
 

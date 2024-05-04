@@ -6,8 +6,10 @@ use InvalidArgumentException;
 use Sendama\Engine\Core\Interfaces\CanCompare;
 use Sendama\Engine\Core\Interfaces\CanEquate;
 use Sendama\Engine\Core\Interfaces\ComponentInterface;
-use Sendama\Engine\Debug\Debug;
 
+/**
+ * Represents a component. This class is the base class for all components in the engine.
+ */
 abstract class Component implements ComponentInterface
 {
   /**
@@ -335,5 +337,28 @@ abstract class Component implements ComponentInterface
   public function hasTag(string $tag): bool
   {
     return $this->gameObject->getTag() === $tag;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function serialize(): ?string
+  {
+    $data = get_object_vars($this);
+
+    return serialize($data);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function unserialize(string $data): void
+  {
+    $data = unserialize($data);
+
+    foreach ($data as $key => $value)
+    {
+      $this->{$key} = $value;
+    }
   }
 }

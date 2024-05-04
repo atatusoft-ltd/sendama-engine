@@ -50,12 +50,18 @@ class PlayerController extends Behaviour
       Game::quit();
     }
 
-    if (Input::GetButtonDown('Fire'))
+    if (Input::isAnyKeyPressed([KeyCode::SPACE, KeyCode::ENTER]))
     {
       $this->fire();
     }
   }
 
+  /**
+   * Moves the player.
+   *
+   * @param float $horizontal The horizontal movement.
+   * @param float $vertical The vertical movement.
+   */
   private function move(float $horizontal, float $vertical): void
   {
     if (abs($horizontal) > 0 || abs($vertical) > 0)
@@ -77,10 +83,7 @@ class PlayerController extends Behaviour
         $this->getGameObject()->getRenderer()->setSprite($this->moveDownSprite);
       }
 
-//      Debug::log(sprintf("Moving player with direction x(%s) y(%s)", $horizontal, $vertical));
-//      Debug::log("Old Position: " . $this->gameObject->getTransform()->getPosition());
       $this->gameObject->getTransform()->translate(new Vector2($horizontal, $vertical));
-//      Debug::log("New Position: " . $this->gameObject->getTransform()->getPosition());
     }
   }
 
