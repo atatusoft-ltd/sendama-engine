@@ -18,8 +18,7 @@ interface ComponentInterface extends
   CanStart,
   CanCompare,
   CanEnable,
-  CanAwake,
-  Serializable
+  CanAwake
 {
   /**
    * Returns the GameObject that this component is attached to.
