@@ -234,6 +234,7 @@ class Game implements ObservableInterface
       Debug::setLogDirectory($this->settings['log_dir']);
       Debug::setLogLevel(LogLevel::tryFrom($this->settings['log_level']) ?? LogLevel::DEBUG);
 
+      $this->sceneManager->loadSettings($this->settings);
       Debug::info("Game settings loaded");
     }
     catch (Exception $exception)
@@ -666,6 +667,7 @@ class Game implements ObservableInterface
     Debug::setLogDirectory($this->settings['log_dir']);
     Debug::setLogLevel(LogLevel::tryFrom($this->settings['log_level']) ?? LogLevel::DEBUG);
 
+    $this->sceneManager->loadSettings($this->settings);
     Debug::info("Game settings initialized");
   }
 

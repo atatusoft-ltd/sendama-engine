@@ -204,4 +204,17 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
       );
     }
   }
+
+  /**
+   * Loads the settings for the SceneManager.
+   *
+   * @param array<string, mixed> $settings
+   */
+  public function loadSettings(?array $settings = null): void
+  {
+    if ($settings)
+    {
+      $this->settings = $settings;
+    }
+  }
 }

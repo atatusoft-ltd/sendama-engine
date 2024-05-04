@@ -4,13 +4,22 @@ namespace Sendama\Engine\Core\Interfaces;
 
 use Sendama\Engine\Core\GameObject;
 use Sendama\Engine\Core\Transform;
+use Serializable;
 
 /**
  * The interface for all components in the game engine.
  *
  * @template T
  */
-interface ComponentInterface extends ActivatableInterface, CanResume, CanUpdate, CanStart, CanCompare, CanEnable, CanAwake
+interface ComponentInterface extends
+  ActivatableInterface,
+  CanResume,
+  CanUpdate,
+  CanStart,
+  CanCompare,
+  CanEnable,
+  CanAwake,
+  Serializable
 {
   /**
    * Returns the GameObject that this component is attached to.

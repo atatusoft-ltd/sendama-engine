@@ -72,6 +72,11 @@ class Renderer extends Component implements CanRender
         $targetX = $xOffset + $x;
         $targetY = $yOffset + $y;
 
+        if ($targetX < 0 || $targetY < 0)
+        {
+          continue;
+        }
+
         // Move the console cursor to the position of the sprite.
         Console::cursor()->moveTo($targetX, $targetY);
 
@@ -108,6 +113,11 @@ class Renderer extends Component implements CanRender
       {
         $targetX = $xOffset + $x;
         $targetY = $yOffset + $y;
+
+        if ($targetX < 0 || $targetY < 0)
+        {
+          continue;
+        }
 
         // Move the console cursor to the position of the sprite.
         Console::cursor()->moveTo($targetX, $targetY);
