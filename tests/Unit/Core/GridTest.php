@@ -64,3 +64,12 @@ it('Can fill the grid with a value', function () {
         [1, 1],
       ]);
 });
+
+it('Can be searched for a value', function () {
+    $grid = new Grid(4, 4);
+    $grid->fill(0, 0, 2, 2, 1);
+    expect($grid->contains(1))
+      ->toBeTrue()
+      ->and($grid->contains(2))
+      ->toBeFalse();
+});

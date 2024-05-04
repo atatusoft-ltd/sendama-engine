@@ -58,6 +58,14 @@ interface GridInterface extends CanCompare, Stringable
   public function fill(int $x, int $y, int $width, int $height, mixed $value): void;
 
   /**
+   * Checks if the grid contains the specified value.
+   *
+   * @param T $value The value to check.
+   * @return bool True if the grid contains the value, false otherwise.
+   */
+  public function contains(mixed $value): bool;
+
+  /**
    * Returns the grid as an array.
    *
    * @return T[][] The grid as an array.

@@ -201,11 +201,17 @@ class Grid implements GridInterface
     }
   }
 
+  /**
+   * @inheritDoc
+   */
   public function __toString(): string
   {
     return implode("\n", array_map(fn($row) => implode('', $row), $this->grid));
   }
 
+  /**
+   * @inheritDoc
+   */
   public function fill(int $x, int $y, int $width, int $height, mixed $value): void
   {
     for ($i = $y; $i < $y + $height; $i++)
@@ -215,5 +221,21 @@ class Grid implements GridInterface
         $this->set($j, $i, $value);
       }
     }
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function contains(mixed $value): bool
+  {
+    foreach ($this->grid as $row)
+    {
+      if (in_array($value, $row))
+      {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

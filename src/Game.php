@@ -24,6 +24,7 @@ use Sendama\Engine\Exceptions\InitializationException;
 use Sendama\Engine\Exceptions\Scenes\SceneNotFoundException;
 use Sendama\Engine\Interfaces\GameStateInterface;
 use Sendama\Engine\IO\Console\Console;
+use Sendama\Engine\IO\Console\Cursor;
 use Sendama\Engine\IO\InputManager;
 use Sendama\Engine\Messaging\Notifications\NotificationsManager;
 use Sendama\Engine\States\ModalState;
@@ -75,7 +76,7 @@ class Game implements ObservableInterface
    */
   private EventManager $eventManager;
   /**
-   * @var \Sendama\Engine\UI\Modals\ModalManager $modalManager
+   * @var ModalManager $modalManager
    */
   private ModalManager $modalManager;
   /**
@@ -86,6 +87,10 @@ class Game implements ObservableInterface
    * @var UIManager $uiManager
    */
   private UIManager $uiManager;
+  /**
+   * @var Cursor $consoleCursor
+   */
+  private Cursor $consoleCursor;
 
   /* Sentinel properties */
   /**
@@ -133,6 +138,7 @@ class Game implements ObservableInterface
     Console::init();
 
     // Initialize managers
+    $this->consoleCursor        = Console::cursor();
     $this->sceneManager         = SceneManager::getInstance();
     $this->eventManager         = EventManager::getInstance();
     $this->modalManager         = ModalManager::getInstance();
@@ -549,6 +555,8 @@ class Game implements ObservableInterface
   }
 
   /**
+   * Display the splash screen.
+   *
    * @return void
    */
   private function showSplashScreen(): void
@@ -577,6 +585,8 @@ class Game implements ObservableInterface
       Debug::info("Rendering splash screen texture");
       foreach ($splashScreenRows as $rowIndex => $row)
       {
+//        $this->consoleCursor->moveTo((int)$leftMargin, (int)($topMargin + $rowIndex));
+//        echo $row;
         Console::write($row, (int)$leftMargin, (int)($topMargin + $rowIndex));
       }
 
