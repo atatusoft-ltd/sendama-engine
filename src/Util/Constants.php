@@ -1,7 +1,9 @@
 <?php
 
+/* Screen */
 const DEFAULT_SCREEN_WIDTH = 170;
 const DEFAULT_SCREEN_HEIGHT = 36;
+/* Dialogs */
 const DEFAULT_DIALOG_WIDTH = 50;
 const DEFAULT_DIALOG_HEIGHT = 3;
 const DEFAULT_SELECT_DIALOG_WIDTH = 30;
@@ -11,7 +13,12 @@ const DEFAULT_FPS = 60;
 const DEFAULT_ASSETS_PATH = 'assets';
 const DEFAULT_LOGS_DIR = 'logs';
 const DEFAULT_LOG_LEVEL = 'debug';
+/* Splash */
 const DEFAULT_SPLASH_TEXTURE_PATH = DEFAULT_ASSETS_PATH . '/splash.texture';
 const DEFAULT_SPLASH_SCREEN_DURATION = 3;
+/* Windows  */
 const DEFAULT_WINDOW_WIDTH = 80;
 const DEFAULT_WINDOW_HEIGHT = 30;
+/* Grid */
+const DEFAULT_GRID_WIDTH = 10;
+const DEFAULT_GRID_HEIGHT = 10;
