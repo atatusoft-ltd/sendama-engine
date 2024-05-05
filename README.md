@@ -30,7 +30,7 @@ composer require atatusoft-ltd/sendama-engine
 ```
 
 ## Usage
-See [examples]() and [Documentation]().
+See [examples]() and [Documentation](docs/DOCS.md).
 
 ## Notes
 The examples in [examples]() are made to demonstrate how Sendama may be used to make simple 2D games.
