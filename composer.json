@@ -36,5 +36,8 @@
     },
     "bin": [
         "bin/sendama"
-    ]
+    ],
+    "scripts": {
+        "test": "vendor/bin/pest"
+    }
 }

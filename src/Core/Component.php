@@ -340,22 +340,18 @@ abstract class Component implements ComponentInterface
   }
 
   /**
-   * @inheritDoc
+   * Serializes the component.
    */
-  public function serialize(): ?string
+  public function __serialize(): array
   {
-    $data = get_object_vars($this);
-
-    return serialize($data);
+    return get_object_vars($this);
   }
 
   /**
-   * @inheritDoc
+   * Deserializes the component.
    */
-  public function unserialize(string $data): void
+  public function __unserialize(array $data): void
   {
-    $data = unserialize($data);
-
     foreach ($data as $key => $value)
     {
       $this->{$key} = $value;

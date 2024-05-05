@@ -11,7 +11,7 @@ use Sendama\Engine\IO\Enumerations\Color;
 class Console
 {
   /**
-   * @var array<string> $buffer The buffer.
+   * @var string[][] $buffer The buffer.
    */
   private static array $buffer = [];
   /**
@@ -185,25 +185,44 @@ class Console
    */
   public static function write(string $message, int $x, int $y): void
   {
-    $textRows = explode("\n", $message);
     $cursor = self::cursor();
 
-    $output = '';
-    foreach ($textRows as $rowIndex => $text)
+    if (!isset(self::$buffer[$y]))
     {
-      $currentBufferRow = $y + $rowIndex;
+      self::$buffer[$y] = str_repeat(' ', DEFAULT_SCREEN_WIDTH);
+    }
 
-      if (!isset(self::$buffer[$currentBufferRow]))
+    self::$buffer[$y] = substr_replace(self::$buffer[$y], $message, $x, strlen($message));
+    echo self::$buffer[$y];
+    $cursor->moveTo(0, $y + 1);
+  }
+
+  /**
+   * Writes text to the console at the specified position.
+   *
+   * @param array<string> $linesOfText The lines of text to write.
+   * @param int $x The x position.
+   * @param int $y The y position.
+   * @return void
+   */
+  public static function writeLines(array $linesOfText, int $x, int $y): void
+  {
+    $cursor = self::cursor();
+
+    foreach ($linesOfText as $rowIndex => $text)
+    {
+      $currentBufferRowIndex = $y + $rowIndex;
+
+      if (!isset(self::$buffer[$currentBufferRowIndex]))
       {
-        self::$buffer[$currentBufferRow] = str_repeat(' ', DEFAULT_SCREEN_WIDTH);
+        self::$buffer[$currentBufferRowIndex] = str_repeat(' ', DEFAULT_SCREEN_WIDTH);
       }
 
-      self::$buffer[$currentBufferRow] = substr_replace(self::$buffer[$currentBufferRow], $text, $x, strlen($text));
-      $output .= self::$buffer[$currentBufferRow] . "\n";
+      self::$buffer[$currentBufferRowIndex] = substr_replace(self::$buffer[$currentBufferRowIndex], $text, $x, strlen($text));
+      echo self::$buffer[$currentBufferRowIndex];
     }
 
     $cursor->moveTo(0, $y);
-    echo $output;
   }
 
   /**
@@ -264,7 +283,7 @@ class Console
    */
   private static function getEmptyBuffer(): array
   {
-    return array_fill(0, DEFAULT_SCREEN_HEIGHT, str_repeat(' ', DEFAULT_SCREEN_WIDTH));
+    return array_fill(0, DEFAULT_SCREEN_HEIGHT, array_fill(0,DEFAULT_SCREEN_WIDTH, ' '));
   }
 
   /**
