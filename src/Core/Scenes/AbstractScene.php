@@ -242,4 +242,24 @@ class AbstractScene implements SceneInterface, Serializable
       $this->worldsSpace[$y] = array_fill(0, $width, 0);
     }
   }
+
+  /**
+   * Adds a game object to the scene.
+   *
+   * @param GameObject $gameObject The game object to add.
+   */
+  public function add(GameObject $gameObject): void
+  {
+    $this->rootGameObjects[] = $gameObject;
+  }
+
+  /**
+   * Removes a game object from the scene.
+   *
+   * @param GameObject $gameObject The game object to remove.
+   */
+  public function remove(GameObject $gameObject): void
+  {
+    $this->rootGameObjects = array_filter($this->rootGameObjects, fn($item) => $item !== $gameObject, $this->rootGameObjects);
+  }
 }
