@@ -176,7 +176,9 @@ Once you have loaded a scene you can add game objects to it. Game objects are th
 #### Adding a Scene
 
 ```php
-\Sendama\Engine\Core\Scenes\SceneManager::getInstance()->addScene($scene);
+use \Sendama\Engine\Core\Scenes\SceneManager;
+
+SceneManager::getInstance()->addScene($scene);
 ```
 
 #### Removing a Scene
