@@ -2,8 +2,12 @@
 
 namespace Sendama\Engine\Core\Interfaces;
 
+use Sendama\Engine\Core\GameObject;
+
 /**
  * The interface SceneInterface.
+ *
+ * @package Sendama\Engine\Core\Interfaces
  */
 interface SceneInterface extends CanStart, CanUpdate, CanRender, CanResume
 {
@@ -70,7 +74,25 @@ interface SceneInterface extends CanStart, CanUpdate, CanRender, CanResume
   public function resume(): void;
 
   /**
+   * Returns the root game objects.
+   *
    * @return array
    */
   public function getRootGameObjects(): array;
+
+  /**
+   * Adds a game object to the scene.
+   *
+   * @param GameObject $gameObject The game object to add.
+   * @return void
+   */
+  public function add(GameObject $gameObject): void;
+
+  /**
+   * Removes a game object from the scene.
+   *
+   * @param GameObject $gameObject The game object to remove.
+   * @return void
+   */
+  public function remove(GameObject $gameObject): void;
 }

@@ -23,13 +23,20 @@ class Grid implements GridInterface
    */
   protected array $grid = [];
 
+  /**
+   * Constructs a grid.
+   *
+   * @param int $width The width of the grid.
+   * @param int $height The height of the grid.
+   */
   public function __construct(
     protected int $width = DEFAULT_GRID_WIDTH,
     protected int $height = DEFAULT_GRID_HEIGHT,
+    protected int|string $initialValue = self::INITIAL_VALUE
   )
   {
     $this->hash = uniqid(__CLASS__, true) . '-' . md5(__CLASS__);
-    $this->grid = array_fill(0, $this->height, array_fill(0, $this->width, self::INITIAL_VALUE));
+    $this->grid = array_fill(0, $this->height, array_fill(0, $this->width, $this->initialValue));
   }
 
   /**
@@ -144,7 +151,16 @@ class Grid implements GridInterface
    */
   public function set(int $x, int $y, mixed $value): void
   {
-    $this->validateCoordinates($x, $y);
+    if ($x < 0)
+    {
+      throw new InvalidArgumentException("The x coordinate, ($x), must be greater than or equal to 0.");
+    }
+
+    if ($y < 0)
+    {
+      throw new InvalidArgumentException("The y coordinate, ($y), must be greater than or equal to 0.");
+    }
+
     $this->provisionSpace($x, $y);
 
     $this->grid[$y][$x] = $value;
@@ -167,15 +183,14 @@ class Grid implements GridInterface
    */
   private function validateCoordinates(int $x, int $y): void
   {
-
     if ($x < 0 || $x >= $this->getWidth())
     {
-      throw new InvalidArgumentException("The x coordinate must be between 0 and the width, $this->width, of the grid.");
+      throw new InvalidArgumentException("The x coordinate, ($x), must be between 0 and the width, $this->width, of the grid.");
     }
 
     if ($y < 0 || $y >= $this->getHeight())
     {
-      throw new InvalidArgumentException("The y coordinate must be between 0 and the height, $this->height, of the grid.");
+      throw new InvalidArgumentException("The y coordinate, ($y), must be between 0 and the height, $this->height, of the grid.");
     }
   }
 
@@ -191,13 +206,13 @@ class Grid implements GridInterface
     if (! isset($this->grid[$y]) )
     {
       $numberOfRowsToAdd = $y - count($this->grid) + 1;
-      $this->grid = array_merge($this->grid, array_fill(0, $numberOfRowsToAdd, array_fill(0, $this->width, self::INITIAL_VALUE)));
+      $this->grid = array_merge($this->grid, array_fill(0, $numberOfRowsToAdd, array_fill(0, $this->width, $this->initialValue)));
     }
 
     if (! isset($this->grid[$y][$x]) )
     {
       $numberOfColumnsToAdd = $x - count($this->grid[$y]) + 1;
-      $this->grid[$y] = array_merge($this->grid[$y], array_fill(0, $numberOfColumnsToAdd, self::INITIAL_VALUE));
+      $this->grid[$y] = array_merge($this->grid[$y], array_fill(0, $numberOfColumnsToAdd, $this->initialValue));
     }
   }
 
