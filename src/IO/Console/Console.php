@@ -2,6 +2,7 @@
 
 namespace Sendama\Engine\IO\Console;
 
+use Sendama\Engine\Core\Grid;
 use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\IO\Enumerations\Color;
 
@@ -11,16 +12,20 @@ use Sendama\Engine\IO\Enumerations\Color;
 class Console
 {
   /**
-   * @var string[][] $buffer The buffer.
+   * @var Grid<string> $buffer The buffer.
    */
-  private static array $buffer = [];
+  private static Grid $buffer;
   /**
    * @var string $previousTerminalSettings The previous terminal settings.
    */
   private static string $previousTerminalSettings = '';
 
+  /**
+   * Console constructor.
+   */
   private function __construct()
   {
+    // Prevent instantiation.
   }
 
   /**
@@ -138,7 +143,7 @@ class Console
    * @param string $name The name of the terminal.
    * @return void
    */
-  public static function setTerminalName(string $name): void
+  public static function setName(string $name): void
   {
     echo "\033]0;$name\007";
   }
@@ -150,7 +155,7 @@ class Console
    * @param int $height The height of the terminal.
    * @return void
    */
-  public static function setTerminalSize(int $width, int $height): void
+  public static function setSize(int $width, int $height): void
   {
     echo "\033[8;$height;{$width}t";
   }
@@ -160,7 +165,7 @@ class Console
    *
    * @return void
    */
-  public static function saveTerminalSettings(): void
+  public static function saveSettings(): void
   {
     self::$previousTerminalSettings = shell_exec('stty -g') ?? '';
   }
@@ -170,9 +175,27 @@ class Console
    *
    * @return void
    */
-  public static function restoreTerminalSettings(): void
+  public static function restoreSettings(): void
   {
     shell_exec('stty ' . self::$previousTerminalSettings);
+  }
+
+  /**
+   * Writes a single character to the console at the specified position.
+   *
+   * @param string $character The character to write.
+   * @param int $x The x position.
+   * @param int $y The y position.
+   * @return void
+   */
+  public static function write(string $character, int $x, int $y): void
+  {
+    $cursor = self::cursor();
+
+    self::$buffer->set($x, $y, substr($character, 0, 1));
+    echo implode(self::$buffer->toArray()[$y][$x]);
+
+    $cursor->moveTo($x + 1, $y);
   }
 
   /**
@@ -183,17 +206,19 @@ class Console
    * @param int $y The y position.
    * @return void
    */
-  public static function write(string $message, int $x, int $y): void
+  public static function writeLine(string $message, int $x, int $y): void
   {
     $cursor = self::cursor();
+    $messageLength = strlen($message);
+    $columnStart = $x;
+    $columnEnd = $x + $messageLength;
 
-    if (!isset(self::$buffer[$y]))
+    for ($i = $columnStart; $i < $columnEnd; $i++)
     {
-      self::$buffer[$y] = str_repeat(' ', DEFAULT_SCREEN_WIDTH);
+      self::$buffer->set($i, $y, $message[$i - $columnStart]);
     }
 
-    self::$buffer[$y] = substr_replace(self::$buffer[$y], $message, $x, strlen($message));
-    echo self::$buffer[$y];
+    echo implode(self::$buffer->toArray()[$y]);
     $cursor->moveTo(0, $y + 1);
   }
 
@@ -211,15 +236,7 @@ class Console
 
     foreach ($linesOfText as $rowIndex => $text)
     {
-      $currentBufferRowIndex = $y + $rowIndex;
-
-      if (!isset(self::$buffer[$currentBufferRowIndex]))
-      {
-        self::$buffer[$currentBufferRowIndex] = str_repeat(' ', DEFAULT_SCREEN_WIDTH);
-      }
-
-      self::$buffer[$currentBufferRowIndex] = substr_replace(self::$buffer[$currentBufferRowIndex], $text, $x, strlen($text));
-      echo self::$buffer[$currentBufferRowIndex];
+      self::writeLine($text, $x, $y + $rowIndex);
     }
 
     $cursor->moveTo(0, $y);
@@ -237,23 +254,28 @@ class Console
   public static function writeInColor(Color $color, string $message, int $x, int $y): void
   {
     echo $color->value;
-    self::write($message, $x, $y);
+    self::writeLine($message, $x, $y);
     echo Color::RESET->value;
   }
 
   /**
-   * Erases
+   * Erases the character at the specified position.
    *
-   * @param int $x
-   * @param int $y
+   * @param int $x The x position.
+   * @param int $y The y position.
    * @return void
    */
   public static function erase(int $x, int $y): void
   {
-    self::write(' ', $x, $y);
+    self::writeLine(' ', $x, $y);
   }
 
-  public static function getBuffer(): array
+  /**
+   * Returns the buffer.
+   *
+   * @return Grid The buffer.
+   */
+  public static function getBuffer(): Grid
   {
     return self::$buffer;
   }
@@ -279,11 +301,11 @@ class Console
   /**
    * Returns an empty buffer.
    *
-   * @return array<string> The empty buffer.
+   * @return Grid<string> The empty buffer.
    */
-  private static function getEmptyBuffer(): array
+  private static function getEmptyBuffer(): Grid
   {
-    return array_fill(0, DEFAULT_SCREEN_HEIGHT, array_fill(0,DEFAULT_SCREEN_WIDTH, ' '));
+    return new Grid(DEFAULT_SCREEN_HEIGHT, DEFAULT_SCREEN_WIDTH, ' ');
   }
 
   /**

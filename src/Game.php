@@ -188,7 +188,7 @@ class Game implements ObservableInterface
    */
   public function __destruct()
   {
-    Console::restoreTerminalSettings();
+    Console::restoreSettings();
 
     if (!empty($this->errors))
     {
@@ -237,8 +237,8 @@ class Game implements ObservableInterface
       $this->settings['log_dir']                = $_ENV['LOG_DIR'] ?? Path::join(getcwd(), DEFAULT_LOGS_DIR);
 
       // Debug settings
-      Debug::setLogDirectory($this->settings['log_dir']);
-      Debug::setLogLevel(LogLevel::tryFrom($this->settings['log_level']) ?? LogLevel::DEBUG);
+      Debug::setLogDirectory($this->getSettings('log_dir'));
+      Debug::setLogLevel(LogLevel::tryFrom($this->getSettings('log_level')) ?? LogLevel::DEBUG);
 
       $this->sceneManager->loadSettings($this->settings);
       Debug::info("Game settings loaded");
@@ -252,11 +252,14 @@ class Game implements ObservableInterface
   }
 
   /**
-   * @return array<string, mixed>
+   * Retrieve game settings.
+   *
+   * @param string|null $key The key of the setting to retrieve.
+   * @return mixed The game settings.
    */
-  public function getSettings(): array
+  public function getSettings(?string $key = null): mixed
   {
-    return $this->settings;
+    return $this->settings[$key] ?? $this->settings;
   }
 
   /**
@@ -268,7 +271,7 @@ class Game implements ObservableInterface
   {
     try
     {
-      $sleepTime = (int)(1000000 / $this->settings['fps']);
+      $sleepTime = (int)(1000000 / $this->getSettings('fps'));
       $this->start();
       $nextFrameTime = microtime(true) + 1;
       $lastFrameCountSnapShot = $this->frameCount;
@@ -306,16 +309,16 @@ class Game implements ObservableInterface
     Debug::info("Starting game");
 
     // Save the terminal settings
-    Console::saveTerminalSettings();
+    Console::saveSettings();
 
     // Set the terminal name
-    Console::setTerminalName($this->settings['name']);
+    Console::setName($this->getSettings('name'));
 
     // Set the terminal size
-    Console::setTerminalSize($this->settings['screen_width'], $this->settings['screen_height']);
+    Console::setSize($this->getSettings('screen_width'), $this->getSettings('screen_height'));
 
     // Hide the cursor
-    Console::cursor()->hide();
+    $this->consoleCursor->hide();
 
     // Disable echo
     InputManager::disableEcho();
@@ -332,7 +335,7 @@ class Game implements ObservableInterface
     // Load the first scene
     try
     {
-      $this->sceneManager->loadScene($this->settings['initial_scene']);
+      $this->sceneManager->loadScene($this->getSettings('initial_scene'));
     }
     catch (SceneNotFoundException $exception)
     {
@@ -367,10 +370,10 @@ class Game implements ObservableInterface
     InputManager::enableEcho();
 
     // Show cursor
-    Console::cursor()->show();
+    $this->consoleCursor->show();
 
     // Restore the terminal settings
-    Console::restoreTerminalSettings();
+    Console::restoreSettings();
 
     // Remove observers
     $this->removeObservers();
@@ -421,7 +424,7 @@ class Game implements ObservableInterface
 
     $this->uiManager->render();
 
-    if ($this->settings['debug'])
+    if ($this->getSettings('debug'))
     {
       $this->renderDebugInfo();
     }
@@ -566,14 +569,14 @@ class Game implements ObservableInterface
       Debug::info("Showing splash screen");
 
       // Check if a splash texture can be loaded
-      if (!file_exists($this->settings['splash_texture']))
+      if (!file_exists($this->getSettings('splash_texture')))
       {
         Debug::warn("Splash screen texture not found: {$this->settings['splash_texture']}");
         $this->settings['splash_texture'] = Path::join(Path::getAssetsDirectory(), DEFAULT_SPLASH_TEXTURE_PATH);
       }
 
       Debug::info("Loading splash screen texture");
-      $splashScreen = file_get_contents($this->settings['splash_texture']);
+      $splashScreen = file_get_contents($this->getSettings('splash_texture'));
       $splashScreenRows = explode("\n", $splashScreen);
       $splashByLine = 'SendamaEngine ™';
       $splashScreenRows[] = sprintf("%s%s", str_repeat(' ', 75 - 12), "powered by");
@@ -587,10 +590,10 @@ class Game implements ObservableInterface
       {
 //        $this->consoleCursor->moveTo((int)$leftMargin, (int)($topMargin + $rowIndex));
 //        echo $row;
-        Console::write($row, (int)$leftMargin, (int)($topMargin + $rowIndex));
+        Console::writeLine($row, (int)$leftMargin, (int)($topMargin + $rowIndex));
       }
 
-      $duration = (int) ($this->settings['splash_screen_duration'] * 1000000);
+      $duration = (int) ($this->getSettings('splash_screen_duration') * 1000000);
       usleep($duration);
       Console::clear();
 
@@ -674,8 +677,8 @@ class Game implements ObservableInterface
     Debug::log("Log directory initialized: {$this->settings['log_dir']}");
 
     // Debug settings
-    Debug::setLogDirectory($this->settings['log_dir']);
-    Debug::setLogLevel(LogLevel::tryFrom($this->settings['log_level']) ?? LogLevel::DEBUG);
+    Debug::setLogDirectory($this->getSettings('log_dir'));
+    Debug::setLogLevel(LogLevel::tryFrom($this->getSettings('log_level')) ?? LogLevel::DEBUG);
 
     $this->sceneManager->loadSettings($this->settings);
     Debug::info("Game settings initialized");
