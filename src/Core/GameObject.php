@@ -11,6 +11,7 @@ use Sendama\Engine\Core\Interfaces\CanResume;
 use Sendama\Engine\Core\Interfaces\CanStart;
 use Sendama\Engine\Core\Interfaces\CanUpdate;
 use Sendama\Engine\Core\Interfaces\ComponentInterface;
+use Sendama\Engine\Core\Rendering\Renderer;
 
 /**
  * Class GameObject. This class represents a game object in the engine.

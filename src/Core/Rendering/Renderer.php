@@ -1,9 +1,11 @@
 <?php
 
-namespace Sendama\Engine\Core;
+namespace Sendama\Engine\Core\Rendering;
 
+use Sendama\Engine\Core\Component;
+use Sendama\Engine\Core\GameObject;
 use Sendama\Engine\Core\Interfaces\CanRender;
-use Sendama\Engine\Debug\Debug;
+use Sendama\Engine\Core\Sprite;
 use Sendama\Engine\IO\Console\Console;
 
 class Renderer extends Component implements CanRender

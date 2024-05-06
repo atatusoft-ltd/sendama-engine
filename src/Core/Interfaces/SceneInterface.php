@@ -3,6 +3,7 @@
 namespace Sendama\Engine\Core\Interfaces;
 
 use Sendama\Engine\Core\GameObject;
+use Sendama\Engine\Core\Rendering\Interfaces\CameraInterface;
 
 /**
  * The interface SceneInterface.
@@ -95,4 +96,11 @@ interface SceneInterface extends CanStart, CanUpdate, CanRender, CanResume
    * @return void
    */
   public function remove(GameObject $gameObject): void;
+
+  /**
+   * Returns the camera.
+   *
+   * @return \Sendama\Engine\Core\Rendering\Interfaces\CameraInterface The camera.
+   */
+  public function getCamera(): \Sendama\Engine\Core\Rendering\Interfaces\CameraInterface;
 }

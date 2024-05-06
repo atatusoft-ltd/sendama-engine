@@ -4,6 +4,10 @@ namespace Sendama\Engine\Core\Scenes;
 
 use Sendama\Engine\Core\GameObject;
 use Sendama\Engine\Core\Interfaces\SceneInterface;
+use Sendama\Engine\Core\Rect;
+use Sendama\Engine\Core\Rendering\Camera;
+use Sendama\Engine\Core\Rendering\Interfaces\CameraInterface;
+use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\Physics\Physics;
 use Serializable;
@@ -35,6 +39,11 @@ class AbstractScene implements SceneInterface, Serializable
   protected array $worldsSpace = [];
 
   /**
+   * @var CameraInterface $camera
+   */
+  protected CameraInterface $camera;
+
+  /**
    * Constructs a scene.
    *
    * @param string $name The name of the scene.
@@ -44,6 +53,7 @@ class AbstractScene implements SceneInterface, Serializable
   )
   {
     $this->physics = Physics::getInstance();
+    $this->camera = new Camera($this);
   }
 
   /**
@@ -78,6 +88,20 @@ class AbstractScene implements SceneInterface, Serializable
     foreach ($settings as $key => $value)
     {
       $this->settings[$key] = $value;
+    }
+
+    if (isset($this->settings['screen_width']) && isset($this->settings['screen_height']))
+    {
+      $oldViewport = $this->camera->getViewport();
+      $this->camera->setViewport(
+        new Rect(
+          $this->camera->getOffset(),
+          new Vector2(
+            $this->settings['screen_width'] ?? $oldViewport->getWidth(),
+            $this->settings['screen_height'] ?? $oldViewport->getHeight()
+          )
+        )
+      );
     }
 
     return $this;
@@ -123,6 +147,9 @@ class AbstractScene implements SceneInterface, Serializable
         $gameObject->update();
       }
     }
+
+    // Update the camera
+    $this->camera->update();
   }
 
   /**
@@ -261,5 +288,15 @@ class AbstractScene implements SceneInterface, Serializable
   public function remove(GameObject $gameObject): void
   {
     $this->rootGameObjects = array_filter($this->rootGameObjects, fn($item) => $item !== $gameObject, $this->rootGameObjects);
+  }
+
+  /**
+   * Returns the camera.
+   *
+   * @return CameraInterface The camera.
+   */
+  public function getCamera(): CameraInterface
+  {
+    return $this->camera;
   }
 }
