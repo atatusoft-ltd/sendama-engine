@@ -86,7 +86,7 @@ class AbstractScene implements SceneInterface, Serializable
   /**
    * @inheritDoc
    */
-  public function start(): void
+  public final function start(): void
   {
     Debug::log("Scene started: " . $this->name);
     $this->createWordsSpace();
@@ -100,7 +100,7 @@ class AbstractScene implements SceneInterface, Serializable
   /**
    * @inheritDoc
    */
-  public function stop(): void
+  public final function stop(): void
   {
     Debug::log("Scene stopped: " . $this->name);
     foreach ($this->rootGameObjects as $gameObject)
@@ -112,7 +112,7 @@ class AbstractScene implements SceneInterface, Serializable
   /**
    * @inheritDoc
    */
-  public function update(): void
+  public final function update(): void
   {
     $this->physics->simulate();
 
@@ -128,7 +128,7 @@ class AbstractScene implements SceneInterface, Serializable
   /**
    * @inheritDoc
    */
-  public function render(): void
+  public final function render(): void
   {
     foreach ($this->rootGameObjects as $gameObject)
     {
@@ -142,7 +142,7 @@ class AbstractScene implements SceneInterface, Serializable
   /**
    * @inheritDoc
    */
-  public function erase(): void
+  public final function erase(): void
   {
     foreach ($this->rootGameObjects as $gameObject)
     {
@@ -156,7 +156,7 @@ class AbstractScene implements SceneInterface, Serializable
   /**
    * @inheritDoc
    */
-  public function suspend(): void
+  public final function suspend(): void
   {
     foreach ($this->rootGameObjects as $gameObject)
     {
@@ -170,7 +170,7 @@ class AbstractScene implements SceneInterface, Serializable
   /**
    * @inheritDoc
    */
-  public function resume(): void
+  public final function resume(): void
   {
     foreach ($this->rootGameObjects as $gameObject)
     {
@@ -184,7 +184,7 @@ class AbstractScene implements SceneInterface, Serializable
   /**
    * @return GameObject[] The list of root game objects in the scene.
    */
-  public function getRootGameObjects(): array
+  public final function getRootGameObjects(): array
   {
     return $this->rootGameObjects;
   }

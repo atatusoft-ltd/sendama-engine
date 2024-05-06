@@ -180,8 +180,8 @@ class Vector2 implements CanEquate, Stringable
 
     if (abs($length) > PHP_FLOAT_MIN)
     {
-      $this->x /= $length;
-      $this->y /= $length;
+      $this->setX((int)($this->getX() / $length));
+      $this->setY((int)($this->getY() / $length));
     }
   }
 
