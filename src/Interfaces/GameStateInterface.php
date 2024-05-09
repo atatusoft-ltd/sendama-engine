@@ -2,12 +2,6 @@
 
 namespace Sendama\Engine\Interfaces;
 
-use Sendama\Engine\Core\Interfaces\CanAwake;
-use Sendama\Engine\Core\Interfaces\CanRender;
-use Sendama\Engine\Core\Interfaces\CanResume;
-use Sendama\Engine\Core\Interfaces\CanStart;
-use Sendama\Engine\Core\Interfaces\CanUpdate;
-
 interface GameStateInterface
 {
   /**
@@ -23,4 +17,18 @@ interface GameStateInterface
    * @return void
    */
   public function render(): void;
+
+  /**
+   * Suspends the game state.
+   *
+   * @return void
+   */
+  public function suspend(): void;
+
+  /**
+   * Resumes the game state.
+   *
+   * @return void
+   */
+  public function resume(): void;
 }
