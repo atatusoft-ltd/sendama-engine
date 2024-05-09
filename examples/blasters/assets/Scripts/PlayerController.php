@@ -45,7 +45,7 @@ class PlayerController extends Behaviour
   {
     $this->move(Input::getAxis(AxisName::HORIZONTAL), Input::getAxis(AxisName::VERTICAL));
 
-    if (Input::isAnyKeyPressed([KeyCode::Q, KeyCode::q, KeyCode::ESCAPE]))
+    if (Input::isAnyKeyPressed([KeyCode::Q, KeyCode::q]))
     {
       Game::quit();
     }
