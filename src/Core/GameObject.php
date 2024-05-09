@@ -3,14 +3,10 @@
 namespace Sendama\Engine\Core;
 
 use InvalidArgumentException;
-use Sendama\Engine\Core\Interfaces\ActivatableInterface;
 use Sendama\Engine\Core\Interfaces\CanCompare;
 use Sendama\Engine\Core\Interfaces\CanEquate;
-use Sendama\Engine\Core\Interfaces\CanRender;
-use Sendama\Engine\Core\Interfaces\CanResume;
-use Sendama\Engine\Core\Interfaces\CanStart;
-use Sendama\Engine\Core\Interfaces\CanUpdate;
 use Sendama\Engine\Core\Interfaces\ComponentInterface;
+use Sendama\Engine\Core\Interfaces\GameObjectInterface;
 use Sendama\Engine\Core\Rendering\Renderer;
 
 /**
@@ -18,7 +14,7 @@ use Sendama\Engine\Core\Rendering\Renderer;
  *
  * @package Sendama\Engine\Core
  */
-class GameObject implements CanCompare, CanResume, CanUpdate, CanStart, CanRender, ActivatableInterface
+class GameObject implements GameObjectInterface
 {
   /**
    * @var bool $active Whether the game object is active or not.
@@ -486,5 +482,31 @@ class GameObject implements CanCompare, CanResume, CanUpdate, CanStart, CanRende
   public static function destroy(GameObject $gameObject, float $delay = 0.0): void
   {
     // TODO: Implement destroy() method.
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function setSprite(Texture2D|array|string $texture, Vector2 $position, Vector2 $size): void
+  {
+    if (is_array($texture))
+    {
+      $texture = new Texture2D($texture['path'], $texture['width'] ?? -1, $texture['height'] ?? -1);
+    }
+
+    if (is_string($texture))
+    {
+      $texture = new Texture2D($texture);
+    }
+
+    $this->getRenderer()->setSprite(new Sprite($texture, new Rect($position, $size)));
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getSprite(): Sprite
+  {
+    return $this->getRenderer()->getSprite();
   }
 }

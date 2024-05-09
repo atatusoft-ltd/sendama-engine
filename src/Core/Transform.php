@@ -7,10 +7,11 @@ class Transform extends Component
   /**
    * Transform constructor.
    *
-   * @param GameObject $gameObject
-   * @param Vector2    $position
-   * @param Vector2    $scale
-   * @param Vector2    $rotation
+   * @param GameObject $gameObject The game object.
+   * @param Vector2 $position The position of the transform.
+   * @param Vector2 $scale The scale of the transform.
+   * @param Vector2 $rotation The rotation of the transform.
+   * @param Transform|null $parent The parent of the transform.
    */
   public function __construct(
     GameObject $gameObject,
