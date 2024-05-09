@@ -2,6 +2,7 @@
 
 namespace Sendama\Engine\UI\Menus\Interfaces;
 
+use Sendama\Engine\Core\Interfaces\ExecutableInterface;
 use Stringable;
 
 /**
@@ -9,7 +10,7 @@ use Stringable;
  *
  * @package Sendama\Engine\UI\Menus\Interfaces
  */
-interface MenuItemInterface extends Stringable
+interface MenuItemInterface extends Stringable, ExecutableInterface
 {
   /**
    * Returns the label of the menu item.
