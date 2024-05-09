@@ -23,6 +23,8 @@ class PausedState extends GameState
     {
       $this->resume();
     }
+
+    $this->menu?->update();
   }
 
   /**

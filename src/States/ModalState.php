@@ -24,4 +24,20 @@ class ModalState extends GameState
   {
     $this->modalManager->update();
   }
+
+  /**
+   * @inheritDoc
+   */
+  public function suspend(): void
+  {
+    // TODO: Implement suspend() method.
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function resume(): void
+  {
+    // TODO: Implement resume() method.
+  }
 }
