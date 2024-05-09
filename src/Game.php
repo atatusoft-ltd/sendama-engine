@@ -25,9 +25,12 @@ use Sendama\Engine\Exceptions\Scenes\SceneNotFoundException;
 use Sendama\Engine\Interfaces\GameStateInterface;
 use Sendama\Engine\IO\Console\Console;
 use Sendama\Engine\IO\Console\Cursor;
+use Sendama\Engine\IO\Enumerations\KeyCode;
 use Sendama\Engine\IO\InputManager;
 use Sendama\Engine\Messaging\Notifications\NotificationsManager;
+use Sendama\Engine\States\GameState;
 use Sendama\Engine\States\ModalState;
+use Sendama\Engine\States\PausedState;
 use Sendama\Engine\States\SceneState;
 use Sendama\Engine\UI\Modals\ModalManager;
 use Sendama\Engine\UI\UIManager;
@@ -113,6 +116,14 @@ class Game implements ObservableInterface
    * @var ModalState $modalState
    */
   protected ModalState $modalState;
+  /**
+   * @var PausedState $pausedState
+   */
+  protected PausedState $pausedState;
+  /**
+   * @var GameState|null $previousState The previous state of the game.
+   */
+  protected ?GameState $previousState = null;
 
   /**
    * Game constructor.
@@ -161,6 +172,14 @@ class Game implements ObservableInterface
       $this->uiManager
     );
     $this->modalState = new ModalState(
+      $this,
+      $this->sceneManager,
+      $this->eventManager,
+      $this->modalManager,
+      $this->notificationsManager,
+      $this->uiManager
+    );
+    $this->pausedState = new PausedState(
       $this,
       $this->sceneManager,
       $this->eventManager,
@@ -549,12 +568,32 @@ class Game implements ObservableInterface
   }
 
   /**
-   * @param GameStateInterface $state
+   * Set the current game state.
+   *
+   * @param GameStateInterface $state The game state to set.
    * @return void
    */
   public function setState(GameStateInterface $state): void
   {
+    Debug::log("Setting game state to " . get_class($state));
+    $this->previousState = $this->state;
     $this->state = $state;
+  }
+
+  /**
+   * Retrieve a game state.
+   *
+   * @param string $stateName The name of the state to retrieve.
+   * @return GameStateInterface|null The game state or null if not found.
+   */
+  public function getState(string $stateName): ?GameStateInterface
+  {
+    return match ($stateName) {
+      'scene' => $this->sceneState,
+      'modal' => $this->modalState,
+      'paused' => $this->pausedState,
+      default => null
+    };
   }
 
   /**
@@ -680,8 +719,16 @@ class Game implements ObservableInterface
     Debug::setLogDirectory($this->getSettings('log_dir'));
     Debug::setLogLevel(LogLevel::tryFrom($this->getSettings('log_level')) ?? LogLevel::DEBUG);
 
+    // Input settings
+    $this->settings['pause_key']              = $_ENV['PAUSE_KEY'] ?? KeyCode::ESCAPE;
+
     $this->sceneManager->loadSettings($this->settings);
     Debug::info("Game settings initialized");
+  }
+
+  public function getPreviousState(): GameState
+  {
+    return $this->previousState;
   }
 
   /**
@@ -696,5 +743,4 @@ class Game implements ObservableInterface
       EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::QUIT));
     }
   }
-
 }
