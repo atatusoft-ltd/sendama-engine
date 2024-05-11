@@ -22,3 +22,6 @@ const DEFAULT_WINDOW_HEIGHT = 30;
 /* Grid */
 const DEFAULT_GRID_WIDTH = 10;
 const DEFAULT_GRID_HEIGHT = 10;
+/* Menu */
+const DEFAULT_MENU_WIDTH = 16;
+const DEFAULT_MENU_HEIGHT = 3;
