@@ -98,4 +98,19 @@ interface WindowInterface extends CanRender, SubjectInterface
    * @return void
    */
   public function setForegroundColor(Color $color): void;
+
+  /**
+   * Returns the content of the window.
+   *
+   * @return string[] The content of the window.
+   */
+  public function getContent(): array;
+
+  /**
+   * Sets the content of the window.
+   *
+   * @param string[] $content The content of the window.
+   * @return void
+   */
+  public function setContent(array $content): void;
 }

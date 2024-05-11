@@ -2,15 +2,18 @@
 
 namespace Sendama\Engine\UI\Menus;
 
+use Closure;
+use PHPUnit\Framework\Constraint\Callback;
 use Sendama\Engine\Core\Interfaces\ExecutionContextInterface;
 use Sendama\Engine\UI\Menus\Interfaces\MenuItemInterface;
 
 class MenuItem implements Interfaces\MenuItemInterface
 {
   public function __construct(
-    protected string $label,
-    protected string $description = '',
-    protected string $icon = ''
+    protected string   $label,
+    protected string   $description = '',
+    protected string   $icon = '',
+    protected ?Closure $callback = null
   )
   {
   }
@@ -20,7 +23,7 @@ class MenuItem implements Interfaces\MenuItemInterface
    */
   public function execute(?ExecutionContextInterface $context = null): void
   {
-    // TODO: Implement execute() method.
+    $this->callback?->call($context);
   }
 
   /**
@@ -69,6 +72,17 @@ class MenuItem implements Interfaces\MenuItemInterface
   public function setDescription(string $description): void
   {
     $this->description = $description;
+  }
+
+  /**
+   * Sets the callback to execute when the menu item is selected.
+   *
+   * @param Callback|null $callback The callback to execute when the menu item is selected.
+   * @return void
+   */
+  public function setCallback(?Callback $callback): void
+  {
+    $this->callback = $callback;
   }
 
   /**
