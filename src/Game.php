@@ -7,7 +7,7 @@ use Dotenv\Dotenv;
 use Error;
 use Exception;
 use Sendama\Engine\Core\Enumerations\ChronoUnit;
-use Sendama\Engine\Core\Interfaces\SceneInterface;
+use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
 use Sendama\Engine\Core\Scenes\SceneManager;
 use Sendama\Engine\Core\Time;
 use Sendama\Engine\Debug\Debug;
