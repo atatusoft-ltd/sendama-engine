@@ -193,7 +193,8 @@ class Console
     $cursor = self::cursor();
 
     self::$buffer->set($x, $y, substr($character, 0, 1));
-    echo implode(self::$buffer->toArray()[$y][$x]);
+    $cursor->moveTo($x, $y);
+    echo self::$buffer->toArray()[$y][$x];
 
     $cursor->moveTo($x + 1, $y);
   }
@@ -218,6 +219,7 @@ class Console
       self::$buffer->set($i, $y, $message[$i - $columnStart]);
     }
 
+    $cursor->moveTo(0, $y);
     echo implode(self::$buffer->toArray()[$y]);
     $cursor->moveTo(0, $y + 1);
   }

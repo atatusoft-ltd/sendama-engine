@@ -326,8 +326,8 @@ class Vector2 implements CanEquate, Stringable
    */
   public function divide(Vector2 $other): void
   {
-    $this->setX($this->getX() / $other->getX());
-    $this->setY($this->getY() / $other->getY());
+    $this->setX(intval($this->getX() / $other->getX()));
+    $this->setY(intval($this->getY() / $other->getY()));
   }
 
   /**

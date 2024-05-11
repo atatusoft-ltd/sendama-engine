@@ -2,26 +2,53 @@
 
 namespace Sendama\Engine\Core\Scenes;
 
-use Sendama\Engine\Core\GameObject;
 use Sendama\Engine\Core\Rect;
-use Sendama\Engine\Core\Sprite;
-use Sendama\Engine\Core\Texture2D;
 use Sendama\Engine\Core\Vector2;
-use Sendama\Examples\Blasters\Scripts\PlayerController;
+use Sendama\Engine\UI\Menus\Menu;
+use Sendama\Engine\UI\Menus\MenuItem;
 
 class TitleScene extends AbstractScene
 {
+  /**
+   * @var Menu $menu
+   */
+  protected Menu $menu;
+
   public function __construct(?string $name = null)
   {
     parent::__construct($name ?? 'Title Scene');
 
-    $player = new GameObject('Player', position: new Vector2(2, 2));
-    $player->addComponent(PlayerController::class);
-    $playerTexture = new Texture2D('Textures/player.texture');
-    $player
-      ->getRenderer()
-      ->setSprite(new Sprite($playerTexture, new Rect(Vector2::zero(), Vector2::one())));
+    $menuWidth = DEFAULT_MENU_WIDTH;
+    $menuHeight = DEFAULT_MENU_HEIGHT;
 
-    $this->add($player);
+    $leftMargin = (DEFAULT_SCREEN_WIDTH / 2) - ($menuWidth / 2);
+    $topMargin = (DEFAULT_SCREEN_HEIGHT / 2) - ($menuHeight / 2);
+
+    $this->menu = new Menu(
+      'Main Menu',
+      'q:quit',
+      new Rect(
+        new Vector2((int)$leftMargin, (int)$topMargin),
+        new Vector2($menuWidth, $menuHeight)
+      )
+    );
+    $this->menu->addItem(new MenuItem(
+      label: 'New Game',
+      description: 'Start a new game',
+      icon: '🎮',
+      callback: function () {
+        loadScene('GameScene');
+      }
+    ));
+    $this->menu->addItem(new MenuItem(
+      label: 'Quit',
+      description: 'Quit the game',
+      icon: '🚪',
+      callback: function () {
+        quitGame();
+      }
+    ));
+
+    $this->add($this->menu);
   }
 }

@@ -1,11 +1,13 @@
 <?php
 
 use Sendama\Engine\Core\GameObject;
+use Sendama\Engine\Core\Scenes\SceneManager;
 use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\Events\Enumerations\GameEventType;
 use Sendama\Engine\Events\EventManager;
 use Sendama\Engine\Events\GameEvent;
 use Sendama\Engine\Events\Interfaces\EventInterface;
+use Sendama\Engine\Exceptions\Scenes\SceneNotFoundException;
 use Sendama\Engine\IO\Console\Console;
 
 
@@ -19,6 +21,18 @@ use Sendama\Engine\IO\Console\Console;
 function quitGame(?int $code = null): void
 {
   EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::QUIT, $code));
+}
+
+/**
+ * Loads the scene with the given index.
+ *
+ * @param string $index The index of the scene to load.
+ * @return void
+ * @throws SceneNotFoundException
+ */
+function loadScene(string $index): void
+{
+  SceneManager::getInstance()->loadScene($index);
 }
 
 /* Math */

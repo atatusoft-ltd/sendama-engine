@@ -22,7 +22,7 @@ class Rect
    */
   public function __construct(
     Vector2 $position = new Vector2(0, 0),
-    Vector2 $size = new Vector2(0, 0),
+    Vector2 $size = new Vector2(1, 1),
   )
   {
     $this->setX($position->getX());

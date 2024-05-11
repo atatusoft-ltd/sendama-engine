@@ -1,13 +1,23 @@
 <?php
 
-namespace Sendama\Engine\Core;
+namespace Sendama\Engine\Core\Rendering;
 
+use Sendama\Engine\Core\Component;
+use Sendama\Engine\Core\GameObject;
 use Sendama\Engine\Core\Interfaces\CanRender;
-use Sendama\Engine\Debug\Debug;
+use Sendama\Engine\Core\Sprite;
 use Sendama\Engine\IO\Console\Console;
+use Sendama\Engine\IO\Console\Cursor;
 
 class Renderer extends Component implements CanRender
 {
+  /**
+   * The console cursor.
+   *
+   * @var Cursor
+   */
+  protected Cursor $consoleCursor;
+
   /**
    * Renderer constructor.
    *
@@ -20,6 +30,8 @@ class Renderer extends Component implements CanRender
   )
   {
     parent::__construct($gameObject);
+
+    $this->consoleCursor = Console::cursor();
   }
 
   /**
@@ -42,13 +54,7 @@ class Renderer extends Component implements CanRender
    */
   public final function onUpdate(): void
   {
-    // TODO: Remove this code
-//    $this->sprite?->setRect(
-//      new Rect(
-//        $this->gameObject->getTransform()->getPosition(),
-//        $this->sprite->getRect()->getSize()
-//      )
-//    );
+    // Do nothing.
   }
 
   /**
@@ -78,7 +84,7 @@ class Renderer extends Component implements CanRender
         }
 
         // Move the console cursor to the position of the sprite.
-        Console::cursor()->moveTo($targetX, $targetY);
+        $this->consoleCursor->moveTo($targetX, $targetY);
 
         // Render the sprite.
         echo $spriteBufferedImage[$y][$x];

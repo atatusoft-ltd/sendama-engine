@@ -5,14 +5,21 @@ namespace Sendama\Engine\UI\Menus\Interfaces;
 use Assegai\Collections\ItemList;
 use Sendama\Engine\Core\Interfaces\CanRender;
 use Sendama\Engine\Core\Interfaces\CanUpdate;
+use Sendama\Engine\Core\Interfaces\ExecutionContextInterface;
 use Sendama\Engine\Events\Interfaces\SubjectInterface;
+use Sendama\Engine\IO\Enumerations\Color;
+use Sendama\Engine\UI\Interfaces\UIElementInterface;
 
 /**
  * Interface MenuInterface. Represents a menu.
  *
  * @package Sendama\Engine\UI\Menus\Interfaces
  */
-interface MenuInterface extends CanUpdate, CanRender, SubjectInterface, MenuGraphNodeInterface
+interface MenuInterface extends
+  UIElementInterface,
+  SubjectInterface,
+  MenuGraphNodeInterface,
+  ExecutionContextInterface
 {
   /**
    * Returns the title of the menu.
@@ -136,4 +143,27 @@ interface MenuInterface extends CanUpdate, CanRender, SubjectInterface, MenuGrap
    * @return void
    */
   public function setActiveItemByLabel(string $label): void;
+
+  /**
+   * Sets the cursor of the menu.
+   *
+   * @param string $cursor The cursor of the menu.
+   * @return void
+   */
+  public function setCursor(string $cursor): void;
+
+  /**
+   * Sets the color of the active item.
+   *
+   * @param Color $color The color of the active item.
+   * @return void
+   */
+  public function setActiveColor(Color $color): void;
+
+  /**
+   * Updates the content of the window.
+   *
+   * @return void
+   */
+  public function updateWindowContent(): void;
 }

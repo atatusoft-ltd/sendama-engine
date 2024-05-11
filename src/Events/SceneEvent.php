@@ -4,7 +4,7 @@ namespace Sendama\Engine\Events;
 
 use DateTimeImmutable;
 use DateTimeInterface;
-use Sendama\Engine\Core\Interfaces\SceneInterface;
+use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
 use Sendama\Engine\Events\Enumerations\EventType;
 use Sendama\Engine\Events\Enumerations\SceneEventType;
 use Sendama\Engine\Events\Interfaces\EventTargetInterface;

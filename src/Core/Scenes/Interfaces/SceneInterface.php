@@ -1,8 +1,15 @@
 <?php
 
-namespace Sendama\Engine\Core\Interfaces;
+namespace Sendama\Engine\Core\Scenes\Interfaces;
 
 use Sendama\Engine\Core\GameObject;
+use Sendama\Engine\Core\Interfaces\CanRender;
+use Sendama\Engine\Core\Interfaces\CanResume;
+use Sendama\Engine\Core\Interfaces\CanStart;
+use Sendama\Engine\Core\Interfaces\CanUpdate;
+use Sendama\Engine\Core\Interfaces\GameObjectInterface;
+use Sendama\Engine\Core\Rendering\Interfaces\CameraInterface;
+use Sendama\Engine\UI\Interfaces\UIElementInterface;
 
 /**
  * The interface SceneInterface.
@@ -76,23 +83,37 @@ interface SceneInterface extends CanStart, CanUpdate, CanRender, CanResume
   /**
    * Returns the root game objects.
    *
-   * @return array
+   * @return array<GameObjectInterface> The list of root game objects in the scene.
    */
   public function getRootGameObjects(): array;
 
   /**
-   * Adds a game object to the scene.
+   * Returns the UI elements.
    *
-   * @param GameObject $gameObject The game object to add.
+   * @return array<UIElementInterface> The list of UI elements in the scene.
+   */
+  public function getUIElements(): array;
+
+  /**
+   * Adds a game object or UI element to the scene.
+   *
+   * @param GameObjectInterface|UIElementInterface $object The game object or UI element to add.
    * @return void
    */
-  public function add(GameObject $gameObject): void;
+  public function add(GameObjectInterface|UIElementInterface $object): void;
 
   /**
    * Removes a game object from the scene.
    *
-   * @param GameObject $gameObject The game object to remove.
+   * @param GameObjectInterface|UIElementInterface $object The game object to remove.
    * @return void
    */
-  public function remove(GameObject $gameObject): void;
+  public function remove(GameObjectInterface|UIElementInterface $object): void;
+
+  /**
+   * Returns the camera.
+   *
+   * @return CameraInterface The camera.
+   */
+  public function getCamera(): CameraInterface;
 }

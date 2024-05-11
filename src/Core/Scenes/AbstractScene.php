@@ -3,9 +3,15 @@
 namespace Sendama\Engine\Core\Scenes;
 
 use Sendama\Engine\Core\GameObject;
-use Sendama\Engine\Core\Interfaces\SceneInterface;
+use Sendama\Engine\Core\Interfaces\GameObjectInterface;
+use Sendama\Engine\Core\Rect;
+use Sendama\Engine\Core\Rendering\Camera;
+use Sendama\Engine\Core\Rendering\Interfaces\CameraInterface;
+use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
+use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\Physics\Physics;
+use Sendama\Engine\UI\Interfaces\UIElementInterface;
 use Serializable;
 
 /**
@@ -21,9 +27,15 @@ class AbstractScene implements SceneInterface, Serializable
   protected array $settings = [];
 
   /**
-   * @var array<GameObject> $rootGameObjects
+   * @var array<GameObjectInterface> $rootGameObjects
    */
   public array $rootGameObjects = [];
+
+  /**
+   * @var array<UIElementInterface> $uiElements
+   */
+  public array $uiElements = [];
+
   /**
    * @var Physics
    */
@@ -35,6 +47,11 @@ class AbstractScene implements SceneInterface, Serializable
   protected array $worldsSpace = [];
 
   /**
+   * @var CameraInterface $camera
+   */
+  protected CameraInterface $camera;
+
+  /**
    * Constructs a scene.
    *
    * @param string $name The name of the scene.
@@ -44,6 +61,7 @@ class AbstractScene implements SceneInterface, Serializable
   )
   {
     $this->physics = Physics::getInstance();
+    $this->camera = new Camera($this);
   }
 
   /**
@@ -80,6 +98,20 @@ class AbstractScene implements SceneInterface, Serializable
       $this->settings[$key] = $value;
     }
 
+    if (isset($this->settings['screen_width']) && isset($this->settings['screen_height']))
+    {
+      $oldViewport = $this->camera->getViewport();
+      $this->camera->setViewport(
+        new Rect(
+          $this->camera->getOffset(),
+          new Vector2(
+            $this->settings['screen_width'] ?? $oldViewport->getWidth(),
+            $this->settings['screen_height'] ?? $oldViewport->getHeight()
+          )
+        )
+      );
+    }
+
     return $this;
   }
 
@@ -95,6 +127,11 @@ class AbstractScene implements SceneInterface, Serializable
     {
       $gameObject->start();
     }
+
+    foreach ($this->uiElements as $uiElement)
+    {
+      $uiElement->start();
+    }
   }
 
   /**
@@ -106,6 +143,11 @@ class AbstractScene implements SceneInterface, Serializable
     foreach ($this->rootGameObjects as $gameObject)
     {
       $gameObject->stop();
+    }
+
+    foreach ($this->uiElements as $uiElement)
+    {
+      $uiElement->stop();
     }
   }
 
@@ -123,6 +165,17 @@ class AbstractScene implements SceneInterface, Serializable
         $gameObject->update();
       }
     }
+
+    foreach ($this->uiElements as $uiElement)
+    {
+      if ($uiElement->isEnabled())
+      {
+        $uiElement->update();
+      }
+    }
+
+    // Update the camera
+    $this->camera->update();
   }
 
   /**
@@ -130,13 +183,7 @@ class AbstractScene implements SceneInterface, Serializable
    */
   public final function render(): void
   {
-    foreach ($this->rootGameObjects as $gameObject)
-    {
-      if ($gameObject->isActive())
-      {
-        $gameObject->render();
-      }
-    }
+    $this->camera->render();
   }
 
   /**
@@ -144,13 +191,7 @@ class AbstractScene implements SceneInterface, Serializable
    */
   public final function erase(): void
   {
-    foreach ($this->rootGameObjects as $gameObject)
-    {
-      if ($gameObject->isActive())
-      {
-        $gameObject->erase();
-      }
-    }
+    $this->camera->erase();
   }
 
   /**
@@ -163,6 +204,14 @@ class AbstractScene implements SceneInterface, Serializable
       if ($gameObject->isActive())
       {
         $gameObject->suspend();
+      }
+    }
+
+    foreach ($this->uiElements as $uiElement)
+    {
+      if ($uiElement->isEnabled())
+      {
+        $uiElement->suspend();
       }
     }
   }
@@ -179,14 +228,30 @@ class AbstractScene implements SceneInterface, Serializable
         $gameObject->resume();
       }
     }
+
+    foreach ($this->uiElements as $uiElement)
+    {
+      if ($uiElement->isEnabled())
+      {
+        $uiElement->resume();
+      }
+    }
   }
 
   /**
-   * @return GameObject[] The list of root game objects in the scene.
+   * @inheritDoc
    */
   public final function getRootGameObjects(): array
   {
     return $this->rootGameObjects;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public final function getUIElements(): array
+  {
+    return $this->uiElements;
   }
 
   /**
@@ -197,7 +262,8 @@ class AbstractScene implements SceneInterface, Serializable
     return json_encode([
       'name' => $this->name,
       'settings' => $this->settings,
-      'rootGameObjects' => $this->rootGameObjects
+      'root_game_objects' => $this->rootGameObjects,
+      'ui_elements' => $this->uiElements,
     ]);
   }
 
@@ -210,7 +276,8 @@ class AbstractScene implements SceneInterface, Serializable
 
     $this->name = $data['name'];
     $this->settings = $data['settings'];
-    $this->rootGameObjects = $data['rootGameObjects'];
+    $this->rootGameObjects = $data['root_game_objects'];
+    $this->uiElements = $data['ui_elements'];
   }
 
   public function __serialize(): array
@@ -218,7 +285,8 @@ class AbstractScene implements SceneInterface, Serializable
     return [
       'name' => $this->name,
       'settings' => $this->settings,
-      'rootGameObjects' => $this->rootGameObjects
+      'root_game_objects' => $this->rootGameObjects,
+      'ui_elements' => $this->uiElements,
     ];
   }
 
@@ -226,7 +294,8 @@ class AbstractScene implements SceneInterface, Serializable
   {
     $this->name = $data['name'];
     $this->settings = $data['settings'];
-    $this->rootGameObjects = $data['rootGameObjects'];
+    $this->rootGameObjects = $data['root_game_objects'];
+    $this->uiElements = $data['ui_elements'];
   }
 
   /**
@@ -244,22 +313,42 @@ class AbstractScene implements SceneInterface, Serializable
   }
 
   /**
-   * Adds a game object to the scene.
-   *
-   * @param GameObject $gameObject The game object to add.
+   * @inheritDoc
    */
-  public function add(GameObject $gameObject): void
+  public function add(GameObjectInterface|UIElementInterface $object): void
   {
-    $this->rootGameObjects[] = $gameObject;
+    if ($object instanceof GameObjectInterface)
+    {
+      $this->rootGameObjects[] = $object;
+    }
+    else
+    {
+      $this->uiElements[] = $object;
+    }
   }
 
   /**
-   * Removes a game object from the scene.
-   *
-   * @param GameObject $gameObject The game object to remove.
+   * @inheritDoc
    */
-  public function remove(GameObject $gameObject): void
+  public function remove(UIElementInterface|GameObjectInterface $object): void
   {
-    $this->rootGameObjects = array_filter($this->rootGameObjects, fn($item) => $item !== $gameObject, $this->rootGameObjects);
+    if ($object instanceof GameObjectInterface)
+    {
+      $this->rootGameObjects = array_filter($this->rootGameObjects, fn($item) => $item !== $object, $this->rootGameObjects);
+    }
+    else
+    {
+      $this->uiElements = array_filter($this->uiElements, fn($item) => $item !== $object, $this->uiElements);
+    }
+  }
+
+  /**
+   * Returns the camera.
+   *
+   * @return CameraInterface The camera.
+   */
+  public function getCamera(): CameraInterface
+  {
+    return $this->camera;
   }
 }
