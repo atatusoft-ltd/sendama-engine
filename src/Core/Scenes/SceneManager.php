@@ -7,8 +7,8 @@ use Sendama\Engine\Core\Interfaces\CanRender;
 use Sendama\Engine\Core\Interfaces\CanResume;
 use Sendama\Engine\Core\Interfaces\CanStart;
 use Sendama\Engine\Core\Interfaces\CanUpdate;
-use Sendama\Engine\Core\Interfaces\SceneInterface;
 use Sendama\Engine\Core\Interfaces\SingletonInterface;
+use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
 use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\Events\Enumerations\SceneEventType;
 use Sendama\Engine\Events\EventManager;
@@ -19,7 +19,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
 {
   protected static ?SceneManager $instance = null;
   /**
-   * @var ItemList<SceneInterface>
+   * @var ItemList<\Sendama\Engine\Core\Scenes\Interfaces\SceneInterface>
    */
   protected ItemList $scenes;
   /**
@@ -27,7 +27,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   protected array $settings = [];
   /**
-   * @var SceneInterface|null $activeScene
+   * @var \Sendama\Engine\Core\Scenes\Interfaces\SceneInterface|null $activeScene
    */
   protected ?SceneInterface $activeScene = null;
   /**
@@ -62,7 +62,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
   /**
    * Returns the currently active scene.
    *
-   * @return SceneInterface|null
+   * @return \Sendama\Engine\Core\Scenes\Interfaces\SceneInterface|null
    */
   public function getActiveScene(): ?SceneInterface
   {
@@ -70,7 +70,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
   }
 
   /**
-   * @param SceneInterface $scene
+   * @param \Sendama\Engine\Core\Scenes\Interfaces\SceneInterface $scene
    * @param mixed|null $data
    * @return $this
    */

@@ -2,9 +2,9 @@
 
 namespace Sendama\Engine\Core\Rendering;
 
-use Sendama\Engine\Core\Interfaces\SceneInterface;
 use Sendama\Engine\Core\Rect;
 use Sendama\Engine\Core\Rendering\Interfaces\CameraInterface;
+use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
 use Sendama\Engine\Core\Transform;
 use Sendama\Engine\Core\Vector2;
 
@@ -100,7 +100,22 @@ class Camera implements CameraInterface
    */
   public function render(): void
   {
-    // TODO: Implement render() method.
+    foreach ($this->scene->getRootGameObjects() as $gameObject)
+    {
+      if ($gameObject->isActive())
+      {
+        $gameObject->render();
+      }
+    }
+
+    foreach ($this->scene->getUIElements() as $uiElement)
+    {
+      if ($uiElement->isEnabled())
+      {
+        $uiElement->render();
+      }
+    }
+
   }
 
   /**
@@ -108,7 +123,21 @@ class Camera implements CameraInterface
    */
   public function renderAt(?int $x = null, ?int $y = null): void
   {
-    // TODO: Implement renderAt() method.
+    foreach ($this->scene->getRootGameObjects() as $gameObject)
+    {
+      if ($gameObject->isActive())
+      {
+        $gameObject->renderAt($x, $y);
+      }
+    }
+
+    foreach ($this->scene->getUIElements() as $uiElement)
+    {
+      if ($uiElement->isEnabled())
+      {
+        $uiElement->renderAt($x, $y);
+      }
+    }
   }
 
   /**
@@ -116,7 +145,21 @@ class Camera implements CameraInterface
    */
   public function erase(): void
   {
-    // TODO: Implement erase() method.
+    foreach ($this->scene->getRootGameObjects() as $gameObject)
+    {
+      if ($gameObject->isActive())
+      {
+        $gameObject->erase();
+      }
+    }
+
+    foreach ($this->scene->getUIElements() as $uiElement)
+    {
+      if ($uiElement->isEnabled())
+      {
+        $uiElement->erase();
+      }
+    }
   }
 
   /**
@@ -124,7 +167,21 @@ class Camera implements CameraInterface
    */
   public function eraseAt(?int $x = null, ?int $y = null): void
   {
-    // TODO: Implement eraseAt() method.
+    foreach ($this->scene->getRootGameObjects() as $gameObject)
+    {
+      if ($gameObject->isActive())
+      {
+        $gameObject->eraseAt($x, $y);
+      }
+    }
+
+    foreach ($this->scene->getUIElements() as $uiElement)
+    {
+      if ($uiElement->isEnabled())
+      {
+        $uiElement->eraseAt($x, $y);
+      }
+    }
   }
 
   /**
