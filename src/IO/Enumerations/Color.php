@@ -36,4 +36,27 @@ enum Color: string
   {
     return $color->value . $to . Color::RESET->value;
   }
+
+  public function getPhoneticName(): string
+  {
+    return match ($this) {
+      Color::BLACK => 'Black',
+      Color::DARK_GRAY => 'Dark Gray',
+      Color::BLUE => 'Blue',
+      Color::LIGHT_BLUE => 'Light Blue',
+      Color::GREEN => 'Green',
+      Color::LIGHT_GREEN => 'Light Green',
+      Color::CYAN => 'Cyan',
+      Color::LIGHT_CYAN => 'Light Cyan',
+      Color::RED => 'Red',
+      Color::LIGHT_RED => 'Light Red',
+      Color::PURPLE => 'Purple',
+      Color::LIGHT_PURPLE => 'Light Purple',
+      Color::BROWN => 'Brown',
+      Color::YELLOW => 'Yellow',
+      Color::LIGHT_GRAY => 'Light Gray',
+      Color::WHITE => 'White',
+      Color::RESET => 'Reset',
+    };
+  }
 }

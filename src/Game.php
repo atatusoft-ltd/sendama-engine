@@ -7,7 +7,7 @@ use Dotenv\Dotenv;
 use Error;
 use Exception;
 use Sendama\Engine\Core\Enumerations\ChronoUnit;
-use Sendama\Engine\Core\Interfaces\SceneInterface;
+use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
 use Sendama\Engine\Core\Scenes\SceneManager;
 use Sendama\Engine\Core\Time;
 use Sendama\Engine\Debug\Debug;
@@ -25,9 +25,12 @@ use Sendama\Engine\Exceptions\Scenes\SceneNotFoundException;
 use Sendama\Engine\Interfaces\GameStateInterface;
 use Sendama\Engine\IO\Console\Console;
 use Sendama\Engine\IO\Console\Cursor;
+use Sendama\Engine\IO\Enumerations\KeyCode;
 use Sendama\Engine\IO\InputManager;
 use Sendama\Engine\Messaging\Notifications\NotificationsManager;
+use Sendama\Engine\States\GameState;
 use Sendama\Engine\States\ModalState;
+use Sendama\Engine\States\PausedState;
 use Sendama\Engine\States\SceneState;
 use Sendama\Engine\UI\Modals\ModalManager;
 use Sendama\Engine\UI\UIManager;
@@ -113,6 +116,14 @@ class Game implements ObservableInterface
    * @var ModalState $modalState
    */
   protected ModalState $modalState;
+  /**
+   * @var PausedState $pausedState
+   */
+  protected PausedState $pausedState;
+  /**
+   * @var GameState|null $previousState The previous state of the game.
+   */
+  protected ?GameState $previousState = null;
 
   /**
    * Game constructor.
@@ -168,6 +179,14 @@ class Game implements ObservableInterface
       $this->notificationsManager,
       $this->uiManager
     );
+    $this->pausedState = new PausedState(
+      $this,
+      $this->sceneManager,
+      $this->eventManager,
+      $this->modalManager,
+      $this->notificationsManager,
+      $this->uiManager
+    );
     $this->state = $this->sceneState;
 
     // Handle exceptions
@@ -213,17 +232,25 @@ class Game implements ObservableInterface
   {
     try
     {
+      Debug::info("Loading environment settings");
+      // Environment
+      $this->settings['debug']                  = $_ENV['DEBUG_MODE'] ?? false;
+      $this->settings['log_level']              = $_ENV['LOG_LEVEL'] ?? DEFAULT_LOG_LEVEL;
+      $this->settings['log_dir']                = $_ENV['LOG_DIR'] ?? Path::join(getcwd(), DEFAULT_LOGS_DIR);
+
       Debug::info("Loading game settings");
-      $this->settings['name']                   = $settings['name'] ?? $this->name;
+      // Game
+      $this->settings['game_name']              = $settings['game_name'] ?? $this->name;
       $this->settings['screen_width']           = $settings['screen_width'] ?? $this->screenWidth;
       $this->settings['screen_height']          = $settings['screen_height'] ?? $this->screenHeight;
       $this->settings['fps']                    = $settings['fps'] ?? DEFAULT_FPS;
       $this->settings['assets_path']            = $settings['assets_path'] ?? getcwd() . DEFAULT_ASSETS_PATH;
 
-      Debug::info("Loading scene settings");
+      Debug::info('Loading scene settings');
+      // Scene
       $this->settings['initial_scene']          = 0 ?? throw new InitializationException("Initial scene not found");
 
-      Debug::info("Loading splash screen settings");
+      Debug::info('Loading splash screen settings');
       if (isset($settings['splash_texture']))
       {
         $this->settings['splash_texture'] = Path::join(getcwd(), $settings['splash_texture']);
@@ -231,12 +258,8 @@ class Game implements ObservableInterface
 
       $this->settings['splash_screen_duration'] = $settings['splash_screen_duration'] ?? DEFAULT_SPLASH_SCREEN_DURATION;
 
-      Debug::info("Loading environment settings");
-      $this->settings['debug']                  = $_ENV['DEBUG_MODE'] ?? false;
-      $this->settings['log_level']              = $_ENV['LOG_LEVEL'] ?? DEFAULT_LOG_LEVEL;
-      $this->settings['log_dir']                = $_ENV['LOG_DIR'] ?? Path::join(getcwd(), DEFAULT_LOGS_DIR);
-
       // Debug settings
+      Debug::info('Loading debug settings');
       Debug::setLogDirectory($this->getSettings('log_dir'));
       Debug::setLogLevel(LogLevel::tryFrom($this->getSettings('log_level')) ?? LogLevel::DEBUG);
 
@@ -312,7 +335,7 @@ class Game implements ObservableInterface
     Console::saveSettings();
 
     // Set the terminal name
-    Console::setName($this->getSettings('name'));
+    Console::setName($this->getSettings('game_name'));
 
     // Set the terminal size
     Console::setSize($this->getSettings('screen_width'), $this->getSettings('screen_height'));
@@ -446,7 +469,13 @@ class Game implements ObservableInterface
     $errorMessage = "[$errno] $errstr in $errfile on line $errline";
     Debug::error($errorMessage);
     $this->stop();
-    exit($errorMessage);
+
+    if ($this->getSettings('debug'))
+    {
+      exit($errorMessage);
+    }
+
+    exit($errno);
   }
 
 
@@ -461,7 +490,13 @@ class Game implements ObservableInterface
     $this->errors[] = $exception;
     Debug::error($exception);
     $this->stop();
-    exit($exception);
+
+    if ($this->getSettings('debug'))
+    {
+      exit($exception);
+    }
+
+    exit($exception->getCode());
   }
 
   /**
@@ -549,12 +584,32 @@ class Game implements ObservableInterface
   }
 
   /**
-   * @param GameStateInterface $state
+   * Set the current game state.
+   *
+   * @param GameStateInterface $state The game state to set.
    * @return void
    */
   public function setState(GameStateInterface $state): void
   {
+    Debug::log("Setting game state to " . get_class($state));
+    $this->previousState = $this->state;
     $this->state = $state;
+  }
+
+  /**
+   * Retrieve a game state.
+   *
+   * @param string $stateName The name of the state to retrieve.
+   * @return GameStateInterface|null The game state or null if not found.
+   */
+  public function getState(string $stateName): ?GameStateInterface
+  {
+    return match ($stateName) {
+      'scene' => $this->sceneState,
+      'modal' => $this->modalState,
+      'paused' => $this->pausedState,
+      default => null
+    };
   }
 
   /**
@@ -567,6 +622,7 @@ class Game implements ObservableInterface
     try
     {
       Debug::info("Showing splash screen");
+      Console::setSize(MAX_SCREEN_WIDTH, MAX_SCREEN_HEIGHT);
 
       // Check if a splash texture can be loaded
       if (!file_exists($this->getSettings('splash_texture')))
@@ -578,23 +634,27 @@ class Game implements ObservableInterface
       Debug::info("Loading splash screen texture");
       $splashScreen = file_get_contents($this->getSettings('splash_texture'));
       $splashScreenRows = explode("\n", $splashScreen);
+      $splashScreenWidth = 75;
+      $splashScreenHeight = 25;
       $splashByLine = 'SendamaEngine ™';
-      $splashScreenRows[] = sprintf("%s%s", str_repeat(' ', 75 - 12), "powered by");
-      $splashScreenRows[] = sprintf("%s%s", str_repeat(' ', 75 - strlen($splashByLine)), $splashByLine);
+      $splashScreenRows[] = sprintf("%s%s", str_repeat(' ', $splashScreenWidth - 12), "powered by");
+      $splashScreenRows[] = sprintf("%s%s", str_repeat(' ', $splashScreenWidth - strlen($splashByLine)), $splashByLine);
 
-      $leftMargin = (DEFAULT_SCREEN_WIDTH  / 2) - (75 / 2);
-      $topMargin = (DEFAULT_SCREEN_HEIGHT / 2) - (25 / 2);
+      $leftMargin = (MAX_SCREEN_WIDTH  / 2) - ($splashScreenWidth / 2);
+      $topMargin = (MAX_SCREEN_HEIGHT / 2) - ($splashScreenHeight / 2);
 
       Debug::info("Rendering splash screen texture");
       foreach ($splashScreenRows as $rowIndex => $row)
       {
-//        $this->consoleCursor->moveTo((int)$leftMargin, (int)($topMargin + $rowIndex));
-//        echo $row;
-        Console::writeLine($row, (int)$leftMargin, (int)($topMargin + $rowIndex));
+        $this->consoleCursor->moveTo((int)$leftMargin, (int)($topMargin + $rowIndex));
+        echo $row;
+//        Console::writeLine($row, (int)$leftMargin, (int)($topMargin + $rowIndex));
       }
 
       $duration = (int) ($this->getSettings('splash_screen_duration') * 1000000);
       usleep($duration);
+
+      Console::setSize($this->getSettings('screen_width'), $this->getSettings('screen_height'));
       Console::clear();
 
       Debug::info("Splash screen hidden");
@@ -657,7 +717,7 @@ class Game implements ObservableInterface
    */
   private function initializeSettings(): void
   {
-    $this->settings['name']                   = $this->name;
+    $this->settings['game_name']              = $_ENV['GAME_NAME'] ?? $this->name;
     $this->settings['screen_width']           = $this->screenWidth;
     $this->settings['screen_height']          = $this->screenHeight;
     $this->settings['fps']                    = DEFAULT_FPS;
@@ -680,8 +740,16 @@ class Game implements ObservableInterface
     Debug::setLogDirectory($this->getSettings('log_dir'));
     Debug::setLogLevel(LogLevel::tryFrom($this->getSettings('log_level')) ?? LogLevel::DEBUG);
 
+    // Input settings
+    $this->settings['pause_key']              = $_ENV['PAUSE_KEY'] ?? KeyCode::ESCAPE;
+
     $this->sceneManager->loadSettings($this->settings);
     Debug::info("Game settings initialized");
+  }
+
+  public function getPreviousState(): GameState
+  {
+    return $this->previousState;
   }
 
   /**
@@ -696,5 +764,4 @@ class Game implements ObservableInterface
       EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::QUIT));
     }
   }
-
 }

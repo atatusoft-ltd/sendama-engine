@@ -27,7 +27,7 @@ class Vector2 implements CanEquate, Stringable
    */
   public function __toString(): string
   {
-    return "Vector2($this->x, $this->y)";
+    return "($this->x, $this->y)";
   }
 
   /**
@@ -180,8 +180,8 @@ class Vector2 implements CanEquate, Stringable
 
     if (abs($length) > PHP_FLOAT_MIN)
     {
-      $this->x /= $length;
-      $this->y /= $length;
+      $this->setX((int)($this->getX() / $length));
+      $this->setY((int)($this->getY() / $length));
     }
   }
 
@@ -326,8 +326,8 @@ class Vector2 implements CanEquate, Stringable
    */
   public function divide(Vector2 $other): void
   {
-    $this->setX($this->getX() / $other->getX());
-    $this->setY($this->getY() / $other->getY());
+    $this->setX(intval($this->getX() / $other->getX()));
+    $this->setY(intval($this->getY() / $other->getY()));
   }
 
   /**

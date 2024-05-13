@@ -3,11 +3,22 @@
 namespace Sendama\Engine\UI\Menus;
 
 use Assegai\Collections\ItemList;
+use Closure;
+use Sendama\Engine\Core\Interfaces\ExecutionContextInterface;
+use Sendama\Engine\Core\Rect;
+use Sendama\Engine\Core\Scenes\SceneManager;
+use Sendama\Engine\Core\Vector2;
+use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\Events\Interfaces\EventInterface;
 use Sendama\Engine\Events\Interfaces\ObserverInterface;
+use Sendama\Engine\IO\Enumerations\AxisName;
+use Sendama\Engine\IO\Enumerations\Color;
+use Sendama\Engine\IO\Enumerations\KeyCode;
+use Sendama\Engine\IO\Input;
 use Sendama\Engine\UI\Menus\Interfaces\MenuGraphNodeInterface;
 use Sendama\Engine\UI\Menus\Interfaces\MenuInterface;
 use Sendama\Engine\UI\Menus\Interfaces\MenuItemInterface;
+use Sendama\Engine\UI\Windows\Window;
 
 /**
  * Class Menu. Represents a menu.
@@ -40,21 +51,63 @@ class Menu implements MenuInterface
    * @var MenuGraphNodeInterface|null $leftSibling
    */
   protected ?MenuGraphNodeInterface $leftSibling = null;
+  /**
+   * @var Window $window
+   */
+  protected Window $window;
+  /**
+   * @var bool $enabled
+   */
+  protected bool $enabled = true;
+  /**
+   * @var bool $rememberCursorPosition
+   */
+  protected bool $rememberCursorPosition = false;
+  /**
+   * @var int $savedCursorPosition
+   */
+  protected int $savedCursorPosition = 0;
 
   /**
    * Menu constructor.
    *
    * @param string $title The title of the menu.
    * @param string $description The description of the menu.
+   * @param Rect $dimensions
    * @param ItemList $items The items of the menu.
+   * @param string $cursor The cursor of the menu.
+   * @param Color $activeColor The active color of the menu.
+   * @param array<KeyCode>|null $cancelKey The cancel key.
+   * @param Closure|null $onCancel The on cancel callback.
    */
   public function __construct(
-    protected string $title,
-    protected string $description = '',
-    protected ItemList $items = new ItemList(MenuItemInterface::class)
+    protected string   $title,
+    protected string   $description = '',
+    protected Rect     $dimensions = new Rect(
+      new Vector2(0, 0),
+      new Vector2(DEFAULT_MENU_WIDTH, DEFAULT_MENU_HEIGHT)
+    ),
+    protected ItemList $items = new ItemList(MenuItemInterface::class),
+    protected string   $cursor = '>',
+    protected Color    $activeColor = Color::BLUE,
+    protected ?array   $cancelKey = null,
+    protected ?Closure $onCancel = null,
+    protected bool     $canNavigate = true,
   )
   {
+    if (! $this->canNavigate)
+    {
+      $this->cursor = '';
+    }
+
     $this->observers = new ItemList(ObserverInterface::class);
+    $this->window = new Window(
+      $this->title,
+      $this->description,
+      $this->dimensions->getPosition(),
+      $this->dimensions->getWidth(),
+      $this->dimensions->getHeight()
+    );
   }
 
   /**
@@ -62,7 +115,7 @@ class Menu implements MenuInterface
    */
   public function render(): void
   {
-    // TODO: Implement render() method.
+    $this->window->render();
   }
 
   /**
@@ -70,7 +123,7 @@ class Menu implements MenuInterface
    */
   public function renderAt(?int $x = null, ?int $y = null): void
   {
-    // Do nothing
+    $this->window->renderAt($x, $y);
   }
 
   /**
@@ -78,7 +131,7 @@ class Menu implements MenuInterface
    */
   public function erase(): void
   {
-    // TODO: Implement erase() method.
+    $this->window->erase();
   }
 
   /**
@@ -86,7 +139,7 @@ class Menu implements MenuInterface
    */
   public function eraseAt(?int $x = null, ?int $y = null): void
   {
-    // TODO: Implement eraseAt() method.
+    $this->window->eraseAt($x, $y);
   }
 
   /**
@@ -94,7 +147,22 @@ class Menu implements MenuInterface
    */
   public function update(): void
   {
-    // TODO: Implement update() method.
+    if ($this->canNavigate)
+    {
+      $this->handleNavigation();
+
+      // Handle submitting the active item.
+      if (Input::isKeyDown(KeyCode::ENTER))
+      {
+        $this->getActiveItem()?->execute($this);
+      }
+    }
+
+    // Handle cancel the menu.
+    if ($this->cancelKey && Input::isAnyKeyPressed($this->cancelKey))
+    {
+      $this->onCancel?->call($this);
+    }
   }
 
   /**
@@ -151,6 +219,11 @@ class Menu implements MenuInterface
   public function addItem(MenuItemInterface $item): void
   {
     $this->items->add($item);
+    if (!$this->getActiveItem())
+    {
+      $this->setActiveItem($item);
+    }
+    $this->updateWindowContent();
   }
 
   /**
@@ -266,11 +339,17 @@ class Menu implements MenuInterface
     }
   }
 
+  /**
+   * @inheritDoc
+   */
   public function onFocus(EventInterface $event): void
   {
     // TODO: Implement onFocus() method.
   }
 
+  /**
+   * @inheritDoc
+   */
   public function onBlur(EventInterface $event): void
   {
     // Do nothing.
@@ -346,5 +425,153 @@ class Menu implements MenuInterface
   public function getMenu(): ?MenuInterface
   {
     return $this;
+  }
+
+  public function setCursor(string $cursor): void
+  {
+    $this->cursor = $cursor;
+  }
+
+  public function setActiveColor(Color $color): void
+  {
+    $this->activeColor = $color;
+  }
+
+  /**
+   * Updates the content of the window.
+   */
+  public function updateWindowContent(): void
+  {
+    $content = [];
+
+    /**
+     * @var int $itemIndex
+     * @var MenuItemInterface $item
+     */
+    foreach ($this->items as $itemIndex => $item)
+    {
+      $output = '  ' . $item->getLabel();
+
+      if ($itemIndex === $this->getActiveItemIndex())
+      {
+        $output = sprintf("%s %s", $this->cursor, $item->getLabel());
+      }
+      $content[] = $output;
+    }
+
+    $this->window->setContent($content);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getArgs(): array
+  {
+    return [
+      'title' => $this->title,
+      'description' => $this->description,
+      'dimensions' => $this->dimensions,
+      'items' => $this->items,
+      'cursor' => $this->cursor,
+      'active_color' => $this->activeColor,
+    ];
+  }
+
+  /**
+   * Handles navigation.
+   *
+   * @void
+   */
+  private function handleNavigation(): void
+  {
+    $v = Input::getAxis(AxisName::VERTICAL);
+
+    if ($v < 0)
+    {
+      // Move up.
+      $this->setActiveItemByIndex(wrap($this->getActiveItemIndex() - 1, 0, $this->items->count() - 1));
+    }
+
+    if ($v > 0)
+    {
+      // Move down
+      $this->setActiveItemByIndex(wrap($this->getActiveItemIndex() + 1, 0, $this->items->count() - 1));
+    }
+
+    // Update the window content
+    $this->updateWindowContent();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function enable(): void
+  {
+    $this->enabled = true;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function disable(): void
+  {
+    $this->enabled = false;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function isEnabled(): bool
+  {
+    return $this->enabled;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function resume(): void
+  {
+    $this->setActiveItemByIndex(0);
+    $this->updateWindowContent();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function suspend(): void
+  {
+    $this->erase();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function start(): void
+  {
+    // TODO: Implement start() method.
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function stop(): void
+  {
+    // TODO: Implement stop() method.
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getName(): string
+  {
+    return $this->getTitle();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function setName(string $name): void
+  {
+    $this->setTitle($name);
   }
 }

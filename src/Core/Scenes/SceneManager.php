@@ -7,8 +7,9 @@ use Sendama\Engine\Core\Interfaces\CanRender;
 use Sendama\Engine\Core\Interfaces\CanResume;
 use Sendama\Engine\Core\Interfaces\CanStart;
 use Sendama\Engine\Core\Interfaces\CanUpdate;
-use Sendama\Engine\Core\Interfaces\SceneInterface;
 use Sendama\Engine\Core\Interfaces\SingletonInterface;
+use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
+use Sendama\Engine\Core\Scenes\Interfaces\SceneNodeInterface;
 use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\Events\Enumerations\SceneEventType;
 use Sendama\Engine\Events\EventManager;
@@ -27,9 +28,9 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   protected array $settings = [];
   /**
-   * @var SceneInterface|null $activeScene
+   * @var SceneNodeInterface|null $activeScene
    */
-  protected ?SceneInterface $activeScene = null;
+  protected ?SceneNodeInterface $activeScene = null;
   /**
    * @var EventManager $eventManager
    */
@@ -66,7 +67,17 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function getActiveScene(): ?SceneInterface
   {
-    return $this->activeScene;
+    return $this->activeScene?->getScene();
+  }
+
+  /**
+   * Returns the previous scene.
+   *
+   * @return SceneInterface|null The previous scene.
+   */
+  public function getPreviousScene(): ?SceneInterface
+  {
+    return $this->activeScene?->getPreviousScene();
   }
 
   /**
@@ -92,8 +103,11 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
   }
 
   /**
-   * @param int|string $index
-   * @return $this
+   * Loads the scene with the given index.
+   *
+   * @param int|string $index The index of the scene to load. If a string is provided, the scene with the name will be
+   * loaded. If an integer is provided, the scene at the index will be loaded.
+   * @return $this The SceneManager instance.
    *
    * @throws SceneNotFoundException
    */
@@ -104,9 +118,19 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
 
     $sceneToBeLoaded = null;
 
-    foreach ($this->scenes as $i => $scene)
+    $scenes = $this->scenes->toArray();
+    /**
+     * @var SceneInterface $scene
+     */
+    foreach ($scenes as $i => $scene)
     {
-      if ($scene->getName() === $index || $i === $index)
+      if (is_int($index) && $i === $index)
+      {
+        $sceneToBeLoaded = $scene;
+        break;
+      }
+
+      if (is_string($index) && $scene->getName() === $index)
       {
         $sceneToBeLoaded = $scene;
         break;
@@ -119,7 +143,10 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
     }
 
     $this->stop();
-    $this->activeScene = $sceneToBeLoaded->loadSceneSettings($this->settings);
+    $this->activeScene = new SceneNode(
+      $sceneToBeLoaded->loadSceneSettings($this->settings),
+      $this->activeScene?->getScene()
+    );
 
     $this->eventManager->dispatchEvent(new SceneEvent(SceneEventType::LOAD_END));
 
@@ -128,11 +155,29 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
   }
 
   /**
+   * Loads the previous scene.
+   *
+   * @return $this The SceneManager instance.
+   * @throws SceneNotFoundException If the previous scene is not found.
+   */
+  public function loadPreviousScene(): self
+  {
+    Debug::info("Loading previous scene");
+
+    if ($this->getPreviousScene())
+    {
+      return $this->loadScene($this->getPreviousScene()->getName());
+    }
+
+    return $this;
+  }
+
+  /**
    * @inheritDoc
    */
   public function render(): void
   {
-    $this->activeScene?->render();
+    $this->activeScene?->getScene()->render();
   }
 
   /**
@@ -140,7 +185,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function renderAt(?int $x = null, ?int $y = null): void
   {
-    $this->activeScene?->renderAt($x, $y);
+    $this->activeScene?->getScene()->renderAt($x, $y);
   }
 
   /**
@@ -148,7 +193,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function erase(): void
   {
-    $this->activeScene?->erase();
+    $this->activeScene?->getScene()->erase();
   }
 
   /**
@@ -156,7 +201,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function eraseAt(?int $x = null, ?int $y = null): void
   {
-    $this->activeScene?->eraseAt($x, $y);
+    $this->activeScene?->getScene()->eraseAt($x, $y);
   }
 
   /**
@@ -164,7 +209,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function resume(): void
   {
-    $this->activeScene?->resume();
+    $this->activeScene?->getScene()->resume();
   }
 
   /**
@@ -172,7 +217,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function suspend(): void
   {
-    $this->activeScene?->suspend();
+    $this->activeScene?->getScene()->suspend();
   }
 
   /**
@@ -180,7 +225,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function start(): void
   {
-    $this->activeScene?->start();
+    $this->activeScene?->getScene()->start();
   }
 
   /**
@@ -188,7 +233,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function stop(): void
   {
-    $this->activeScene?->stop();
+    $this->activeScene?->getScene()->stop();
   }
 
   /**
@@ -198,9 +243,9 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
   {
     if ($this->activeScene)
     {
-      $this->activeScene->update();
+      $this->activeScene->getScene()->update();
       $this->eventManager->dispatchEvent(
-        new SceneEvent(SceneEventType::UPDATE, $this->activeScene)
+        new SceneEvent(SceneEventType::UPDATE, $this->activeScene->getScene())
       );
     }
   }
@@ -216,5 +261,16 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
     {
       $this->settings = $settings;
     }
+  }
+
+  /**
+   * Returns the settings for the SceneManager.
+   *
+   * @param string|null $key
+   * @return mixed
+   */
+  public function getSettings(?string $key = null): mixed
+  {
+    return $this->settings[$key] ?? $this->settings;
   }
 }

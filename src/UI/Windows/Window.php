@@ -4,6 +4,7 @@ namespace Sendama\Engine\UI\Windows;
 
 use Assegai\Collections\ItemList;
 use Sendama\Engine\Core\Vector2;
+use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\Events\Interfaces\EventInterface;
 use Sendama\Engine\Events\Interfaces\ObserverInterface;
 use Sendama\Engine\IO\Console\Console;
@@ -67,7 +68,7 @@ class Window implements WindowInterface
    */
   public function getTitle(): string
   {
-    return $this->title;
+    return substr($this->title, 0, $this->width - 3);
   }
 
   /**
@@ -83,7 +84,7 @@ class Window implements WindowInterface
    */
   public function getHelp(): string
   {
-    return $this->help;
+    return substr($this->help, 0, $this->width - 3);
   }
 
   /**
@@ -159,9 +160,7 @@ class Window implements WindowInterface
   }
 
   /**
-   * Returns the window's content
-   *
-   * @return array
+   * @inheritDoc
    */
   public function getContent(): array
   {
@@ -169,12 +168,11 @@ class Window implements WindowInterface
   }
 
   /**
-   * Sets
-   * @param array $content
-   * @return void
+   * @inheritDoc
    */
   public function setContent(array $content): void
   {
+    $this->content = $content;
   }
 
   /**
@@ -201,8 +199,13 @@ class Window implements WindowInterface
 
     // Render content
     $linesOfContent = $this->getLinesOfContent();
-    foreach ($linesOfContent as $line)
+    if (!$linesOfContent)
     {
+      $linesOfContent = [''];
+    }
+    foreach ($linesOfContent as $index => $line)
+    {
+      $this->cursor->moveTo($leftMargin, $topMargin + $index + $topBorderHeight);
       echo mb_substr($line, 0, $this->width);
     }
 
@@ -270,7 +273,7 @@ class Window implements WindowInterface
    */
   private function getTopBorder(): string
   {
-    $titleLength = strlen($this->title);
+    $titleLength = strlen($this->getTitle());
     $borderLength = $this->width - $titleLength  - 3;
     $output = $this->borderPack->getTopLeftCorner() . $this->borderPack->getHorizontalBorder() . $this->title;
     $output .= str_repeat($this->borderPack->getHorizontalBorder(), $borderLength);
@@ -339,7 +342,7 @@ class Window implements WindowInterface
    */
   private function getBottomBorder(): string
   {
-    $helpLength = strlen($this->help);
+    $helpLength = strlen($this->getHelp());
     $output = $this->borderPack->getBottomLeftCorner() . $this->borderPack->getHorizontalBorder() . $this->help;
     $output .= str_repeat($this->borderPack->getHorizontalBorder(), $this->width - $helpLength - 3);
     $output .= $this->borderPack->getBottomRightCorner();

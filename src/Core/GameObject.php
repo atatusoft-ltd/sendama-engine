@@ -3,21 +3,20 @@
 namespace Sendama\Engine\Core;
 
 use InvalidArgumentException;
-use Sendama\Engine\Core\Interfaces\ActivatableInterface;
 use Sendama\Engine\Core\Interfaces\CanCompare;
 use Sendama\Engine\Core\Interfaces\CanEquate;
-use Sendama\Engine\Core\Interfaces\CanRender;
-use Sendama\Engine\Core\Interfaces\CanResume;
-use Sendama\Engine\Core\Interfaces\CanStart;
-use Sendama\Engine\Core\Interfaces\CanUpdate;
 use Sendama\Engine\Core\Interfaces\ComponentInterface;
+use Sendama\Engine\Core\Interfaces\GameObjectInterface;
+use Sendama\Engine\Core\Rendering\Renderer;
+use Sendama\Engine\Core\Scenes\SceneManager;
+use Sendama\Engine\Debug\Debug;
 
 /**
  * Class GameObject. This class represents a game object in the engine.
  *
  * @package Sendama\Engine\Core
  */
-class GameObject implements CanCompare, CanResume, CanUpdate, CanStart, CanRender, ActivatableInterface
+class GameObject implements GameObjectInterface
 {
   /**
    * @var bool $active Whether the game object is active or not.
@@ -45,6 +44,10 @@ class GameObject implements CanCompare, CanResume, CanUpdate, CanStart, CanRende
    *
    * @param string $name The name of the game object.
    * @param string|null $tag The tag of the game object.
+   * @param Vector2 $position The position of the game object.
+   * @param Vector2 $rotation The rotation of the game object.
+   * @param Vector2 $scale The scale of the game object.
+   * @param Sprite|null $sprite The sprite of the game object.
    */
   public function __construct(
     protected string  $name,
@@ -63,6 +66,9 @@ class GameObject implements CanCompare, CanResume, CanUpdate, CanStart, CanRende
     $this->components[] = $this->renderer;
   }
 
+  /**
+   * @return void
+   */
   public function __clone(): void
   {
     $this->hash = md5(__CLASS__) . '-' . uniqid($this->name, true);
@@ -404,45 +410,48 @@ class GameObject implements CanCompare, CanResume, CanUpdate, CanStart, CanRende
   }
 
   /**
-   * Gets a component of type $componentType from the game object.
-   *
-   * @param class-string $componentType
-   * @return ComponentInterface|null The component of type $componentType.
+   * @inheritDoc
    */
-  public function getComponent(string $componentType): ?ComponentInterface
+  public function getComponent(string $componentClass): ?ComponentInterface
   {
-    $component = null;
+    if (! class_exists($componentClass) && ! interface_exists($componentClass) )
+    {
+      throw new InvalidArgumentException('The component type ' . $componentClass . ' does not exist.');
+    }
 
     foreach ($this->components as $component)
     {
-      if ($component instanceof $componentType)
+      if ($component instanceof $componentClass)
       {
         return $component;
       }
     }
 
-    return $component;
+    return null;
   }
 
   /**
-   * Returns the components attached to the game object.
-   *
-   * @return ComponentInterface[] The components attached to the game object.
+   * @inheritDoc
    */
-  public function getComponents(): array
+  public function getComponents(?string $componentClass = null): array
   {
+    if ($componentClass)
+    {
+      return array_filter($this->components, fn(ComponentInterface $component) => $component instanceof $componentClass);
+    }
+
     return $this->components;
   }
 
   /**
    * Clones the original game object and returns the clone.
    *
-   * @param GameObject $original
-   * @param Vector2|null $position
-   * @param Vector2|null $rotation
-   * @param Vector2|null $scale
-   * @param Transform|null $parent
-   * @return GameObject
+   * @param GameObject $original The original game object to clone.
+   * @param Vector2|null $position The position of the clone.
+   * @param Vector2|null $rotation The rotation of the clone.
+   * @param Vector2|null $scale The scale of the clone.
+   * @param Transform|null $parent The parent of the clone.
+   * @return GameObject The clone of the original game object.
    */
   public static function instantiate(
     GameObject $original,
@@ -484,6 +493,44 @@ class GameObject implements CanCompare, CanResume, CanUpdate, CanStart, CanRende
    */
   public static function destroy(GameObject $gameObject, float $delay = 0.0): void
   {
-    // TODO: Implement destroy() method.
+    if ($activeScene = SceneManager::getInstance()->getActiveScene())
+    {
+      // Wait for the delay before destroying the game object.
+
+
+      $activeScene->remove($gameObject);
+      unset($gameObject);
+    }
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function setSprite(Texture2D|array|string $texture, Vector2 $position, Vector2 $size): void
+  {
+    if (is_array($texture))
+    {
+      $texture = new Texture2D($texture['path'], $texture['width'] ?? -1, $texture['height'] ?? -1);
+    }
+
+    if (is_string($texture))
+    {
+      $texture = new Texture2D($texture);
+    }
+
+    $this->getRenderer()->setSprite(new Sprite($texture, new Rect($position, $size)));
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getSprite(): Sprite
+  {
+    return $this->getRenderer()->getSprite();
+  }
+
+  public function sendMessage(string $methodName, mixed $value): void
+  {
+    // TODO: Implement sendMessage() method.
   }
 }

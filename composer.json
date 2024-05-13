@@ -9,7 +9,8 @@
     "autoload": {
         "psr-4": {
             "Sendama\\Engine\\": "src/",
-            "Sendama\\Examples\\Blasters\\": "examples/blasters/assets/"
+            "Sendama\\Examples\\Blasters\\": "examples/blasters/assets/",
+            "Sendama\\Engine\\Mocks\\": "tests/Mocks/"
         },
         "files": [
             "src/Util/Constants.php",

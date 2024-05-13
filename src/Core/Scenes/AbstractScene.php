@@ -3,17 +3,26 @@
 namespace Sendama\Engine\Core\Scenes;
 
 use Sendama\Engine\Core\GameObject;
-use Sendama\Engine\Core\Interfaces\SceneInterface;
+use Sendama\Engine\Core\Grid;
+use Sendama\Engine\Core\Interfaces\GameObjectInterface;
+use Sendama\Engine\Core\Rect;
+use Sendama\Engine\Core\Rendering\Camera;
+use Sendama\Engine\Core\Rendering\Interfaces\CameraInterface;
+use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
+use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\Debug\Debug;
+use Sendama\Engine\Exceptions\FileNotFoundException;
+use Sendama\Engine\Physics\Interfaces\ColliderInterface;
 use Sendama\Engine\Physics\Physics;
-use Serializable;
+use Sendama\Engine\UI\Interfaces\UIElementInterface;
+use Sendama\Engine\Util\Path;
 
 /**
  * The abstract scene class.
  *
  * @package Sendama\Engine\Core\Scenes
  */
-class AbstractScene implements SceneInterface, Serializable
+abstract class AbstractScene implements SceneInterface
 {
   /**
    * @var array<string, mixed> $settings
@@ -21,29 +30,62 @@ class AbstractScene implements SceneInterface, Serializable
   protected array $settings = [];
 
   /**
-   * @var array<GameObject> $rootGameObjects
+   * @var array<GameObjectInterface> $rootGameObjects
    */
   public array $rootGameObjects = [];
+
+  /**
+   * @var array<UIElementInterface> $uiElements
+   */
+  public array $uiElements = [];
+
   /**
    * @var Physics
    */
   protected Physics $physics;
 
   /**
-   * @var array<array<int>> $worldsSpace
+   * @var Grid $worldsSpace
    */
-  protected array $worldsSpace = [];
+  protected Grid $worldsSpace;
+
+  /**
+   * @var Grid $collisionWorldSpace
+   */
+  protected Grid $collisionWorldSpace;
+
+  /**
+   * @var CameraInterface $camera
+   */
+  protected CameraInterface $camera;
+  /**
+   * @var string $environmentTileMapPath
+   */
+  protected string $environmentTileMapData = '';
 
   /**
    * Constructs a scene.
    *
    * @param string $name The name of the scene.
+   * @param string $environmentTileMapPath
+   * @throws FileNotFoundException
    */
   public function __construct(
-    protected string $name
+    protected string $name,
+    protected string $environmentTileMapPath = ''
   )
   {
+    $this->worldsSpace = new Grid();
+    $this->collisionWorldSpace = new Grid();
     $this->physics = Physics::getInstance();
+    $this->camera = new Camera($this);
+
+    if ($this->environmentTileMapPath)
+    {
+      $this->loadEnvironmentTileMapData();
+    }
+
+    $this->awake();
   }
 
   /**
@@ -80,39 +122,73 @@ class AbstractScene implements SceneInterface, Serializable
       $this->settings[$key] = $value;
     }
 
+    if (isset($this->settings['screen_width']) && isset($this->settings['screen_height']))
+    {
+      $oldViewport = $this->camera->getViewport();
+      $this->camera->setViewport(
+        new Rect(
+          $this->camera->getOffset(),
+          new Vector2(
+            $this->settings['screen_width'] ?? $oldViewport->getWidth(),
+            $this->settings['screen_height'] ?? $oldViewport->getHeight()
+          )
+        )
+      );
+    }
+
     return $this;
   }
 
   /**
+   * Called when the scene is awake.
+   */
+  public abstract function awake(): void;
+
+  /**
    * @inheritDoc
    */
-  public function start(): void
+  public final function start(): void
   {
     Debug::log("Scene started: " . $this->name);
+  
     $this->createWordsSpace();
+    $this->loadStaticEnvironment();
 
     foreach ($this->rootGameObjects as $gameObject)
     {
       $gameObject->start();
     }
-  }
 
-  /**
-   * @inheritDoc
-   */
-  public function stop(): void
-  {
-    Debug::log("Scene stopped: " . $this->name);
-    foreach ($this->rootGameObjects as $gameObject)
+    foreach ($this->uiElements as $uiElement)
     {
-      $gameObject->stop();
+      $uiElement->start();
     }
   }
 
   /**
    * @inheritDoc
    */
-  public function update(): void
+  public final function stop(): void
+  {
+    Debug::log("Scene stopped: " . $this->name);
+
+    foreach ($this->rootGameObjects as $gameObject)
+    {
+      $gameObject->stop();
+    }
+
+    foreach ($this->uiElements as $uiElement)
+    {
+      $uiElement->stop();
+    }
+
+    $this->getCamera()->clearScreen();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public final function update(): void
   {
     $this->physics->simulate();
 
@@ -123,40 +199,39 @@ class AbstractScene implements SceneInterface, Serializable
         $gameObject->update();
       }
     }
-  }
 
-  /**
-   * @inheritDoc
-   */
-  public function render(): void
-  {
-    foreach ($this->rootGameObjects as $gameObject)
+    foreach ($this->uiElements as $uiElement)
     {
-      if ($gameObject->isActive())
+      if ($uiElement->isEnabled())
       {
-        $gameObject->render();
+        $uiElement->update();
       }
     }
+
+    // Update the camera
+    $this->camera->update();
   }
 
   /**
    * @inheritDoc
    */
-  public function erase(): void
+  public final function render(): void
   {
-    foreach ($this->rootGameObjects as $gameObject)
-    {
-      if ($gameObject->isActive())
-      {
-        $gameObject->erase();
-      }
-    }
+    $this->camera->render();
   }
 
   /**
    * @inheritDoc
    */
-  public function suspend(): void
+  public final function erase(): void
+  {
+    $this->camera->erase();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public final function suspend(): void
   {
     foreach ($this->rootGameObjects as $gameObject)
     {
@@ -165,13 +240,23 @@ class AbstractScene implements SceneInterface, Serializable
         $gameObject->suspend();
       }
     }
+
+    foreach ($this->uiElements as $uiElement)
+    {
+      if ($uiElement->isEnabled())
+      {
+        $uiElement->suspend();
+      }
+    }
   }
 
   /**
    * @inheritDoc
    */
-  public function resume(): void
+  public final function resume(): void
   {
+    $this->camera->renderWorldSpace();
+
     foreach ($this->rootGameObjects as $gameObject)
     {
       if ($gameObject->isActive())
@@ -179,14 +264,30 @@ class AbstractScene implements SceneInterface, Serializable
         $gameObject->resume();
       }
     }
+
+    foreach ($this->uiElements as $uiElement)
+    {
+      if ($uiElement->isEnabled())
+      {
+        $uiElement->resume();
+      }
+    }
   }
 
   /**
-   * @return GameObject[] The list of root game objects in the scene.
+   * @inheritDoc
    */
-  public function getRootGameObjects(): array
+  public final function getRootGameObjects(): array
   {
     return $this->rootGameObjects;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public final function getUIElements(): array
+  {
+    return $this->uiElements;
   }
 
   /**
@@ -197,7 +298,8 @@ class AbstractScene implements SceneInterface, Serializable
     return json_encode([
       'name' => $this->name,
       'settings' => $this->settings,
-      'rootGameObjects' => $this->rootGameObjects
+      'root_game_objects' => $this->rootGameObjects,
+      'ui_elements' => $this->uiElements,
     ]);
   }
 
@@ -210,23 +312,37 @@ class AbstractScene implements SceneInterface, Serializable
 
     $this->name = $data['name'];
     $this->settings = $data['settings'];
-    $this->rootGameObjects = $data['rootGameObjects'];
+    $this->rootGameObjects = $data['root_game_objects'];
+    $this->uiElements = $data['ui_elements'];
   }
 
+  /**
+   * Serializes the scene.
+   *
+   * @return array The serialized scene.
+   */
   public function __serialize(): array
   {
     return [
       'name' => $this->name,
       'settings' => $this->settings,
-      'rootGameObjects' => $this->rootGameObjects
+      'root_game_objects' => $this->rootGameObjects,
+      'ui_elements' => $this->uiElements,
     ];
   }
 
+  /**
+   * Deserializes the scene.
+   *
+   * @param array $data The data to unserialize.
+   * @return void
+   */
   public function __unserialize(array $data): void
   {
     $this->name = $data['name'];
     $this->settings = $data['settings'];
-    $this->rootGameObjects = $data['rootGameObjects'];
+    $this->rootGameObjects = $data['root_game_objects'];
+    $this->uiElements = $data['ui_elements'];
   }
 
   /**
@@ -237,29 +353,159 @@ class AbstractScene implements SceneInterface, Serializable
     $width = $this->settings['screen_width'];
     $height = $this->settings['screen_height'];
 
-    for ($y = 0; $y < $height; $y++)
+    $this->worldsSpace = new Grid($width, $height, ' ');
+    $this->collisionWorldSpace = new Grid($width, $height, 0);
+  }
+
+  /**
+   * Sets the world space.
+   *
+   * @param Grid $worldSpace The new world space.
+   * @return void
+   */
+  private function setWorldSpace(Grid $worldSpace): void
+  {
+    $this->worldsSpace = $worldSpace;
+  }
+
+  /**
+   * Sets the collision world space.
+   *
+   * @param Grid $worldSpace The new collision world space.
+   * @return void
+   */
+  private function setCollisionWorldSpace(Grid $worldSpace): void
+  {
+    $this->collisionWorldSpace = $worldSpace;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getWorldSpace(): Grid
+  {
+    return $this->worldsSpace;
+  }
+
+  public function getCollisionWorldSpace()
+  {
+    
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function add(GameObjectInterface|UIElementInterface $object): void
+  {
+    if ($object instanceof GameObjectInterface)
     {
-      $this->worldsSpace[$y] = array_fill(0, $width, 0);
+      $this->rootGameObjects[] = $object;
+      if ($collider = $object->getComponent(ColliderInterface::class))
+      {
+        $this->physics->addCollider($collider);
+      }
+    }
+    else
+    {
+      $this->uiElements[] = $object;
     }
   }
 
   /**
-   * Adds a game object to the scene.
-   *
-   * @param GameObject $gameObject The game object to add.
+   * @inheritDoc
    */
-  public function add(GameObject $gameObject): void
+  public function remove(UIElementInterface|GameObjectInterface $object): void
   {
-    $this->rootGameObjects[] = $gameObject;
+    if ($object instanceof GameObjectInterface)
+    {
+      $this->rootGameObjects = array_filter($this->rootGameObjects, fn($item) => $item !== $object, $this->rootGameObjects);
+      if ($collider = $object->getComponent('Collider'))
+      {
+        $this->physics->removeCollider($collider);
+      }
+    }
+    else
+    {
+      $this->uiElements = array_filter($this->uiElements, fn($item) => $item !== $object, $this->uiElements);
+    }
   }
 
   /**
-   * Removes a game object from the scene.
+   * Returns the camera.
    *
-   * @param GameObject $gameObject The game object to remove.
+   * @return CameraInterface The camera.
    */
-  public function remove(GameObject $gameObject): void
+  public function getCamera(): CameraInterface
   {
-    $this->rootGameObjects = array_filter($this->rootGameObjects, fn($item) => $item !== $gameObject, $this->rootGameObjects);
+    return $this->camera;
+  }
+
+  private function loadStaticEnvironment(): void
+  {
+    // Return if no tile map data
+    if (! $this->environmentTileMapData)
+    {
+      return;
+    }
+
+    // Parse the tile map data
+    $buffer = new Grid();
+    $lines = explode("\n", $this->environmentTileMapData);
+
+    foreach ($lines as $y => $line)
+    {
+      $tiles = str_split($line);
+
+      foreach ($tiles as $x => $tile)
+      {
+        $buffer->set($x, $y, $tile);
+      }
+    }
+
+    // Fill the world space with the static tiles
+    $this->setWorldSpace($buffer);
+
+    $this->camera->renderWorldSpace();
+  }
+
+  /**
+   * Loads the environment tile map data from a file on disk.
+   *
+   * @return void
+   * @throws FileNotFoundException If the file does not exist.
+   */
+  private function loadEnvironmentTileMapData(): void
+  {
+    // Check if the file exists
+    if (! file_exists($this->getAbsoluteEnvironmentTileMapPath()) )
+    {
+      throw new FileNotFoundException($this->getAbsoluteEnvironmentTileMapPath());
+    }
+
+    if (! is_file($this->getAbsoluteEnvironmentTileMapPath()) )
+    {
+      throw new FileNotFoundException($this->getAbsoluteEnvironmentTileMapPath());
+    }
+
+    // Get the contents of the file
+    $this->environmentTileMapData = file_get_contents($this->getAbsoluteEnvironmentTileMapPath());
+  }
+
+  /**
+   * Returns the absolute path to the environment tile map file.
+   *
+   * @return string The absolute path to the environment tile map file.
+   */
+  private function getAbsoluteEnvironmentTileMapPath(): string
+  {
+    return Path::join(Path::getWorkingDirectoryAssetsPath(), $this->environmentTileMapPath);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getSettings(?string $key): mixed
+  {
+    return $this->settings[$key] ?? $this->settings;
   }
 }
