@@ -2,11 +2,15 @@
 
 namespace Sendama\Engine\States;
 
-use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\IO\Console\Console;
 use Sendama\Engine\IO\Input;
 use Sendama\Engine\UI\Menus\Menu;
 
+/**
+ * Represents the paused state.
+ *
+ * @package Sendama\Engine\States
+ */
 class PausedState extends GameState
 {
   /**
@@ -49,6 +53,7 @@ class PausedState extends GameState
   public function resume(): void
   {
     Console::clear();
+    $this->sceneManager->getActiveScene()?->resume();
     $this->context->setState($this->context->getState('scene'));
   }
 
@@ -60,11 +65,17 @@ class PausedState extends GameState
     // Do nothing
   }
 
+  /**
+   * Renders the default pause text.
+   *
+   * @return void
+   */
   private function renderDefaultPauseText(): void
   {
     $promptText = 'PAUSED';
-    $leftMargin = ($this->context->getSettings('screen_width') / 2) - (strlen($promptText) / 2);
-    $topMargin = ($this->context->getSettings('screen_height') / 2) - 1;
-    Console::writeLine($promptText, $leftMargin, $topMargin);
+    $leftMargin = intval(($this->context->getSettings('screen_width') / 2) - (strlen($promptText) / 2));
+    $topMargin = intval(($this->context->getSettings('screen_height') / 2) - 1);
+    Console::cursor()->moveTo($leftMargin, $topMargin);
+    echo $promptText;
   }
 }
