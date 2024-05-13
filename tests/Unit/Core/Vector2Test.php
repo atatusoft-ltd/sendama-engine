@@ -9,43 +9,43 @@ it('can create a new instance of Vector2', function () {
 
 it('can get the string representation of Vector2', function () {
     $vector2 = new Vector2(1, 2);
-    expect($vector2->__toString())->toBe('Vector2(1, 2)');
+    expect($vector2->__toString())->toBe('(1, 2)');
 });
 
 it('can get a new Vector2(0, 0)', function () {
     $vector2 = Vector2::zero();
     expect($vector2)->toBeInstanceOf(Vector2::class)
-      ->and($vector2->__toString())->toBe('Vector2(0, 0)');
+      ->and($vector2->__toString())->toBe('(0, 0)');
 });
 
 it('can get a new Vector2(1, 1)', function () {
     $vector2 = Vector2::one();
     expect($vector2)->toBeInstanceOf(Vector2::class)
-      ->and($vector2->__toString())->toBe('Vector2(1, 1)');
+      ->and($vector2->__toString())->toBe('(1, 1)');
 });
 
 it('can get a new Vector2(-1, 0)', function () {
     $vector2 = Vector2::left();
     expect($vector2)->toBeInstanceOf(Vector2::class)
-      ->and($vector2->__toString())->toBe('Vector2(-1, 0)');
+      ->and($vector2->__toString())->toBe('(-1, 0)');
 });
 
 it('can get a new Vector2(0, -1)', function () {
     $vector2 = Vector2::down();
     expect($vector2)->toBeInstanceOf(Vector2::class)
-      ->and($vector2->__toString())->toBe('Vector2(0, -1)');
+      ->and($vector2->__toString())->toBe('(0, -1)');
 });
 
 it('can get a new Vector2(1, 0)', function () {
     $vector2 = Vector2::right();
     expect($vector2)->toBeInstanceOf(Vector2::class)
-      ->and($vector2->__toString())->toBe('Vector2(1, 0)');
+      ->and($vector2->__toString())->toBe('(1, 0)');
 });
 
 it('can get a new Vector2(0, 1)', function () {
     $vector2 = Vector2::up();
     expect($vector2)->toBeInstanceOf(Vector2::class)
-      ->and($vector2->__toString())->toBe('Vector2(0, 1)');
+      ->and($vector2->__toString())->toBe('(0, 1)');
 });
 
 it('can get the x and y values of Vector2', function () {

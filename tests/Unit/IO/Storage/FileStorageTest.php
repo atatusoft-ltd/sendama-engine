@@ -7,4 +7,8 @@ it('can get the singleton instance of FileStorage', function() {
     expect($fileStorage)->toBeInstanceOf(FileStorage::class);
 });
 
-it ('can load a save file')
+//it ('can load a save file', function() {
+//    $fileStorage = FileStorage::getInstance();
+//    $fileStorage->load('tests/data/test.json');
+//    expect($fileStorage->get('test'))->toBe('test');
+//});
