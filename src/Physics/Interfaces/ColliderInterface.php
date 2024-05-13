@@ -2,12 +2,14 @@
 
 namespace Sendama\Engine\Physics\Interfaces;
 
+use Sendama\Engine\Core\Interfaces\ComponentInterface;
+
 /**
  * Interface ColliderInterface. Interface for colliders.
  *
  * @package Sendama\Engine\Physics\Interfaces
  */
-interface ColliderInterface
+interface ColliderInterface extends ComponentInterface
 {
   /**
    * Check if this collider is touching another collider.

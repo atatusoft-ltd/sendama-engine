@@ -7,6 +7,8 @@ use Sendama\Engine\Core\Rendering\Interfaces\CameraInterface;
 use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
 use Sendama\Engine\Core\Transform;
 use Sendama\Engine\Core\Vector2;
+use Sendama\Engine\IO\Console\Console;
+use Sendama\Engine\IO\Console\Cursor;
 
 /**
  * Represents a camera.
@@ -18,7 +20,15 @@ class Camera implements CameraInterface
    */
   protected Rect $viewport;
 
+  /**
+   * @var Transform|null The target.
+   */
   protected ?Transform $target = null;
+
+  /**
+   * @var Cursor The cursor.
+   */
+  protected Cursor $cursor;
 
   /**
    * Camera constructor.
@@ -37,6 +47,7 @@ class Camera implements CameraInterface
   )
   {
     $this->viewport = new Rect($this->offset, new Vector2($width, $height));
+    $this->cursor = Console::cursor();
   }
 
   /**
@@ -187,6 +198,14 @@ class Camera implements CameraInterface
   /**
    * @inheritDoc
    */
+  public function clearScreen(): void
+  {
+    Console::clear();
+  }
+
+  /**
+   * @inheritDoc
+   */
   public function update(): void
   {
     // TODO: Implement update() method.
@@ -198,5 +217,16 @@ class Camera implements CameraInterface
   public function setViewport(Rect $viewport): void
   {
     $this->viewport = $viewport;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function renderWorldSpace(): void
+  {
+    Console::clear();
+    $this->cursor->moveTo(0, 0);
+
+    echo $this->scene->getWorldSpace();
   }
 }

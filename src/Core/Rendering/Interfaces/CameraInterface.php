@@ -69,4 +69,19 @@ interface CameraInterface extends CanRender, CanUpdate
    * @param Rect $viewport The viewport.
    */
   public function setViewport(Rect $viewport): void;
+
+  /**
+   * Clears the screen. This method clears the screen without calling 
+   * the erase method on each scene object.
+   *
+   * @return void
+   */
+  public function clearScreen(): void;
+
+  /**
+   * Renders the entire world space.
+   *
+   * @return void
+   */
+  public function renderWorldSpace(): void;
 }

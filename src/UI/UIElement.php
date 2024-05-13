@@ -13,6 +13,10 @@ use Sendama\Engine\UI\Interfaces\UIElementInterface;
  */
 abstract class UIElement implements UIElementInterface
 {
+  protected bool $enabled = true;
+
+  protected bool $active = true;
+
   /**
    * Constructs a UI element.
    *
@@ -28,5 +32,69 @@ abstract class UIElement implements UIElementInterface
     protected Vector2 $size = new Vector2(0, 0),
   )
   {
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function enable(): void
+  {
+    $this->enabled = true;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function disable(): void
+  {
+    $this->enabled = false;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function isEnabled(): bool
+  {
+    return $this->enabled;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function resume(): void
+  {
+    $this->render();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function suspend(): void
+  {
+    $this->erase();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function stop(): void
+  {
+    $this->erase();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getName(): string
+  {
+    return $this->name;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function setName(string $name): void
+  {
+    $this->name = $name;
   }
 }

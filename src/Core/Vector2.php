@@ -27,7 +27,7 @@ class Vector2 implements CanEquate, Stringable
    */
   public function __toString(): string
   {
-    return "Vector2($this->x, $this->y)";
+    return "($this->x, $this->y)";
   }
 
   /**
