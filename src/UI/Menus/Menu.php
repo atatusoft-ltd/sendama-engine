@@ -3,6 +3,7 @@
 namespace Sendama\Engine\UI\Menus;
 
 use Assegai\Collections\ItemList;
+use Closure;
 use Sendama\Engine\Core\Interfaces\ExecutionContextInterface;
 use Sendama\Engine\Core\Rect;
 use Sendama\Engine\Core\Scenes\SceneManager;
@@ -72,22 +73,33 @@ class Menu implements MenuInterface
    *
    * @param string $title The title of the menu.
    * @param string $description The description of the menu.
+   * @param Rect $dimensions
    * @param ItemList $items The items of the menu.
    * @param string $cursor The cursor of the menu.
    * @param Color $activeColor The active color of the menu.
+   * @param array<KeyCode>|null $cancelKey The cancel key.
+   * @param Closure|null $onCancel The on cancel callback.
    */
   public function __construct(
-    protected string $title,
-    protected string $description = '',
-    protected Rect $dimensions = new Rect(
+    protected string   $title,
+    protected string   $description = '',
+    protected Rect     $dimensions = new Rect(
       new Vector2(0, 0),
       new Vector2(DEFAULT_MENU_WIDTH, DEFAULT_MENU_HEIGHT)
     ),
     protected ItemList $items = new ItemList(MenuItemInterface::class),
-    protected string $cursor = '>',
-    protected Color $activeColor = Color::BLUE
+    protected string   $cursor = '>',
+    protected Color    $activeColor = Color::BLUE,
+    protected ?array   $cancelKey = null,
+    protected ?Closure $onCancel = null,
+    protected bool     $canNavigate = true,
   )
   {
+    if (! $this->canNavigate)
+    {
+      $this->cursor = '';
+    }
+
     $this->observers = new ItemList(ObserverInterface::class);
     $this->window = new Window(
       $this->title,
@@ -135,12 +147,21 @@ class Menu implements MenuInterface
    */
   public function update(): void
   {
-    $this->handleNavigation();
-
-    // Handle submitting the active item.
-    if (Input::isKeyDown(KeyCode::ENTER))
+    if ($this->canNavigate)
     {
-      $this->getActiveItem()?->execute($this);
+      $this->handleNavigation();
+
+      // Handle submitting the active item.
+      if (Input::isKeyDown(KeyCode::ENTER))
+      {
+        $this->getActiveItem()?->execute($this);
+      }
+    }
+
+    // Handle cancel the menu.
+    if ($this->cancelKey && Input::isAnyKeyPressed($this->cancelKey))
+    {
+      $this->onCancel?->call($this);
     }
   }
 
@@ -465,13 +486,13 @@ class Menu implements MenuInterface
   {
     $v = Input::getAxis(AxisName::VERTICAL);
 
-    if ($v > 0)
+    if ($v < 0)
     {
       // Move up.
       $this->setActiveItemByIndex(wrap($this->getActiveItemIndex() - 1, 0, $this->items->count() - 1));
     }
 
-    if ($v < 0)
+    if ($v > 0)
     {
       // Move down
       $this->setActiveItemByIndex(wrap($this->getActiveItemIndex() + 1, 0, $this->items->count() - 1));
