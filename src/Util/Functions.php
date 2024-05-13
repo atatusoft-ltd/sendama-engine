@@ -12,6 +12,11 @@ use Sendama\Engine\IO\Console\Console;
 
 
 /* Application */
+function getGameName(): string
+{
+  return SceneManager::getInstance()->getSettings('game_name') ?? $_ENV['GAME_NAME'];
+}
+
 /**
  * Quits the game with the given exit code.
  *
@@ -33,6 +38,11 @@ function quitGame(?int $code = null): void
 function loadScene(string $index): void
 {
   SceneManager::getInstance()->loadScene($index);
+}
+
+function loadPreviousScene(): void
+{
+  SceneManager::getInstance()->loadPreviousScene();
 }
 
 /* Math */
