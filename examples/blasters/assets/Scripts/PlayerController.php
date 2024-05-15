@@ -2,8 +2,7 @@
 
 namespace Sendama\Examples\Blasters\Scripts;
 
-use Sendama\Engine\Core\Behaviour;
-use Sendama\Engine\Core\Rect;
+use Sendama\Engine\Core\Behaviours\Behaviour;
 use Sendama\Engine\Core\Sprite;
 use Sendama\Engine\Core\Texture2D;
 use Sendama\Engine\Core\Vector2;

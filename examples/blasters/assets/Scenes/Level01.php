@@ -9,16 +9,12 @@ use Sendama\Examples\Blasters\Scripts\PlayerController;
 
 class Level01 extends AbstractScene
 {
-  public function __construct()
-  {
-    parent::__construct('Level 01', 'Maps/level01.tmap');
-  }
-
   /**
    * @inheritDoc
    */
   public function awake(): void
   {
+    $this->environmentTileMapPath = 'Maps/level01';
     $screenHeight = $this->getSettings('screen_height');
 
     if (! is_int($screenHeight) )
