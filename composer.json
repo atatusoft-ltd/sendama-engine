@@ -10,6 +10,7 @@
         "psr-4": {
             "Sendama\\Engine\\": "src/",
             "Sendama\\Examples\\Blasters\\": "examples/blasters/assets/",
+            "Sendama\\Examples\\Collector\\": "examples/collector/assets/",
             "Sendama\\Engine\\Mocks\\": "tests/Mocks/"
         },
         "files": [
