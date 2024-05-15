@@ -124,7 +124,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
      */
     foreach ($scenes as $i => $scene)
     {
-      if (is_int($index) && $i === $index)
+      if (is_int($index) && $i === (int)$index)
       {
         $sceneToBeLoaded = $scene;
         break;

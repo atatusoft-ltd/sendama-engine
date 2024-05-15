@@ -380,4 +380,16 @@ class Vector2 implements CanEquate, Stringable
 
     return new Vector2($x, $y);
   }
+
+  /**
+   * Scales this vector by the given scalar.
+   *
+   * @param int $scalar The scalar to scale by.
+   * @return void
+   */
+  public function scale(int $scalar): void
+  {
+    $this->setX($this->getX() * $scalar);
+    $this->setY($this->getY() * $scalar);
+  }
 }

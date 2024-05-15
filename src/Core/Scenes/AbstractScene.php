@@ -25,6 +25,10 @@ use Sendama\Engine\Util\Path;
 abstract class AbstractScene implements SceneInterface
 {
   /**
+   * @const string MAP_FILE_EXTENSION
+   */
+  const string MAP_FILE_EXTENSION = '.tmap';
+  /**
    * @var array<string, mixed> $settings
    */
   protected array $settings = [];
@@ -61,31 +65,31 @@ abstract class AbstractScene implements SceneInterface
   /**
    * @var string $environmentTileMapPath
    */
+  protected string $environmentTileMapPath = '';
+  /**
+   * @var string $environmentTileMapPath
+   */
   protected string $environmentTileMapData = '';
 
   /**
    * Constructs a scene.
    *
    * @param string $name The name of the scene.
-   * @param string $environmentTileMapPath
    * @throws FileNotFoundException
    */
-  public function __construct(
-    protected string $name,
-    protected string $environmentTileMapPath = ''
-  )
+  public final function __construct(protected string $name)
   {
     $this->worldsSpace = new Grid();
     $this->collisionWorldSpace = new Grid();
     $this->physics = Physics::getInstance();
     $this->camera = new Camera($this);
 
+    $this->awake();
+
     if ($this->environmentTileMapPath)
     {
       $this->loadEnvironmentTileMapData();
     }
-
-    $this->awake();
   }
 
   /**
@@ -471,10 +475,11 @@ abstract class AbstractScene implements SceneInterface
   /**
    * Loads the environment tile map data from a file on disk.
    *
+   * @param string|null $path
    * @return void
    * @throws FileNotFoundException If the file does not exist.
    */
-  private function loadEnvironmentTileMapData(): void
+  private function loadEnvironmentTileMapData(?string $path = null): void
   {
     // Check if the file exists
     if (! file_exists($this->getAbsoluteEnvironmentTileMapPath()) )
@@ -498,7 +503,7 @@ abstract class AbstractScene implements SceneInterface
    */
   private function getAbsoluteEnvironmentTileMapPath(): string
   {
-    return Path::join(Path::getWorkingDirectoryAssetsPath(), $this->environmentTileMapPath);
+    return Path::join(Path::getWorkingDirectoryAssetsPath(), $this->environmentTileMapPath) . self::MAP_FILE_EXTENSION;
   }
 
   /**

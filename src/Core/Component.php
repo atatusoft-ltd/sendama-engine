@@ -3,6 +3,8 @@
 namespace Sendama\Engine\Core;
 
 use InvalidArgumentException;
+use ReflectionObject;
+use Sendama\Engine\Core\Behaviours\Attributes\SerializeField;
 use Sendama\Engine\Core\Interfaces\CanCompare;
 use Sendama\Engine\Core\Interfaces\CanEquate;
 use Sendama\Engine\Core\Interfaces\ComponentInterface;
@@ -344,7 +346,19 @@ abstract class Component implements ComponentInterface
    */
   public function __serialize(): array
   {
-    return get_object_vars($this);
+    $data = [];
+    $reflection = new ReflectionObject($this);
+    $properties = $reflection->getProperties();
+
+    foreach ($properties as $property)
+    {
+      if ($property->isPublic() || $property->getAttributes(SerializeField::class))
+      {
+        $data[$property->getName()] = $property->getValue($this);
+      }
+    }
+
+    return $data;
   }
 
   /**
