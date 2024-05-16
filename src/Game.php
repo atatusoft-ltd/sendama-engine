@@ -741,6 +741,7 @@ class Game implements ObservableInterface
     Debug::setLogLevel(LogLevel::tryFrom($this->getSettings('log_level')) ?? LogLevel::DEBUG);
 
     // Input settings
+    $this->settings['buttons']                = [];
     $this->settings['pause_key']              = $_ENV['PAUSE_KEY'] ?? KeyCode::ESCAPE;
 
     $this->sceneManager->loadSettings($this->settings);

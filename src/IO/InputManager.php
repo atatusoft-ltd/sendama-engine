@@ -36,6 +36,13 @@ class InputManager
   private static array $axes = [];
 
   /**
+   * The button map.
+   *
+   * @var array<Button> $buttons The button map.
+   */
+  private static array $buttons = [];
+
+  /**
    * Initializes the InputManager.
    *
    * @return void
@@ -111,11 +118,23 @@ class InputManager
   /**
    * Returns the value of the virtual axis identified by axisName.
    *
-   * @param AxisName $axisName The name of the axis.
+   * @param AxisName|string $axisName The name of the axis.
    * @return float Returns the value of the virtual axis identified by axisName.
    */
-  public static function getAxis(AxisName $axisName): float
+  public static function getAxis(AxisName|string $axisName): float
   {
+    if (is_string($axisName))
+    {
+      /** @var ?Button $axis */
+      $axis = array_filter(self::$buttons, fn(Button $button) => $button->getName() === $axisName)[0] ?? null;
+      if (is_null($axis))
+      {
+        return 0;
+      }
+
+      return $axis->getValue();
+    }
+
     if ($axisName === AxisName::HORIZONTAL)
     {
       if (self::isAnyKeyPressed([KeyCode::LEFT, KeyCode::A, KeyCode::a]))
@@ -233,6 +252,25 @@ class InputManager
     $previousKey = self::getKey(self::$previousKeyPress);
 
     return empty($key) && $previousKey === $keyCode->value;
+  }
+
+  /**
+   * Checks if a button of given name $buttonName is down.
+   *
+   * @param string $buttonName The name of the button.
+   * @return bool Returns true if the button is down, false otherwise.
+   */
+  public static function isButtonDown(string $buttonName): bool
+  {
+    foreach (self::$buttons as $button)
+    {
+      if ($button->getName() === $buttonName)
+      {
+        return self::isAnyKeyPressed($button->getPositiveKeys());
+      }
+    }
+
+    return false;
   }
 
   /**
