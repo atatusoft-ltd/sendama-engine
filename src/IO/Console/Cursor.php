@@ -67,8 +67,8 @@ class Cursor
    */
   public function moveTo(int $x, int $y): void
   {
-    $x = max(0, $x);
-    $y = max(0, $y);
+    $x = max(1, $x);
+    $y = max(1, $y);
 
     echo "\033[{$y};{$x}H";
   }

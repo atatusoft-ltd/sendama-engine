@@ -1,6 +1,6 @@
 <?php
 
-namespace Sendama\Examples\Collector\Scripts\Game;
+namespace Sendama\Examples\Blasters\Scripts\Game;
 
 use Sendama\Engine\Core\Behaviours\Behaviour;
 use Sendama\Engine\IO\Enumerations\KeyCode;

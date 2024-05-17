@@ -8,6 +8,7 @@ use Sendama\Engine\Core\Behaviours\Attributes\SerializeField;
 use Sendama\Engine\Core\Interfaces\CanCompare;
 use Sendama\Engine\Core\Interfaces\CanEquate;
 use Sendama\Engine\Core\Interfaces\ComponentInterface;
+use Sendama\Engine\Core\Rendering\Renderer;
 
 /**
  * Represents a component. This class is the base class for all components in the engine.
@@ -28,7 +29,7 @@ abstract class Component implements ComponentInterface
    */
   protected string $hash;
 
-  public function __construct(protected GameObject $gameObject)
+  public function __construct(private readonly GameObject $gameObject)
   {
     $this->hash = md5(__CLASS__) .  '-' . uniqid($this->gameObject->getName(), true);
 
@@ -49,6 +50,14 @@ abstract class Component implements ComponentInterface
   public final function getTransform(): Transform
   {
     return $this->gameObject->getTransform();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public final function getRenderer(): Renderer
+  {
+    return $this->getGameObject()->getRenderer();
   }
 
   /**
@@ -370,5 +379,21 @@ abstract class Component implements ComponentInterface
     {
       $this->{$key} = $value;
     }
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getComponent(string $componentClass): ?ComponentInterface
+  {
+    return $this->getGameObject()->getComponent($componentClass);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getComponents(string $componentClass): array
+  {
+    return $this->getGameObject()->getComponents($componentClass);
   }
 }
