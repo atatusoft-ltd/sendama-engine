@@ -62,7 +62,7 @@ class Transform extends Component
    */
   public function translate(Vector2 $translation): void
   {
-    $this->gameObject->getRenderer()->erase();
+    $this->getRenderer()->erase();
     $this->position->add($translation);
   }
 

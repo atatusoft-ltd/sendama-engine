@@ -15,14 +15,4 @@ abstract class Behaviour extends Component
   {
     parent::__construct($gameObject);
   }
-
-  /**
-   * Returns the renderer of the game object.
-   *
-   * @return Renderer
-   */
-  public function getRenderer(): Renderer
-  {
-    return $this->getGameObject()->getRenderer();
-  }
 }
