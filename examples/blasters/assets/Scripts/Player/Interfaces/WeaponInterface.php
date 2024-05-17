@@ -1,6 +1,6 @@
 <?php
 
-namespace Sendama\Examples\Collector\Scripts\Player\Interfaces;
+namespace Sendama\Examples\Blasters\Scripts\Player\Interfaces;
 
 interface WeaponInterface
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Sendama\Examples\Collector\Scripts\Player;
+namespace Sendama\Examples\Blasters\Scripts\Player;
 
 use Sendama\Engine\Core\Behaviours\Behaviour;
 use Sendama\Engine\Debug\Debug;
