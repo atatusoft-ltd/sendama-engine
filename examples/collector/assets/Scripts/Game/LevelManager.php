@@ -8,6 +8,9 @@ use Sendama\Engine\IO\Input;
 
 class LevelManager extends Behaviour
 {
+  /**
+   * @inheritDoc
+   */
   public function onUpdate(): void
   {
     if (Input::isKeyDown(KeyCode::ESCAPE))

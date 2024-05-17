@@ -45,16 +45,16 @@ class Level01 extends AbstractScene
     $playerTexture = new Texture2D('Textures/player.texture');
     $player->getTransform()->setPosition(new Vector2($playerStartingX, $playerStartingY));
     /**
-     * @var CharacterMovement $playerMovement
+     * @var CharacterMovement $playerMovementController
      */
-    $playerMovement = $player->addComponent(CharacterMovement::class);
-    $playerMovement->setSprites(
+    $playerMovementController = $player->addComponent(CharacterMovement::class);
+    $playerMovementController->setSprites(
       new Sprite($playerTexture, ['x' => 0, 'y' => 0, 'width' => 1, 'height' => 1]),
       new Sprite($playerTexture, ['x' => 1, 'y' => 0, 'width' => 1, 'height' => 1]),
       new Sprite($playerTexture, ['x' => 2, 'y' => 0, 'width' => 1, 'height' => 1]),
-      new Sprite($playerTexture, ['x' => 3, 'y' => 0, 'width' => 1, 'height' => 1])
+      new Sprite($playerTexture, ['x' => 3, 'y' => 0, 'width' => 1, 'height' => 1]),
     );
-    $playerMovement->setSpeed(2);
+    $playerMovementController->setSpeed(1);
     $player->setSprite($playerTexture, Vector2::zero(), Vector2::one());
 
     // Add the game objects to the scene
