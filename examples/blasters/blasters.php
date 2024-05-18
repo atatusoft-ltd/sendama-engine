@@ -19,7 +19,7 @@ function bootstrap(): void
 
   $game->addScenes(
     new TitleScene($gameName),
-    new Level01(),
+    new Level01('Level01'),
     new SettingsScene('Settings'),
     new HighScoresScene('High Scores')
   );

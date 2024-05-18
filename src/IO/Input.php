@@ -23,6 +23,12 @@ class Input
     return InputManager::getAxis($axisName);
   }
 
+  /**
+   * Checks if a key is pressed.
+   *
+   * @param KeyCode $keyCode The key code to check.
+   * @return bool Returns true if the key is pressed, false otherwise.
+   */
   public static function isKeyPressed(KeyCode $keyCode): bool
   {
     return InputManager::isKeyPressed($keyCode);
@@ -50,18 +56,47 @@ class Input
     return InputManager::isAnyKeyPressed($keyCodes);
   }
 
+  /**
+   * Checks if any of the given keys are released.
+   *
+   * @param array<KeyCode> $keyCodes The key codes to check.
+   * @return bool Returns true if any key is released, false otherwise.
+   */
   public static function isAnyKeyReleased(array $keyCodes): bool
   {
     return InputManager::isAnyKeyReleased($keyCodes);
   }
 
+  /**
+   * Checks if the given key is pressed.
+   *
+   * @param KeyCode $keyCode The key code to check.
+   * @return bool Returns true if the key is pressed, false otherwise.
+   */
   public static function isKeyDown(KeyCode $keyCode): bool
   {
     return InputManager::isKeyDown($keyCode);
   }
 
+  /**
+   * Checks if the given key was released.
+   *
+   * @param KeyCode $keyCode The key code to check.
+   * @return bool Returns true if the key was released, false otherwise.
+   */
   public static function isKeyUp(KeyCode $keyCode): bool
   {
     return InputManager::isKeyUp($keyCode);
+  }
+
+  /**
+   * Checks if the given button is pressed.
+   *
+   * @param string $buttonName The name of the button to check.
+   * @return bool Returns true if the button is pressed, false otherwise.
+   */
+  public static function isButtonDown(string $buttonName): bool
+  {
+    return InputManager::isButtonDown($buttonName);
   }
 }

@@ -2,12 +2,14 @@
 
 namespace Sendama\Engine\Core;
 
+use Serializable;
+
 /**
  * Class Sprite
  *
  * @package Sendama\Engine\Core
  */
-class Sprite
+class Sprite implements Serializable
 {
   protected Rect $rect;
   /**
@@ -112,5 +114,50 @@ class Sprite
       }
     }
     return $buffer;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function serialize(): string
+  {
+    return json_encode([
+      'texture' => $this->texture,
+      'rect' => $this->rect,
+      'pivot' => $this->pivot,
+    ]);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function unserialize(string $data): void
+  {
+    $data = json_decode($data, true);
+    $this->texture = $data['texture'];
+    $this->rect = $data['rect'];
+    $this->pivot = $data['pivot'];
+  }
+
+  /**
+   * @return array{texture: Texture2D, rect: Rect, pivot: Vector2}
+   */
+  public function __serialize(): array
+  {
+    return [
+      'texture' => $this->texture,
+      'rect' => $this->rect,
+      'pivot' => $this->pivot,
+    ];
+  }
+
+  /**
+   * @param array{texture: Texture2D, rect: Rect, pivot: Vector2} $data
+   */
+  public function __unserialize(array $data): void
+  {
+    $this->texture = $data['texture'];
+    $this->rect = $data['rect'];
+    $this->pivot = $data['pivot'];
   }
 }

@@ -21,6 +21,17 @@ class Vector2 implements CanEquate, Stringable
   }
 
   /**
+   * @param array{x: int, y: int} $vector
+   * @return Vector2
+   */
+  public static function fromArray(array $vector): Vector2
+  {
+    [$x, $y] = $vector;
+
+    return new Vector2($x, $y);
+  }
+
+  /**
    * Gets the string representation of this vector.
    *
    * @return string The string representation of this vector.
@@ -379,5 +390,17 @@ class Vector2 implements CanEquate, Stringable
     $y = lerp($a->getY(), $b->getY(), $t);
 
     return new Vector2($x, $y);
+  }
+
+  /**
+   * Scales this vector by the given scalar.
+   *
+   * @param int $scalar The scalar to scale by.
+   * @return void
+   */
+  public function scale(int $scalar): void
+  {
+    $this->setX($this->getX() * $scalar);
+    $this->setY($this->getY() * $scalar);
   }
 }

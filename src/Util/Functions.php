@@ -29,13 +29,33 @@ function quitGame(?int $code = null): void
 }
 
 /**
+ * Pauses the game.
+ *
+ * @return void
+ */
+function pauseGame(): void
+{
+  EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::PAUSE));
+}
+
+/**
+ * Resumes the game.
+ *
+ * @return void
+ */
+function resumeGame(): void
+{
+  EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::RESUME));
+}
+
+/**
  * Loads the scene with the given index.
  *
- * @param string $index The index of the scene to load.
+ * @param string|int $index The index of the scene to load.
  * @return void
  * @throws SceneNotFoundException
  */
-function loadScene(string $index): void
+function loadScene(string|int $index): void
 {
   SceneManager::getInstance()->loadScene($index);
 }

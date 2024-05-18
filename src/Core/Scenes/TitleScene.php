@@ -16,38 +16,34 @@ class TitleScene extends AbstractScene
    * @var Menu $menu
    */
   protected Menu $menu;
-
-  protected Text $titleText;
-
   /**
-   * @inheritDoc
-   *
-   * @throws Exception
+   * @var Text $titleText
    */
-  public function __construct(
-    string $name = 'Title Scene',
-    protected ?int $screenWidth = null,
-    protected ?int $screenHeight = null
-  )
-  {
-    parent::__construct($name);
-  }
+  protected Text $titleText;
+  /**
+   * @var int|null
+   */
+  protected ?int $screenWidth = null;
+  /**
+   * @var int|null
+   */
+  protected ?int $screenHeight = null;
+  protected int $menuWidth = 20;
+  protected int $menuHeight = 8;
+  protected SceneManager $sceneManager;
+  protected string $title = '';
 
   /**
    * @inheritDoc
    */
   public function awake(): void
   {
-    $menuWidth = 20;
-    $menuHeight = 8;
-
-    $sceneManager = SceneManager::getInstance();
-    $screenWidth = $this->screenWidth ?? $sceneManager->getSettings('screen_width');
-    $screenHeight = $this->screenHeight ?? $sceneManager->getSettings('screen_height');
-
-    $leftMargin = ($screenWidth / 2) - ($menuWidth / 2);
-    $topMargin = ($screenHeight / 2) - ($menuHeight / 2);
+    $this->sceneManager = SceneManager::getInstance();
     $gameName = getGameName() ?? $this->name;
+    if (!$this->title)
+    {
+      $this->title = $gameName;
+    }
 
     $this->titleText = new Text(
       scene: $this,
@@ -74,8 +70,8 @@ class TitleScene extends AbstractScene
       title: $gameName,
       description: 'q:quit',
       dimensions: new Rect(
-        new Vector2((int)$leftMargin, (int)$topMargin),
-        new Vector2($menuWidth, $menuHeight)
+        new Vector2($this->getMenuLeftMargin(), $this->getMenuTopMargin()),
+        new Vector2($this->menuWidth, $this->menuHeight)
       ),
       cancelKey: [KeyCode::Q, KeyCode::q],
       onCancel: fn() => quitGame()
@@ -115,5 +111,53 @@ class TitleScene extends AbstractScene
 
     $this->add($this->titleText);
     $this->add($this->menu);
+  }
+
+  /**
+   * Returns the title of the game.
+   *
+   * @return string The title of the game.
+   */
+  public function getTitle(): string
+  {
+    return $this->title;
+  }
+
+  /**
+   * Set the title of the game.
+   *
+   * @param string $title The title of the game.
+   */
+  public function setTitle(string $title): void
+  {
+    $this->title = $title;
+  }
+
+  public function setScreenDimensions(
+    ?int $width = null,
+    ?int $height = null,
+  ): void
+  {
+    $this->screenWidth = $width;
+    $this->screenHeight = $height;
+
+  }
+
+  /**
+   * @return int
+   */
+  private function getMenuLeftMargin(): int
+  {
+    $screenWidth = $this->screenWidth ?? $this->sceneManager->getSettings('screen_width');
+    return ($screenWidth / 2) - ($this->menuWidth / 2);
+  }
+
+  /**
+   * @return int
+   */
+  private function getMenuTopMargin(): int
+  {
+    $screenHeight = $this->screenHeight ?? $this->sceneManager->getSettings('screen_height');
+    return ($screenHeight / 2) - ($this->menuHeight / 2);
   }
 }
