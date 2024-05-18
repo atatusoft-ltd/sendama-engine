@@ -529,8 +529,18 @@ class GameObject implements GameObjectInterface
     return $this->getRenderer()->getSprite();
   }
 
-  public function sendMessage(string $methodName, mixed $value): void
+  /**
+   * @inheritDoc
+   */
+  public static function pool(GameObjectInterface $gameObject, int $size): array
   {
-    // TODO: Implement sendMessage() method.
+    $pool = [];
+
+    for ($i = 0; $i < $size; ++$i)
+    {
+      $pool[] = clone $gameObject;
+    }
+
+    return $pool;
   }
 }
