@@ -47,11 +47,11 @@ interface GameObjectInterface extends CanCompare, CanResume, CanUpdate, CanStart
   public function getComponents(?string $componentClass = null): array;
 
   /**
-   * Calls the method named $methodName on every behaviour in this GameObject.
+   * Creates a pool of game objects of the specified size. This is useful for creating a pool of bullets, enemies, etc.
    *
-   * @param string $methodName The name of the method to call.
-   * @param mixed $value The value to pass to the method.
-   * @return void
+   * @param GameObjectInterface $gameObject The game object to pool.
+   * @param int $size The size of the pool.
+   * @return array<GameObjectInterface> The pool of game objects.
    */
-  public function sendMessage(string $methodName, mixed $value): void;
+  public static function pool(GameObjectInterface $gameObject, int $size): array;
 }

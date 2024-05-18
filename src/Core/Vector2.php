@@ -21,6 +21,17 @@ class Vector2 implements CanEquate, Stringable
   }
 
   /**
+   * @param array{x: int, y: int} $vector
+   * @return Vector2
+   */
+  public static function fromArray(array $vector): Vector2
+  {
+    [$x, $y] = $vector;
+
+    return new Vector2($x, $y);
+  }
+
+  /**
    * Gets the string representation of this vector.
    *
    * @return string The string representation of this vector.
