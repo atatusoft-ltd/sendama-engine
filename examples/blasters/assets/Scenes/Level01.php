@@ -23,7 +23,7 @@ class Level01 extends AbstractScene
 
     // Create the actors in the scene (i.e. game objects and ui elements)
     $levelManager = new GameObject('Level Manager');
-    $player = new GameObject('Player');
+    $player = new GameObject('Player Ship');
 
     // Set up the level manager
     $levelManager->addComponent(LevelManager::class);
@@ -38,7 +38,7 @@ class Level01 extends AbstractScene
     $playerStartingX = 4;
     $playerStartingY = $screenHeight / 2;
     $playerTexture = new Texture2D('Textures/player.texture');
-    $player->setSprite($playerTexture, Vector2::zero(), Vector2::one());
+    $player->setSprite($playerTexture, new Vector2(0, 1), new Vector2(5, 3));
     $player->getTransform()->setPosition(new Vector2($playerStartingX, $playerStartingY));
     /**
      * @var CharacterMovement $playerMovementController
