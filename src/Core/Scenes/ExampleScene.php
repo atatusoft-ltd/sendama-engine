@@ -2,20 +2,47 @@
 
 namespace Sendama\Engine\Core\Scenes;
 
+use Sendama\Engine\Core\Behaviours\CharacterMovement;
 use Sendama\Engine\Core\GameObject;
+use Sendama\Engine\Core\Sprite;
+use Sendama\Engine\Core\Texture2D;
 use Sendama\Engine\Core\Vector2;
-use Sendama\Examples\Blasters\Scripts\PlayerController;
 
 class ExampleScene extends AbstractScene
 {
-  public function __construct(string $name = 'Example Scene')
+  public function awake(): void
   {
-    parent::__construct($name);
+    $this->environmentTileMapPath = 'Maps/example';
 
+    # Create the actors in the scene (i.e. game objects and ui elements)
     $player = new GameObject('Player', position: new Vector2(2, 2));
-    $player->addComponent(PlayerController::class);
-    $player->setSprite('Textures/player.texture', Vector2::zero(), Vector2::one());
-    $this->add($player);
 
+    # Set up the player
+    $playerTexture = new Texture2D('Textures/player.texture');
+    $player->setSprite($playerTexture, Vector2::zero(), Vector2::one());
+    /**
+     * @var CharacterMovement $characterMovement
+     */
+    $characterMovement = $player->addComponent(CharacterMovement::class);
+    $characterMovement->setSpeed(1);
+    $characterMovement->setSprites(
+      new Sprite($playerTexture, ['x' => 0, 'y' => 0, 'width' => 1, 'height' => 1]),
+      new Sprite($playerTexture, ['x' => 1, 'y' => 0, 'width' => 1, 'height' => 1]),
+      new Sprite($playerTexture, ['x' => 2, 'y' => 0, 'width' => 1, 'height' => 1]),
+      new Sprite($playerTexture, ['x' => 3, 'y' => 0, 'width' => 1, 'height' => 1]),
+    );
+
+    # Add the player to the scene
+    $this->add($player);
+  }
+
+  public function __serialize(): array
+  {
+    // TODO: Implement __serialize() method.
+  }
+
+  public function __unserialize(array $data): void
+  {
+    // TODO: Implement __unserialize() method.
   }
 }
