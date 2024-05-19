@@ -8,8 +8,16 @@ use Sendama\Engine\Core\Sprite;
 use Sendama\Engine\Core\Texture2D;
 use Sendama\Engine\Core\Vector2;
 
+/**
+ * Class ExampleScene is an example scene.
+ *
+ * @package Sendama\Engine\Core\Scenes
+ */
 class ExampleScene extends AbstractScene
 {
+  /**
+   * @inheritDoc
+   */
   public function awake(): void
   {
     $this->environmentTileMapPath = 'Maps/example';
@@ -34,15 +42,5 @@ class ExampleScene extends AbstractScene
 
     # Add the player to the scene
     $this->add($player);
-  }
-
-  public function __serialize(): array
-  {
-    // TODO: Implement __serialize() method.
-  }
-
-  public function __unserialize(array $data): void
-  {
-    // TODO: Implement __unserialize() method.
   }
 }
