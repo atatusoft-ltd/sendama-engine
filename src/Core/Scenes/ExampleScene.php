@@ -3,19 +3,32 @@
 namespace Sendama\Engine\Core\Scenes;
 
 use Sendama\Engine\Core\Behaviours\CharacterMovement;
+use Sendama\Engine\Core\Behaviours\SimpleQuitListener;
 use Sendama\Engine\Core\GameObject;
 use Sendama\Engine\Core\Sprite;
 use Sendama\Engine\Core\Texture2D;
 use Sendama\Engine\Core\Vector2;
 
+/**
+ * Class ExampleScene is an example scene.
+ *
+ * @package Sendama\Engine\Core\Scenes
+ */
 class ExampleScene extends AbstractScene
 {
+  /**
+   * @inheritDoc
+   */
   public function awake(): void
   {
     $this->environmentTileMapPath = 'Maps/example';
 
     # Create the actors in the scene (i.e. game objects and ui elements)
-    $player = new GameObject('Player', position: new Vector2(2, 2));
+    $levelManager = new GameObject('LevelManager');
+    $player = new GameObject('Player', position: new Vector2(4, 10));
+
+    # Set up the level manager
+    $levelManager->addComponent(SimpleQuitListener::class);
 
     # Set up the player
     $playerTexture = new Texture2D('Textures/player.texture');
@@ -34,15 +47,5 @@ class ExampleScene extends AbstractScene
 
     # Add the player to the scene
     $this->add($player);
-  }
-
-  public function __serialize(): array
-  {
-    // TODO: Implement __serialize() method.
-  }
-
-  public function __unserialize(array $data): void
-  {
-    // TODO: Implement __unserialize() method.
   }
 }

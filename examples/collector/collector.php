@@ -1,8 +1,8 @@
 <?php
 
+use Sendama\Engine\Game;
 use Sendama\Engine\Core\Scenes\TitleScene;
 use Sendama\Examples\Collector\Scenes\Level01;
-use Sendama\Engine\Game;
 use Sendama\Examples\Collector\Scenes\Level02;
 
 require '../../vendor/autoload.php';
