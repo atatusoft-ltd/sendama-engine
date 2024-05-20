@@ -13,8 +13,18 @@ use Sendama\Engine\UI\Interfaces\UIElementInterface;
  */
 abstract class UIElement implements UIElementInterface
 {
+  /**
+   * Whether the UI element is enabled.
+   *
+   * @var bool
+   */
   protected bool $enabled = true;
 
+  /**
+   * Whether the UI element is active.
+   *
+   * @var bool
+   */
   protected bool $active = true;
 
   /**
