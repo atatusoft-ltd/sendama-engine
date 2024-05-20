@@ -3,6 +3,7 @@
 namespace Sendama\Engine\Core\Scenes;
 
 use Sendama\Engine\Core\Behaviours\CharacterMovement;
+use Sendama\Engine\Core\Behaviours\SimpleQuitListener;
 use Sendama\Engine\Core\GameObject;
 use Sendama\Engine\Core\Sprite;
 use Sendama\Engine\Core\Texture2D;
@@ -23,7 +24,11 @@ class ExampleScene extends AbstractScene
     $this->environmentTileMapPath = 'Maps/example';
 
     # Create the actors in the scene (i.e. game objects and ui elements)
-    $player = new GameObject('Player', position: new Vector2(2, 2));
+    $levelManager = new GameObject('LevelManager');
+    $player = new GameObject('Player', position: new Vector2(4, 10));
+
+    # Set up the level manager
+    $levelManager->addComponent(SimpleQuitListener::class);
 
     # Set up the player
     $playerTexture = new Texture2D('Textures/player.texture');
