@@ -3,6 +3,7 @@
 namespace Sendama\Engine\UI\Windows\Interfaces;
 
 use Sendama\Engine\Core\Interfaces\CanRender;
+use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\Events\Interfaces\SubjectInterface;
 use Sendama\Engine\IO\Enumerations\Color;
 use Sendama\Engine\UI\Windows\WindowAlignment;
@@ -38,6 +39,21 @@ interface WindowInterface extends CanRender, SubjectInterface
    * @return void
    */
   public function setHelp(string $help): void;
+
+  /**
+   * Sets the window's position.
+   *
+   * @param Vector2|array{x: int, y: int} $position The window's position.
+   * @return void
+   */
+  public function setPosition(Vector2|array $position): void;
+
+  /**
+   * Returns the window's position.
+   *
+   * @return Vector2 The window's position.
+   */
+  public function getPosition(): Vector2;
 
   /**
    * Returns the border pack of the window. This pack determines the window's border.

@@ -98,6 +98,22 @@ class Window implements WindowInterface
   /**
    * @inheritDoc
    */
+  public function setPosition(Vector2|array $position): void
+  {
+    $this->position = is_array($position) ? Vector2::fromArray($position) : $position;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getPosition(): Vector2
+  {
+    return $this->position;
+  }
+
+  /**
+   * @inheritDoc
+   */
   public function getBorderPack(): BorderPackInterface
   {
     return $this->borderPack;
