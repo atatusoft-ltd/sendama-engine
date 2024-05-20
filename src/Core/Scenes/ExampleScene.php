@@ -46,6 +46,7 @@ class ExampleScene extends AbstractScene
     );
 
     # Add the player to the scene
+    $this->add($levelManager);
     $this->add($player);
   }
 }

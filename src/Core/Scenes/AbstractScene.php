@@ -105,7 +105,7 @@ abstract class AbstractScene implements SceneInterface
    */
   public final function renderAt(?int $x = null, ?int $y = null): void
   {
-    // Do nothing.
+    $this->camera->renderAt($x, $y);
   }
 
   /**

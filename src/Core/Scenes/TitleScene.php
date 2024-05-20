@@ -2,10 +2,12 @@
 
 namespace Sendama\Engine\Core\Scenes;
 
+use Amasiye\Figlet\FontName;
 use Exception;
 use Sendama\Engine\Core\Rect;
 use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\IO\Enumerations\KeyCode;
+use Sendama\Engine\UI\Menus\Interfaces\MenuItemInterface;
 use Sendama\Engine\UI\Menus\Menu;
 use Sendama\Engine\UI\Menus\MenuItem;
 use Sendama\Engine\UI\Text\Text;
@@ -48,23 +50,19 @@ class TitleScene extends AbstractScene
     $this->titleText = new Text(
       scene: $this,
       name: $gameName,
-      position: new Vector2(0, 0),
+      position: new Vector2(0, 4),
       size: new Vector2(DEFAULT_SCREEN_WIDTH, 5)
     );
+    $this->titleText->setFontName(FontName::BIG->value);
     $this->titleText->setText($gameName);
-    $this->titleText->setFontName('basic');
+    $textLeftMargin = ($this->sceneManager->getSettings('screen_width') / 2) - ($this->titleText->getWidth() / 2);
+    $textTopMargin = 4;
+    $this->titleText->setPosition(new Vector2(round($textLeftMargin), round($textTopMargin)));
 
     if (is_array($gameName))
     {
       $gameName = $_ENV['GAME_NAME'] ?? $this->name;
     }
-
-    $this->titleText = new Text(
-      scene: $this,
-      name: $gameName,
-      position: new Vector2(0, 0),
-      size: new Vector2(DEFAULT_SCREEN_WIDTH, 5)
-    );
 
     $this->menu = new Menu(
       title: $gameName,
@@ -82,22 +80,6 @@ class TitleScene extends AbstractScene
       icon: '🎮',
       callback: function () {
         loadScene(1);
-      }
-    ));
-    $this->menu->addItem(new MenuItem(
-      'High Scores',
-      'View the high scores',
-      '🏆',
-      function () {
-        loadScene('High Scores');
-      }
-    ));
-    $this->menu->addItem(new MenuItem(
-      label: 'Settings',
-      description: 'Change the game settings',
-      icon: '⚙️',
-      callback: function () {
-        loadScene('Settings');
       }
     ));
     $this->menu->addItem(new MenuItem(
@@ -140,7 +122,6 @@ class TitleScene extends AbstractScene
   {
     $this->screenWidth = $width;
     $this->screenHeight = $height;
-
   }
 
   /**
@@ -159,5 +140,34 @@ class TitleScene extends AbstractScene
   {
     $screenHeight = $this->screenHeight ?? $this->sceneManager->getSettings('screen_height');
     return ($screenHeight / 2) - ($this->menuHeight / 2);
+  }
+
+  /**
+   * Adds menu items to the menu.
+   *
+   * @param MenuItemInterface ...$item The menu items to add.
+   * @return $this
+   */
+  public function addMenuItems(MenuItemInterface ...$item): self
+  {
+    foreach ($item as $menuItem)
+    {
+      $this->menu->addItem($menuItem);
+    }
+
+    return $this;
+  }
+
+  /**
+   * Sets the font name of the title text.
+   *
+   * @param FontName|string $fontName The font name of the title text.
+   * @return $this
+   * @throws Exception
+   */
+  public function setTitleFont(FontName|string $fontName): self
+  {
+    $this->titleText->setFontName($fontName instanceof FontName ? $fontName->value : $fontName);
+    return $this;
   }
 }
