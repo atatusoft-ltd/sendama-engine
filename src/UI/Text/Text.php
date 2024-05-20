@@ -6,12 +6,14 @@ use Amasiye\Figlet\Figlet;
 use Exception;
 use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
 use Sendama\Engine\Core\Vector2;
-use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\IO\Console\Console;
 use Sendama\Engine\IO\Console\Cursor;
 use Sendama\Engine\IO\Enumerations\Color;
 use Sendama\Engine\UI\UIElement;
 
+/**
+ * Represents a text UI element.
+ */
 class Text extends UIElement
 {
   /**
@@ -27,6 +29,13 @@ class Text extends UIElement
    * @var array
    */
   protected array $rawLines = [];
+
+  /**
+   * The width of the rendered text.
+   *
+   * @var int
+   */
+  protected int $renderWidth = 0;
 
   /**
    * The color of the text.
@@ -69,6 +78,12 @@ class Text extends UIElement
    * @var Cursor|null The reference to the cursor object.
    */
   protected ?Cursor $cursor = null;
+  /**
+   * The height of the rendered text.
+   *
+   * @var int
+   */
+  protected int $renderHeight = 0;
 
   /**
    * @inheritDoc
@@ -86,12 +101,12 @@ class Text extends UIElement
 
     $this->cursor = Console::cursor();
     $this->figlet = new Figlet();
-//    $this->figlet->setFont($this->getFontName());
-    $this->figlet->setBackgroundColor(str_replace(' ', '_', strtolower($this->backgroundColor->getPhoneticName())));
-    $this->figlet->setFontColor(str_replace(' ', '_', strtolower($this->color->getPhoneticName())));
+    $this->figlet
+      ->setFont($this->getFontName())
+      ->setBackgroundColor(str_replace(' ', '_', strtolower($this->backgroundColor->getPhoneticName())))
+      ->setFontColor(str_replace(' ', '_', strtolower($this->color->getPhoneticName())));
 
     $this->rawLines = $this->getRawLines();
-    Debug::log("Text '{$name}' created. - " . var_export($this->rawLines, true));
   }
 
   /**
@@ -180,7 +195,15 @@ class Text extends UIElement
    */
   protected function getRawLines(): array
   {
-    return explode("\n", $this->figlet?->render($this->getText()));
+    $rawLines = explode("\n", $this->figlet?->render($this->getText()));
+
+    foreach ($rawLines as $line)
+    {
+      $this->renderWidth = max($this->renderWidth, strlen($line));
+    }
+    $this->renderHeight = count($rawLines);
+
+    return $rawLines;
   }
 
   /**
@@ -188,19 +211,52 @@ class Text extends UIElement
    *
    * @param string $fontName The font name of the text.
    * @return void
+   * @throws Exception
    */
   public function setFontName(string $fontName): void
   {
-    $this->fontName = strtolower($fontName);
+    $this->figlet?->setFont($fontName);
+    $this->fontName = $fontName;
   }
 
+  /**
+   * Returns the font name of the text.
+   *
+   * @return string The font name of the text.
+   */
   public function getFontName(): string
   {
-    return strtolower($this->fontName);
+    return $this->fontName;
   }
 
-  public function get()
+  /**
+   * Returns the width of the rendered text.
+   *
+   * @return int The width of the rendered text.
+   */
+  public function getWidth(): int
   {
+    return $this->renderWidth;
+  }
 
+  /**
+   * Returns the height of the rendered text.
+   *
+   * @return int The height of the rendered text.
+   */
+  public function getHeight(): int
+  {
+    return $this->renderHeight;
+  }
+
+  /**
+   * Sets the position of the UI element.
+   *
+   * @param Vector2 $position The position of the UI element.
+   * @return void
+   */
+  public function setPosition(Vector2 $position): void
+  {
+    $this->position = $position;
   }
 }

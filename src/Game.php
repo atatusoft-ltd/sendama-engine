@@ -241,6 +241,7 @@ class Game implements ObservableInterface
       Debug::info("Loading environment settings");
       // Environment
       $this->settings['debug']                  = $_ENV['DEBUG_MODE'] ?? false;
+      $this->settings['debug_info']             = $_ENV['SHOW_DEBUG_INFO'] ?? false;
       $this->settings['log_level']              = $_ENV['LOG_LEVEL'] ?? DEFAULT_LOG_LEVEL;
       $this->settings['log_dir']                = $_ENV['LOG_DIR'] ?? Path::join(getcwd(), DEFAULT_LOGS_DIR);
 
@@ -454,10 +455,7 @@ class Game implements ObservableInterface
 
     $this->uiManager->render();
 
-    if ($this->getSettings('debug'))
-    {
-      $this->renderDebugInfo();
-    }
+    $this->renderDebugInfo();
 
     $this->notify(new GameEvent(GameEventType::RENDER));
   }
@@ -709,14 +707,17 @@ class Game implements ObservableInterface
    */
   private function renderDebugInfo(): void
   {
-    $content = [
-      "FPS: $this->frameRate",
-      "Delta: " . round(Time::getDeltaTime(), 2),
-      "Time: " . Time::getPrettyTime(ChronoUnit::SECONDS)
-    ];
+    if ($this->isDebug() && $this->showDebugInfo())
+    {
+      $content = [
+        "FPS: $this->frameRate",
+        "Delta: " . round(Time::getDeltaTime(), 2),
+        "Time: " . Time::getPrettyTime(ChronoUnit::SECONDS)
+      ];
 
-    $this->debugWindow->setContent($content);
-    $this->debugWindow->render();
+      $this->debugWindow->setContent($content);
+      $this->debugWindow->render();
+    }
   }
 
   /**
@@ -741,6 +742,7 @@ class Game implements ObservableInterface
 
     // Load environment settings
     $this->settings['debug']                  = $_ENV['DEBUG_MODE'] ?? false;
+    $this->settings['debug_info']             = $_ENV['SHOW_DEBUG_INFO'] ?? false;
     $this->settings['log_level']              = $_ENV['LOG_LEVEL'] ?? 'info';
     $this->settings['log_dir']                = Path::join(getcwd(), DEFAULT_LOGS_DIR);
     Debug::log("Log directory initialized: {$this->settings['log_dir']}");
@@ -774,5 +776,30 @@ class Game implements ObservableInterface
     {
       EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::QUIT));
     }
+  }
+
+  /**
+   * Get the debug status.
+   *
+   * @return bool The debug status.
+   */
+  private function isDebug(): bool
+  {
+    return match (gettype($this->getSettings('debug'))) {
+      'boolean' => $this->getSettings('debug'),
+      'string'  => strtolower($this->getSettings('debug')) === 'true',
+      'integer' => $this->getSettings('debug') === 1,
+      default   => false
+    };
+  }
+
+  private function showDebugInfo(): bool
+  {
+    return match (gettype($this->getSettings('debug_info'))) {
+      'boolean' => $this->getSettings('debug_info'),
+      'string'  => strtolower($this->getSettings('debug_info')) === 'true',
+      'integer' => $this->getSettings('debug_info') === 1,
+      default   => false
+    };
   }
 }
