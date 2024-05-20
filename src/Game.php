@@ -34,6 +34,7 @@ use Sendama\Engine\States\PausedState;
 use Sendama\Engine\States\SceneState;
 use Sendama\Engine\UI\Modals\ModalManager;
 use Sendama\Engine\UI\UIManager;
+use Sendama\Engine\UI\Windows\Window;
 use Sendama\Engine\Util\Path;
 use Throwable;
 
@@ -44,6 +45,7 @@ use Throwable;
  */
 class Game implements ObservableInterface
 {
+  const int DEBUG_WINDOW_HEIGHT = 5;
   /**
    * @var array<string|Throwable|Exception|Error>
    */
@@ -94,6 +96,8 @@ class Game implements ObservableInterface
    * @var Cursor $consoleCursor
    */
   private Cursor $consoleCursor;
+
+  private Window $debugWindow;
 
   /* Sentinel properties */
   /**
@@ -155,6 +159,8 @@ class Game implements ObservableInterface
     $this->modalManager         = ModalManager::getInstance();
     $this->notificationsManager = NotificationsManager::getInstance();
     $this->uiManager            = UIManager::getInstance();
+
+    $this->debugWindow          = new Window();
 
     // Initialize observers
     $this->observers = new ItemList(ObserverInterface::class);
@@ -262,6 +268,7 @@ class Game implements ObservableInterface
       Debug::info('Loading debug settings');
       Debug::setLogDirectory($this->getSettings('log_dir'));
       Debug::setLogLevel(LogLevel::tryFrom($this->getSettings('log_level')) ?? LogLevel::DEBUG);
+      $this->debugWindow->setPosition([0, $this->settings['screen_height'] - self::DEBUG_WINDOW_HEIGHT]);
 
       $this->sceneManager->loadSettings($this->settings);
       Debug::info("Game settings loaded");
@@ -702,12 +709,14 @@ class Game implements ObservableInterface
    */
   private function renderDebugInfo(): void
   {
-    // TODO: Implement renderDebugInfo()
     $content = [
       "FPS: $this->frameRate",
       "Delta: " . round(Time::getDeltaTime(), 2),
       "Time: " . Time::getPrettyTime(ChronoUnit::SECONDS)
     ];
+
+    $this->debugWindow->setContent($content);
+    $this->debugWindow->render();
   }
 
   /**
@@ -739,6 +748,7 @@ class Game implements ObservableInterface
     // Debug settings
     Debug::setLogDirectory($this->getSettings('log_dir'));
     Debug::setLogLevel(LogLevel::tryFrom($this->getSettings('log_level')) ?? LogLevel::DEBUG);
+    $this->debugWindow->setPosition([0, $this->settings['screen_height'] - self::DEBUG_WINDOW_HEIGHT]);
 
     // Input settings
     $this->settings['buttons']                = [];
