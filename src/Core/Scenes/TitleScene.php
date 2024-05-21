@@ -34,6 +34,8 @@ class TitleScene extends AbstractScene
   protected int $menuHeight = 8;
   protected SceneManager $sceneManager;
   protected string $title = '';
+  protected int $titleLeftMargin = 4;
+  protected int $titleTopMargin = 4;
 
   /**
    * @inheritDoc
@@ -55,9 +57,9 @@ class TitleScene extends AbstractScene
     );
     $this->titleText->setFontName(FontName::BIG->value);
     $this->titleText->setText($gameName);
-    $textLeftMargin = ($this->sceneManager->getSettings('screen_width') / 2) - ($this->titleText->getWidth() / 2);
-    $textTopMargin = 4;
-    $this->titleText->setPosition(new Vector2(round($textLeftMargin), round($textTopMargin)));
+    $this->titleLeftMargin = ($this->sceneManager->getSettings('screen_width') / 2) - ($this->titleText->getWidth() / 2);
+    $this->titleTopMargin = 4;
+    $this->titleText->setPosition(new Vector2(round($this->titleLeftMargin), round($this->titleTopMargin)));
 
     if (is_array($gameName))
     {
@@ -138,8 +140,7 @@ class TitleScene extends AbstractScene
    */
   private function getMenuTopMargin(): int
   {
-    $screenHeight = $this->screenHeight ?? $this->sceneManager->getSettings('screen_height');
-    return ($screenHeight / 2) - ($this->menuHeight / 2);
+    return ($this->titleTopMargin + $this->titleText->getHeight() + 1);
   }
 
   /**
