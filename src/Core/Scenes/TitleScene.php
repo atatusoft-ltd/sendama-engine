@@ -150,11 +150,16 @@ class TitleScene extends AbstractScene
    */
   public function addMenuItems(MenuItemInterface ...$item): self
   {
+    $lastItemIndex = $this->menu->getItems()->count() - 1;
+    $quitItem = $this->menu->getItemByIndex($lastItemIndex);
+    $this->menu->removeItemByIndex($lastItemIndex);
+
     foreach ($item as $menuItem)
     {
       $this->menu->addItem($menuItem);
     }
 
+    $this->menu->addItem($quitItem);
     return $this;
   }
 

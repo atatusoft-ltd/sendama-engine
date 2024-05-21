@@ -217,6 +217,7 @@ class Text extends UIElement
   {
     $this->figlet?->setFont($fontName);
     $this->fontName = $fontName;
+    $this->rawLines = $this->getRawLines();
   }
 
   /**
