@@ -1,3 +1,7 @@
+<div style="width: 100%; display: flex; justify-content: center;">
+    <img src="logo.jpg" width="128" height="128">
+</div>
+
 # Sendama &mdash; 2D Game Engine for Terminal Based Games
 by amasiye313@gmail.com
 
