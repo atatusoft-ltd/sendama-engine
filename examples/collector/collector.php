@@ -1,5 +1,6 @@
 <?php
 
+use Amasiye\Figlet\FontName;
 use Sendama\Engine\Game;
 use Sendama\Engine\Core\Scenes\TitleScene;
 use Sendama\Examples\Collector\Scenes\Level01;
@@ -14,6 +15,7 @@ function bootstrap(): void
 
   $titleScene = new TitleScene('Title Screen');
   $titleScene->setTitle($gameName);
+  $titleScene->setTitleFont(FontName::BASIC);
 
   $game->addScenes(
     $titleScene,
