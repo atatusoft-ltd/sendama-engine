@@ -57,7 +57,7 @@ class TitleScene extends AbstractScene
     );
     $this->titleText->setFontName(FontName::BIG->value);
     $this->titleText->setText($gameName);
-    $this->titleLeftMargin = ($this->sceneManager->getSettings('screen_width') / 2) - ($this->titleText->getWidth() / 2);
+    $this->titleLeftMargin = round(($this->sceneManager->getSettings('screen_width') / 2) - ($this->titleText->getWidth() / 2));
     $this->titleTopMargin = 4;
     $this->titleText->setPosition(new Vector2(round($this->titleLeftMargin), round($this->titleTopMargin)));
 

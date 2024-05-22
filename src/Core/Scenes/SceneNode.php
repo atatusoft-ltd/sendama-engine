@@ -4,6 +4,7 @@ namespace Sendama\Engine\Core\Scenes;
 
 use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
 use Sendama\Engine\Core\Scenes\Interfaces\SceneNodeInterface;
+use Sendama\Engine\Debug\Debug;
 
 /**
  * The class SceneNode.
@@ -12,9 +13,15 @@ use Sendama\Engine\Core\Scenes\Interfaces\SceneNodeInterface;
  */
 final class SceneNode implements Interfaces\SceneNodeInterface
 {
+  /**
+   * Constructs a SceneNode.
+   *
+   * @param SceneInterface $scene The scene.
+   * @param SceneNodeInterface|null $previousNode The previous node.
+   */
   public function __construct(
     protected SceneInterface $scene,
-    protected ?SceneInterface $previousScene = null
+    protected ?SceneNodeInterface $previousNode = null
   )
   {
   }
@@ -30,8 +37,8 @@ final class SceneNode implements Interfaces\SceneNodeInterface
   /**
    * @inheritDoc
    */
-  public function getPreviousScene(): ?SceneInterface
+  public function getPreviousNode(): ?SceneNodeInterface
   {
-    return $this->previousScene;
+    return $this->previousNode;
   }
 }
