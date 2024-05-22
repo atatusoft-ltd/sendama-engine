@@ -73,11 +73,11 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
   /**
    * Returns the previous scene.
    *
-   * @return SceneInterface|null The previous scene.
+   * @return SceneNodeInterface|null The previous scene.
    */
-  public function getPreviousScene(): ?SceneInterface
+  public function getPreviousSceneNode(): ?SceneNodeInterface
   {
-    return $this->activeScene?->getPreviousScene();
+    return $this->activeScene?->getPreviousNode();
   }
 
   /**
@@ -124,7 +124,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
      */
     foreach ($scenes as $i => $scene)
     {
-      if (is_int($index) && $i === (int)$index)
+      if (is_int($index) && $i === $index)
       {
         $sceneToBeLoaded = $scene;
         break;
@@ -145,7 +145,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
     $this->stop();
     $this->activeScene = new SceneNode(
       $sceneToBeLoaded->loadSceneSettings($this->settings),
-      $this->activeScene?->getScene()
+      $this->activeScene
     );
 
     $this->eventManager->dispatchEvent(new SceneEvent(SceneEventType::LOAD_END));
@@ -164,9 +164,9 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
   {
     Debug::info("Loading previous scene");
 
-    if ($this->getPreviousScene())
+    if ($this->getPreviousSceneNode())
     {
-      return $this->loadScene($this->getPreviousScene()->getName());
+      return $this->loadScene($this->getPreviousSceneNode()->getScene()->getName());
     }
 
     return $this;

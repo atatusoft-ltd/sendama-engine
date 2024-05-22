@@ -9,7 +9,6 @@ use Sendama\Engine\Core\Interfaces\ComponentInterface;
 use Sendama\Engine\Core\Interfaces\GameObjectInterface;
 use Sendama\Engine\Core\Rendering\Renderer;
 use Sendama\Engine\Core\Scenes\SceneManager;
-use Sendama\Engine\Debug\Debug;
 
 /**
  * Class GameObject. This class represents a game object in the engine.
@@ -269,10 +268,7 @@ class GameObject implements GameObjectInterface
     {
       foreach ($this->components as $component)
       {
-        if ($component->isActive() && $component->isEnabled())
-        {
-          $component->start();
-        }
+        $component->start();
       }
     }
   }
@@ -286,10 +282,7 @@ class GameObject implements GameObjectInterface
     {
       foreach ($this->components as $component)
       {
-        if ($component->isActive() && $component->isEnabled())
-        {
-          $component->stop();
-        }
+        $component->stop();
       }
     }
   }

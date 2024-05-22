@@ -19,7 +19,7 @@ interface SceneNodeInterface
   /**
    * Returns the previous scene.
    *
-   * @return SceneInterface|null The previous scene.
+   * @return SceneNodeInterface|null The previous scene.
    */
-  public function getPreviousScene(): ?SceneInterface;
+  public function getPreviousNode(): ?SceneNodeInterface;
 }
