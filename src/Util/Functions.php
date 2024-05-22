@@ -60,6 +60,12 @@ function loadScene(string|int $index): void
   SceneManager::getInstance()->loadScene($index);
 }
 
+/**
+ * Loads the next scene.
+ *
+ * @return void
+ * @throws SceneNotFoundException If the previous scene is not found.
+ */
 function loadPreviousScene(): void
 {
   SceneManager::getInstance()->loadPreviousScene();
