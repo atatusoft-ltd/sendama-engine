@@ -9,6 +9,7 @@ use Sendama\Engine\Core\Sprite;
 use Sendama\Engine\Core\Texture2D;
 use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\UI\Label\Label;
+use Sendama\Examples\Collector\Scripts\Collectable\CollectableController;
 use Sendama\Examples\Collector\Scripts\Game\LevelManager;
 
 /**
@@ -29,6 +30,7 @@ class Level01 extends AbstractScene
     // Create the actors in the scene (i.e. game objects and ui elements)
     $levelManager = new GameObject('LevelManager');
     $player = new GameObject('Player');
+    $apple = new GameObject('Apple');
 
     // GUI Elements
     $collectedLabel = new Label($this, 'Collected Label', new Vector2(0, 27), new Vector2(15, 1));
@@ -66,9 +68,15 @@ class Level01 extends AbstractScene
     $playerMovementController->setSpeed(1);
     $player->setSprite($playerTexture, Vector2::zero(), Vector2::one());
 
+    // Set up the apple
+    $appleTexture = new Texture2D('Textures/apple.texture');
+    $apple->addComponent(CollectableController::class);
+    $apple->setSprite($appleTexture, Vector2::zero(), Vector2::one());
+
     // Add the game objects to the scene
     $this->add($levelManager);
     $this->add($player);
+    $this->add($apple);
     $this->add($collectedLabel);
     $this->add($stepsLabel);
   }

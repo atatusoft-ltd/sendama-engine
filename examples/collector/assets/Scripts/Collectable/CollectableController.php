@@ -3,19 +3,23 @@
 namespace Sendama\Examples\Collector\Scripts\Collectable;
 
 use Override;
+use Sendama\Engine\Core\Behaviours\Attributes\SerializeField;
 use Sendama\Engine\Core\Behaviours\Behaviour;
 use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\Physics\Interfaces\CollisionInterface;
 use Sendama\Examples\Collector\Scripts\Game\LevelManager;
 
 /**
- * Class AppleController is responsible for controlling the apple.
+ * Class CollectableController is responsible for controlling a collectable.
  *
  * @package Sendama\Examples\Collector\Scripts\Collectable
  */
-class AppleController extends Behaviour
+class CollectableController extends Behaviour
 {
   public ?LevelManager $levelManager = null;
+
+  #[SerializeField]
+  protected int $value = 1;
 
   #[Override]
   public function onStart(): void
@@ -37,6 +41,9 @@ class AppleController extends Behaviour
     $this->randomizePosition();
   }
 
+  /**
+   * Randomizes the position of the collectable.
+   */
   protected function randomizePosition(): void
   {
     $this->getTransform()->setPosition(new Vector2(rand(0, 80), rand(0, 26)));

@@ -2,6 +2,7 @@
 
 namespace Sendama\Examples\Collector\Scripts\Game;
 
+use Sendama\Engine\Core\Behaviours\Attributes\SerializeField;
 use Sendama\Engine\Core\Behaviours\Behaviour;
 use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\IO\Enumerations\KeyCode;
@@ -18,6 +19,8 @@ class LevelManager extends Behaviour
    * @var Vector2|array
    */
   public Vector2|array $playerStartingPosition = [0, 0];
+  #[SerializeField]
+  protected int $score = 0;
 
   public function onStart(): void
   {
@@ -55,5 +58,25 @@ class LevelManager extends Behaviour
       is_array($position) => Vector2::fromArray($position),
       default => $position
     };
+  }
+
+  /**
+   * Increments the score by the given amount.
+   *
+   * @param int $increment The amount to increment the score by.
+   */
+  public function incrementScore(int $increment = 1): void
+  {
+    $this->score += $increment;
+  }
+
+  /**
+   * Returns the current score.
+   *
+   * @return int The current score.
+   */
+  public function getScore(): int
+  {
+    return $this->score;
   }
 }
