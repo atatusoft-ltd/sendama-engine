@@ -2,6 +2,7 @@
 
 namespace Sendama\Engine\UI\Menus\Interfaces;
 
+use Closure;
 use Sendama\Engine\Core\Interfaces\ExecutableInterface;
 use Stringable;
 
@@ -56,4 +57,12 @@ interface MenuItemInterface extends Stringable, ExecutableInterface
    * @return void
    */
   public function setDescription(string $description): void;
+
+  /**
+   * Sets the callback to execute when the menu item is selected.
+   *
+   * @param Closure|null $callback The callback to execute when the menu item is selected.
+   * @return void
+   */
+  public function setCallback(?Closure $callback = null): void;
 }
