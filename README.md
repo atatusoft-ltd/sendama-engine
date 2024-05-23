@@ -31,7 +31,7 @@ compatibility issues.
 
 ## Installation
 
-### Using the [Sendama CLI](https://github.com/atatusoft-ltd/console)
+### Using the [Sendama CLI](https://github.com/atatusoft-ltd/sendama-console)
 The recommended way to install Sendama is through the CLI. You can install Sendama by running the following commands:
 
 ```bash
