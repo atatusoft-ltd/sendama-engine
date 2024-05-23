@@ -9,6 +9,7 @@ use Sendama\Engine\Core\Interfaces\ComponentInterface;
 use Sendama\Engine\Core\Interfaces\GameObjectInterface;
 use Sendama\Engine\Core\Rendering\Renderer;
 use Sendama\Engine\Core\Scenes\SceneManager;
+use Sendama\Engine\UI\Interfaces\UIElementInterface;
 
 /**
  * Class GameObject. This class represents a game object in the engine.
@@ -29,6 +30,10 @@ class GameObject implements GameObjectInterface
    * @var ComponentInterface[] $components The components attached to the game object.
    */
   protected array $components = [];
+  /**
+   * @var UIElementInterface[] $uiElements The UI elements attached to the game object.
+   */
+  protected array $uiElements = [];
   /**
    * @var Transform $transform The transform of the game object.
    */
@@ -434,6 +439,40 @@ class GameObject implements GameObjectInterface
     }
 
     return $this->components;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getUIElement(string $uiElementClass): ?UIElementInterface
+  {
+    if (! class_exists($uiElementClass) && ! interface_exists($uiElementClass) )
+    {
+      throw new InvalidArgumentException('The ui element type ' . $uiElementClass . ' does not exist.');
+    }
+
+    foreach ($this->uiElements as $uiElement)
+    {
+      if ($uiElement instanceof $uiElementClass)
+      {
+        return $uiElement;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getUIElements(?string $uiElementClass = null): array
+  {
+    if ($uiElementClass)
+    {
+      return array_filter($this->uiElements, fn(UIElementInterface $uiElement) => $uiElement instanceof $uiElementClass);
+    }
+
+    return $this->uiElements;
   }
 
   /**

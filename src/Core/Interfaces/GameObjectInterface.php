@@ -5,6 +5,7 @@ namespace Sendama\Engine\Core\Interfaces;
 use Sendama\Engine\Core\Sprite;
 use Sendama\Engine\Core\Texture2D;
 use Sendama\Engine\Core\Vector2;
+use Sendama\Engine\UI\Interfaces\UIElementInterface;
 
 /**
  * The GameObjectInterface
@@ -45,6 +46,24 @@ interface GameObjectInterface extends CanCompare, CanResume, CanUpdate, CanStart
    * @return array<ComponentInterface> The components of type T that are attached to the GameObject.
    */
   public function getComponents(?string $componentClass = null): array;
+
+  /**
+   * Gets a reference to the UI element of the specified class.
+   *
+   * @param class-string<UIElementInterface> $uiElementClass The class of the UI element to get.
+   * @return UIElementInterface|null The UI element of the specified class or null if it is not attached.
+   */
+  public function getUIElement(string $uiElementClass): ?UIElementInterface;
+
+  /**
+   * Gets references to all UI elements of the specified class. If the class is not specified then all the UI elements
+   * are returned.
+   *
+   * @param class-string<UIElementInterface>|null $uiElementClass The class of the UI element to get. If null, all UI
+   * elements are returned.
+   * @return array<UIElementInterface> The UI elements of the specified class that are attached to the GameObject.
+   */
+  public function getUIElements(?string $uiElementClass = null): array;
 
   /**
    * Creates a pool of game objects of the specified size. This is useful for creating a pool of bullets, enemies, etc.
