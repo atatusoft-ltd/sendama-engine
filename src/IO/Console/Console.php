@@ -183,20 +183,49 @@ class Console
   /**
    * Writes a single character to the console at the specified position.
    *
-   * @param string $character The character to write.
+   * @param string $char The character to write.
    * @param int $x The x position.
    * @param int $y The y position.
    * @return void
    */
-  public static function write(string $character, int $x, int $y): void
+  public static function writeChar(string $character, int $x, int $y): void
   {
     $cursor = self::cursor();
+
+    $x = max(1, $x);
+    $y = max(1, $y);
 
     self::$buffer->set($x, $y, substr($character, 0, 1));
     $cursor->moveTo($x, $y);
     echo self::$buffer->toArray()[$y][$x];
 
     $cursor->moveTo($x + 1, $y);
+  }
+
+  /**
+   * Writes a message to the console at the specified position.
+   *
+   * @param string $message The character to write.
+   * @param int $x The x position.
+   * @param int $y The y position.
+   * @return void
+   */
+  public static function write(string $message, int $x, int $y): void
+  {
+    $cursor = self::cursor();
+    $messageLength = strlen($message);
+
+    $x = max(1, $x);
+    $y = max(1, $y);
+
+    for ($index = 0; $index < $messageLength; ++$index)
+    {
+      self::$buffer->set($x + $index, $y, $message[$index]);
+      $cursor->moveTo($x + $index, $y);
+      echo self::$buffer->toArray()[$y][$x + $index];
+    }
+
+    $cursor->moveTo($x + $messageLength, $y);
   }
 
   /**
@@ -210,6 +239,10 @@ class Console
   public static function writeLine(string $message, int $x, int $y): void
   {
     $cursor = self::cursor();
+    $x = max(1, $x);
+    $y = max(1, $y);
+
+
     $messageLength = strlen($message);
     $columnStart = $x;
     $columnEnd = $x + $messageLength;
@@ -235,6 +268,9 @@ class Console
   public static function writeLines(array $linesOfText, int $x, int $y): void
   {
     $cursor = self::cursor();
+
+    $x = max(1, $x);
+    $y = max(1, $y);
 
     foreach ($linesOfText as $rowIndex => $text)
     {
