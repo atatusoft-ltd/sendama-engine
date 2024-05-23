@@ -20,6 +20,7 @@ function bootstrap(): void
   $titleScene->setTitle($gameName);
   $titleScene
     ->setTitleFont(FontName::BASIC)
+    ->setNewGameSceneIndex(2)
     ->addMenuItems(
       new MenuItem(
         'Settings',

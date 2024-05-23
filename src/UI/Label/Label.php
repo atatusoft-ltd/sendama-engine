@@ -2,8 +2,14 @@
 
 namespace Sendama\Engine\UI\Label;
 
+use Sendama\Engine\IO\Console\Console;
 use Sendama\Engine\UI\UIElement;
 
+/**
+ * Represents a label UI element.
+ *
+ * @package Sendama\Engine\UI\Label
+ */
 class Label extends UIElement
 {
   protected string $text = '';
@@ -31,7 +37,7 @@ class Label extends UIElement
    */
   public function renderAt(?int $x = null, ?int $y = null): void
   {
-    // TODO: Implement renderAt() method.
+    Console::write($this->text, $x, $y);
   }
 
   /**
@@ -47,13 +53,11 @@ class Label extends UIElement
    */
   public function eraseAt(?int $x = null, ?int $y = null): void
   {
-    // TODO: Implement eraseAt() method.
+    $buffer = str_repeat(' ', strlen($this->text));
+    Console::write($buffer, $x, $y);
   }
 
-  /**
-   * @inheritDoc
-   */
-  public function start(): void
+  public function awake(): void
   {
     $this->setText($this->name);
   }
@@ -61,8 +65,16 @@ class Label extends UIElement
   /**
    * @inheritDoc
    */
+  public function start(): void
+  {
+    // Do nothing
+  }
+
+  /**
+   * @inheritDoc
+   */
   public function update(): void
   {
-    // TODO: Implement update() method.
+    // Do nothing
   }
 }

@@ -3,12 +3,23 @@
 namespace Sendama\Engine\UI\Menus;
 
 use Closure;
-use PHPUnit\Framework\Constraint\Callback;
 use Sendama\Engine\Core\Interfaces\ExecutionContextInterface;
-use Sendama\Engine\UI\Menus\Interfaces\MenuItemInterface;
 
+/**
+ * The class MenuItem.
+ *
+ * @package Sendama\Engine\UI\Menus
+ */
 class MenuItem implements Interfaces\MenuItemInterface
 {
+  /**
+   * Constructs a MenuItem.
+   *
+   * @param string $label The label of the menu item.
+   * @param string $description The description of the menu item.
+   * @param string $icon The icon of the menu item.
+   * @param Closure|null $callback The callback to execute when the menu item is selected.
+   */
   public function __construct(
     protected string   $label,
     protected string   $description = '',
@@ -77,10 +88,10 @@ class MenuItem implements Interfaces\MenuItemInterface
   /**
    * Sets the callback to execute when the menu item is selected.
    *
-   * @param Callback|null $callback The callback to execute when the menu item is selected.
+   * @param Closure|null $callback The callback to execute when the menu item is selected.
    * @return void
    */
-  public function setCallback(?Callback $callback): void
+  public function setCallback(?Closure $callback = null): void
   {
     $this->callback = $callback;
   }

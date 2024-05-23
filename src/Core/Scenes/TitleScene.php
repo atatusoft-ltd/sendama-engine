@@ -30,11 +30,41 @@ class TitleScene extends AbstractScene
    * @var int|null
    */
   protected ?int $screenHeight = null;
+  /**
+   * The width of the menu.
+   *
+   * @var int $menuWidth
+   */
   protected int $menuWidth = 20;
+  /**
+   * The height of the menu.
+   *
+   * @var int $menuHeight
+   */
   protected int $menuHeight = 8;
+  /**
+   * The scene manager.
+   *
+   * @var SceneManager $sceneManager
+   */
   protected SceneManager $sceneManager;
+  /**
+   * The title of the game.
+   *
+   * @var string $title
+   */
   protected string $title = '';
+  /**
+   * The left margin of the title.
+   *
+   * @var int $titleLeftMargin
+   */
   protected int $titleLeftMargin = 4;
+  /**
+   * The top margin of the title.
+   *
+   * @var int $titleTopMargin
+   */
   protected int $titleTopMargin = 4;
 
   /**
@@ -81,7 +111,7 @@ class TitleScene extends AbstractScene
       description: 'Start a new game',
       icon: '🎮',
       callback: function () {
-        loadScene(1);
+        loadScene( 1);
       }
     ));
     $this->menu->addItem(new MenuItem(
@@ -115,6 +145,21 @@ class TitleScene extends AbstractScene
   public function setTitle(string $title): void
   {
     $this->title = $title;
+  }
+
+  /**
+   * Sets the index of the new game scene.
+   *
+   * @param int $newGameSceneIndex The index of the new game scene.
+   * @return TitleScene $this
+   */
+  public function setNewGameSceneIndex(int $newGameSceneIndex): self
+  {
+    $this->menu->getItemByIndex(0)->setCallback(function () use ($newGameSceneIndex) {
+      loadScene(max($newGameSceneIndex, 1));
+    });
+
+    return $this;
   }
 
   public function setScreenDimensions(
