@@ -10,7 +10,7 @@ use Sendama\Engine\UI\Interfaces\UIElementInterface;
 /**
  * The GameObjectInterface
  */
-interface GameObjectInterface extends CanCompare, CanResume, CanUpdate, CanStart, CanRender, ActivatableInterface
+interface GameObjectInterface extends CanCompare, CanResume, CanUpdate, CanStart, CanRender, CanActivate
 {
   /**
    * Sets the sprite of the game object
