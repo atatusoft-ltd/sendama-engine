@@ -5,8 +5,11 @@ namespace Sendama\Examples\Collector\Scripts\Collectable;
 use Override;
 use Sendama\Engine\Core\Behaviours\Attributes\SerializeField;
 use Sendama\Engine\Core\Behaviours\Behaviour;
+use Sendama\Engine\Core\GameObject;
 use Sendama\Engine\Core\Vector2;
+use Sendama\Engine\Physics\Collider;
 use Sendama\Engine\Physics\Interfaces\CollisionInterface;
+use Sendama\Examples\Collector\Scripts\Enumerations\Name;
 use Sendama\Examples\Collector\Scripts\Game\LevelManager;
 
 /**
@@ -24,7 +27,13 @@ class CollectableController extends Behaviour
   #[Override]
   public function onStart(): void
   {
+    $this->getGameObject()->addComponent(Collider::class);
     $this->randomizePosition();
+
+    if ($levelManagerGO = GameObject::find(Name::LEVEL_MANAGER->value))
+    {
+      $this->levelManager = $levelManagerGO->getComponent(LevelManager::class);
+    }
   }
 
   /**
@@ -32,7 +41,7 @@ class CollectableController extends Behaviour
    */
   public function onCollisionEnter(CollisionInterface $collision): void
   {
-    if ($collision->getGameObject()->getName() === 'Player')
+    if ($collision->getGameObject()->getName() === Name::PLAYER->value)
     {
       // Increase the score
       $this->levelManager->incrementScore();
@@ -46,6 +55,7 @@ class CollectableController extends Behaviour
    */
   protected function randomizePosition(): void
   {
-    $this->getTransform()->setPosition(new Vector2(rand(0, 80), rand(0, 26)));
+    $this->getGameObject()->erase();
+    $this->getTransform()->setPosition(new Vector2(rand(2, 78), rand(2, 25)));
   }
 }
