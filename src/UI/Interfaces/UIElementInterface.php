@@ -2,6 +2,8 @@
 
 namespace Sendama\Engine\UI\Interfaces;
 
+use Sendama\Engine\Core\Interfaces\ActivatableInterface;
+use Sendama\Engine\Core\Interfaces\CanActivate;
 use Sendama\Engine\Core\Interfaces\CanEnable;
 use Sendama\Engine\Core\Interfaces\CanRender;
 use Sendama\Engine\Core\Interfaces\CanResume;
@@ -13,7 +15,7 @@ use Sendama\Engine\Core\Interfaces\CanUpdate;
  *
  * @package Sendama\Engine\UI\Interfaces
  */
-interface UIElementInterface extends CanUpdate, CanRender, CanStart, CanResume, CanEnable
+interface UIElementInterface extends CanUpdate, CanRender, CanStart, CanResume, CanActivate
 {
   /**
    * Gets the name of the UI element.

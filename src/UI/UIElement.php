@@ -14,13 +14,6 @@ use Sendama\Engine\UI\Interfaces\UIElementInterface;
 abstract class UIElement implements UIElementInterface
 {
   /**
-   * Whether the UI element is enabled.
-   *
-   * @var bool
-   */
-  protected bool $enabled = true;
-
-  /**
    * Whether the UI element is active.
    *
    * @var bool
@@ -47,25 +40,25 @@ abstract class UIElement implements UIElementInterface
   /**
    * @inheritDoc
    */
-  public function enable(): void
+  public function activate(): void
   {
-    $this->enabled = true;
+    $this->active = true;
   }
 
   /**
    * @inheritDoc
    */
-  public function disable(): void
+  public function deactivate(): void
   {
-    $this->enabled = false;
+    $this->active = false;
   }
 
   /**
    * @inheritDoc
    */
-  public function isEnabled(): bool
+  public function isActive(): bool
   {
-    return $this->enabled;
+    return $this->active;
   }
 
   /**
