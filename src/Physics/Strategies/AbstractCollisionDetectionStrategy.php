@@ -3,11 +3,11 @@
 namespace Sendama\Engine\Physics\Strategies;
 
 use Sendama\Engine\Physics\Interfaces\ColliderInterface;
-use Sendama\Engine\Physics\Interfaces\TouchDetectionStrategyInterface;
+use Sendama\Engine\Physics\Interfaces\CollisionDetectionStrategyInterface;
 
-abstract class AbstractTouchDetectionStrategy implements TouchDetectionStrategyInterface
+abstract class AbstractCollisionDetectionStrategy implements CollisionDetectionStrategyInterface
 {
-  public final function __construct()
+  public final function __construct(protected ColliderInterface $collider)
   {
     // Constructor logic here
   }

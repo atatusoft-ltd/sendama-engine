@@ -4,8 +4,10 @@ namespace Sendama\Engine\Physics;
 
 use Assegai\Collections\ItemList;
 use Sendama\Engine\Core\Interfaces\SingletonInterface;
+use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\Physics\Interfaces\ColliderInterface;
+use Sendama\Engine\Physics\Interfaces\CollisionInterface;
 
 /**
  * Class Physics. Defines the global physics engine and its helper methods and properties.
@@ -81,5 +83,33 @@ final class Physics implements SingletonInterface
     {
       Debug::warn("Failed to remove collider from physics engine.");
     }
+  }
+
+  /**
+   * Checks for collisions between the given collider and all other colliders in the physics engine.
+   *
+   * @param ColliderInterface $collider The collider to check for collisions.
+   * @param Vector2 $motion The motion of the collider.
+   * @return array<CollisionInterface> The collisions found.
+   */
+  public function checkCollisions(ColliderInterface $collider, Vector2 $motion): array
+  {
+    $collisions = [];
+
+    foreach ($this->colliders as $otherCollider)
+    {
+      if ($collider->isTouching($otherCollider))
+      {
+        $collisions[] = new Collision($otherCollider, [
+          new ContactPoint(
+            Vector2::sum($collider->getTransform()->getPosition(), $motion),
+            $collider,
+            $otherCollider
+          )
+        ]);
+      }
+    }
+
+    return $collisions;
   }
 }
