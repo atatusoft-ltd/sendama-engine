@@ -73,4 +73,36 @@ interface GameObjectInterface extends CanCompare, CanResume, CanUpdate, CanStart
    * @return array<GameObjectInterface> The pool of game objects.
    */
   public static function pool(GameObjectInterface $gameObject, int $size): array;
+
+  /**
+   * Finds the game object with the specified name.
+   *
+   * @param string $gameObjectName The name of the game object to find.
+   * @return GameObjectInterface|null The game object with the specified name.
+   */
+  public static function find(string $gameObjectName): ?GameObjectInterface;
+
+  /**
+   * Finds the game object with the specified tag.
+   *
+   * @param string $gameObjectTag The tag of the game object to find.
+   * @return GameObjectInterface|null The game object with the specified tag.
+   */
+  public static function findWithTag(string $gameObjectTag): ?GameObjectInterface;
+
+  /**
+   * Finds all game objects with the specified name.
+   *
+   * @param string $gameObjectName The name of the game object to find.
+   * @return array<GameObjectInterface> The game objects with the specified name.
+   */
+  public static function findAll(string $gameObjectName): array;
+
+  /**
+   * Finds all game objects with the specified tag.
+   *
+   * @param string $gameObjectTag The tag of the game object to find.
+   * @return array<GameObjectInterface> The game objects with the specified tag.
+   */
+  public static function findAllWithTag(string $gameObjectTag): array;
 }

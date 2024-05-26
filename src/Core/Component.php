@@ -16,10 +16,6 @@ use Sendama\Engine\Core\Rendering\Renderer;
 abstract class Component implements ComponentInterface
 {
   /**
-   * @var bool $active Whether the component is active or not.
-   */
-  protected bool $active = true;
-  /**
    * @var bool $enabled Whether the component is enabled or not.
    */
   protected bool $enabled = true;
@@ -61,58 +57,6 @@ abstract class Component implements ComponentInterface
   }
 
   /**
-   * Activates the component.
-   *
-   * @inheritDoc
-   */
-  public final function activate(): void
-  {
-    $this->active = true;
-    $this->onActivate();
-  }
-
-  /**
-   * Called when the component is activated.
-   *
-   * @return void
-   */
-  public function onActivate(): void
-  {
-    // Do nothing
-  }
-
-  /**
-   * Deactivates the component.
-   *
-   * @inheritDoc
-   */
-  public final function deactivate(): void
-  {
-    $this->active = false;
-    $this->onDeactivate();
-  }
-
-  /**
-   * Called when the component is deactivated.
-   *
-   * @return void
-   */
-  public function onDeactivate(): void
-  {
-    // Do nothing
-  }
-
-  /**
-   * Determines whether the component is active or not.
-   *
-   * @inheritDoc
-   */
-  public function isActive(): bool
-  {
-    return $this->active;
-  }
-
-  /**
    * Enables the component.
    *
    * @inheritDoc
@@ -120,17 +64,7 @@ abstract class Component implements ComponentInterface
   public final function enable(): void
   {
     $this->enabled = true;
-    $this->onEnable();
-  }
-
-  /**
-   * Called when the component is enabled.
-   *
-   * @return void
-   */
-  public function onEnable(): void
-  {
-    // Do nothing
+    $this->start();
   }
 
   /**
@@ -139,7 +73,7 @@ abstract class Component implements ComponentInterface
   public final function disable(): void
   {
     $this->enabled = false;
-    $this->onDisable();
+    $this->stop();
   }
 
   /**
@@ -270,8 +204,6 @@ abstract class Component implements ComponentInterface
    */
   public final function start(): void
   {
-    $this->activate();
-    $this->enable();
     $this->onStart();
   }
 
@@ -290,8 +222,6 @@ abstract class Component implements ComponentInterface
    */
   public final function stop(): void
   {
-    $this->deactivate();
-    $this->disable();
     $this->onStop();
   }
 
@@ -310,7 +240,7 @@ abstract class Component implements ComponentInterface
    */
   public final function update(): void
   {
-    if ($this->isActive() && $this->isEnabled())
+    if ($this->isEnabled())
     {
       $this->onUpdate();
     }

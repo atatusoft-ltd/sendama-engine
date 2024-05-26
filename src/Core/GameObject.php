@@ -123,7 +123,8 @@ class GameObject implements GameObjectInterface
    */
   public function compareTo(CanCompare $other): int
   {
-    if (!$other instanceof GameObject) {
+    if (!$other instanceof GameObject)
+    {
       throw new InvalidArgumentException('Cannot compare a game object with a non-game object.');
     }
 
@@ -191,7 +192,7 @@ class GameObject implements GameObjectInterface
    */
   public function render(): void
   {
-    if ($this->isActive() && $this->renderer->isActive() && $this->renderer->isEnabled())
+    if ($this->isActive() && $this->renderer->isEnabled())
     {
       $this->renderer->render();
     }
@@ -202,7 +203,7 @@ class GameObject implements GameObjectInterface
    */
   public function renderAt(?int $x = null, ?int $y = null): void
   {
-    if ($this->isActive() && $this->renderer->isActive() && $this->renderer->isEnabled())
+    if ($this->isActive() && $this->renderer->isEnabled())
     {
       $this->renderer->renderAt($x, $y);
     }
@@ -213,7 +214,7 @@ class GameObject implements GameObjectInterface
    */
   public function erase(): void
   {
-    if ($this->isActive() && $this->renderer->isActive() && $this->renderer->isEnabled())
+    if ($this->isActive() && $this->renderer->isEnabled())
     {
       $this->renderer->erase();
     }
@@ -224,7 +225,7 @@ class GameObject implements GameObjectInterface
    */
   public function eraseAt(?int $x = null, ?int $y = null): void
   {
-    if ($this->isActive() && $this->renderer->isActive() && $this->renderer->isEnabled())
+    if ($this->isActive() && $this->renderer->isEnabled())
     {
       $this->renderer->eraseAt($x, $y);
     }
@@ -239,7 +240,7 @@ class GameObject implements GameObjectInterface
     {
       foreach ($this->components as $component)
       {
-        if ($component->isActive() && $component->isEnabled())
+        if ($component->isEnabled())
         {
           $component->resume();
         }
@@ -256,7 +257,7 @@ class GameObject implements GameObjectInterface
     {
       foreach ($this->components as $component)
       {
-        if ($component->isActive() && $component->isEnabled())
+        if ($component->isEnabled())
         {
           $component->suspend();
         }
@@ -273,7 +274,10 @@ class GameObject implements GameObjectInterface
     {
       foreach ($this->components as $component)
       {
-        $component->start();
+        if ($component->isEnabled())
+        {
+          $component->start();
+        }
       }
     }
   }
@@ -287,7 +291,10 @@ class GameObject implements GameObjectInterface
     {
       foreach ($this->components as $component)
       {
-        $component->stop();
+        if ($component->isEnabled())
+        {
+          $component->stop();
+        }
       }
     }
   }
@@ -301,7 +308,7 @@ class GameObject implements GameObjectInterface
     {
       foreach ($this->components as $component)
       {
-        if ($component->isActive() && $component->isEnabled())
+        if ($component->isEnabled())
         {
           $component->update();
         }
@@ -315,10 +322,6 @@ class GameObject implements GameObjectInterface
   public function activate(): void
   {
     $this->active = true;
-    foreach ($this->components as $component)
-    {
-      $component->activate();
-    }
   }
 
   /**
@@ -574,5 +577,85 @@ class GameObject implements GameObjectInterface
     }
 
     return $pool;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function find(string $gameObjectName): ?GameObjectInterface
+  {
+    if ($activeScene = SceneManager::getInstance()->getActiveScene())
+    {
+      foreach ($activeScene->getRootGameObjects() as $gameObject)
+      {
+        if ($gameObject->getName() === $gameObjectName)
+        {
+          return $gameObject;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function findWithTag(string $gameObjectTag): ?GameObjectInterface
+  {
+    if ($activeScene = SceneManager::getInstance()->getActiveScene())
+    {
+      foreach ($activeScene->getRootGameObjects() as $gameObject)
+      {
+        if ($gameObject->getTag() === $gameObjectTag)
+        {
+          return $gameObject;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function findAll(string $gameObjectName): array
+  {
+    $gameObjects = [];
+
+    if ($activeScene = SceneManager::getInstance()->getActiveScene())
+    {
+      foreach ($activeScene->getRootGameObjects() as $gameObject)
+      {
+        if ($gameObject->getName() === $gameObjectName)
+        {
+          $gameObjects[] = $gameObject;
+        }
+      }
+    }
+
+    return $gameObjects;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function findAllWithTag(string $gameObjectTag): array
+  {
+    $gameObjects = [];
+
+    if ($activeScene = SceneManager::getInstance()->getActiveScene())
+    {
+      foreach ($activeScene->getRootGameObjects() as $gameObject)
+      {
+        if ($gameObject->getTag() === $gameObjectTag)
+        {
+          $gameObjects[] = $gameObject;
+        }
+      }
+    }
+
+    return $gameObjects;
   }
 }
