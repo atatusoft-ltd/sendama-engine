@@ -4,9 +4,11 @@ namespace Sendama\Engine\UI\Menus\MenuItems;
 
 use Assegai\Collections\ItemList;
 use Closure;
+use Sendama\Engine\Events\Enumerations\MenuEventType;
 use Sendama\Engine\Events\Interfaces\EventInterface;
 use Sendama\Engine\Events\Interfaces\ObserverInterface;
 use Sendama\Engine\Events\Interfaces\StaticObserverInterface;
+use Sendama\Engine\Events\MenuEvent;
 use Sendama\Engine\IO\Enumerations\AxisName;
 use Sendama\Engine\IO\Input;
 use Sendama\Engine\UI\Menus\Interfaces\MenuControlInterface;
@@ -72,11 +74,13 @@ abstract class AbstractMenuControl extends MenuItem implements MenuControlInterf
     if (abs($v) > 0)
     {
       $this->onVerticalInput($v);
+      $this->notify(new MenuEvent(MenuEventType::ITEM_RECEIVED_VERTICAL_INPUT));
     }
 
     if (abs($h) > 0)
     {
       $this->onHorizontalInput($h);
+      $this->notify(new MenuEvent(MenuEventType::ITEM_RECEIVED_HORIZONTAL_INPUT));
     }
   }
 

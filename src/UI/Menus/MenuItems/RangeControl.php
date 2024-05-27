@@ -25,7 +25,7 @@ class RangeControl extends AbstractMenuControl
     string              $description = '',
     string              $icon = '',
     ?Closure            $callback = null,
-    protected mixed     $value = null,
+    protected mixed     $value = 0,
     protected int       $min = 0,
     protected int       $max = 100,
     protected int       $step = 1,
