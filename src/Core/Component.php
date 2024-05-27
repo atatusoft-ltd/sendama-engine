@@ -25,6 +25,11 @@ abstract class Component implements ComponentInterface
    */
   protected string $hash;
 
+  /**
+   * Component constructor.
+   *
+   * @param GameObject $gameObject The game object.
+   */
   public function __construct(private readonly GameObject $gameObject)
   {
     $this->hash = md5(__CLASS__) .  '-' . uniqid($this->gameObject->getName(), true);
