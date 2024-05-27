@@ -1,6 +1,6 @@
 <?php
 
-namespace Sendama\Engine\UI\Menus;
+namespace Sendama\Engine\UI\Menus\MenuItems;
 
 use Assegai\Collections\ItemList;
 use Closure;
@@ -34,14 +34,31 @@ abstract class AbstractMenuControl extends MenuItem implements MenuControlInterf
    */
   public function __construct(
     string              $label,
-    protected mixed     $value = null,
     string              $description = '',
     string              $icon = '',
-    ?Closure            $callback = null
+    ?Closure            $callback = null,
+    protected mixed     $value = null,
   )
   {
     parent::__construct($label, $description, $icon, $callback);
     $this->observers = new ItemList(ObserverInterface::class);
+  }
+
+
+  /**
+   * @inheritDoc
+   */
+  public function getValue(): mixed
+  {
+    return $this->value;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function setValue(mixed $value): void
+  {
+    $this->value = $value;
   }
 
   /**
