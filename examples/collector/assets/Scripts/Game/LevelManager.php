@@ -125,6 +125,12 @@ class LevelManager extends Behaviour implements ObservableInterface
   {
     foreach ($this->observers as $observer)
     {
+      if ($observer instanceof StaticObserverInterface)
+      {
+        $observer::onNotify($this, $event);
+        continue;
+      }
+
       $observer->onNotify($this, $event);
     }
   }

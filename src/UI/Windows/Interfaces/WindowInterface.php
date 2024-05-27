@@ -4,11 +4,11 @@ namespace Sendama\Engine\UI\Windows\Interfaces;
 
 use Sendama\Engine\Core\Interfaces\CanRender;
 use Sendama\Engine\Core\Vector2;
-use Sendama\Engine\Events\Interfaces\SubjectInterface;
+use Sendama\Engine\Events\Interfaces\ObservableInterface;
 use Sendama\Engine\IO\Enumerations\Color;
 use Sendama\Engine\UI\Windows\WindowAlignment;
 
-interface WindowInterface extends CanRender, SubjectInterface
+interface WindowInterface extends CanRender, ObservableInterface
 {
   /**
    * Returns the window's title.

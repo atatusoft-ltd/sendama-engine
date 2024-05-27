@@ -11,6 +11,7 @@ use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\Events\Interfaces\EventInterface;
 use Sendama\Engine\Events\Interfaces\ObserverInterface;
+use Sendama\Engine\Events\Interfaces\StaticObserverInterface;
 use Sendama\Engine\IO\Enumerations\AxisName;
 use Sendama\Engine\IO\Enumerations\Color;
 use Sendama\Engine\IO\Enumerations\KeyCode;
@@ -322,17 +323,23 @@ class Menu implements MenuInterface
   /**
    * @inheritDoc
    */
-  public function addObserver(string|ObserverInterface $observer): void
+  public function addObservers(ObserverInterface|StaticObserverInterface|string ...$observers): void
   {
-    $this->observers->add($observer);
+    foreach ($observers as $observer)
+    {
+      $this->observers->add($observer);
+    }
   }
 
   /**
    * @inheritDoc
    */
-  public function removeObserver(string|ObserverInterface $observer): void
+  public function removeObservers(ObserverInterface|StaticObserverInterface|string|null ...$observers): void
   {
-    $this->observers->removeAt($observer);
+    foreach ($observers as $observer)
+    {
+      $this->observers->remove($observer);
+    }
   }
 
   /**
@@ -342,6 +349,12 @@ class Menu implements MenuInterface
   {
     foreach ($this->observers as $observer)
     {
+      if ($observer instanceof StaticObserverInterface)
+      {
+        $observer::onNotify($this, $event);
+        continue;
+      }
+
       $observer->onNotify($event);
     }
   }

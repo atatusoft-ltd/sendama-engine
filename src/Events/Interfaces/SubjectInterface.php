@@ -6,6 +6,7 @@ namespace Sendama\Engine\Events\Interfaces;
  * Interface SubjectInterface. This interface is implemented by classes that want to be observed.
  *
  * @package Sendama\Engine\Events\Interfaces
+ * @deprecated Use the ObservableInterface instead.
  */
 interface SubjectInterface
 {
