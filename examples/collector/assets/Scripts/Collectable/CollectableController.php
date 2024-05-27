@@ -24,6 +24,11 @@ class CollectableController extends Behaviour
   #[SerializeField]
   protected int $value = 1;
 
+  private const int MIN_X_POSITION = 2;
+  private const int MIN_Y_POSITION = 2;
+  private const int MAX_X_POSITION = 78;
+  private const int MAX_Y_POSITION = 24;
+
   #[Override]
   public function onStart(): void
   {
@@ -56,6 +61,13 @@ class CollectableController extends Behaviour
   protected function randomizePosition(): void
   {
     $this->getGameObject()->erase();
-    $this->getTransform()->setPosition(new Vector2(rand(2, 78), rand(2, 25)));
+    $this
+      ->getTransform()
+      ->setPosition(
+        new Vector2(
+          rand(self::MIN_X_POSITION, self::MAX_X_POSITION),
+          rand(self::MIN_Y_POSITION, self::MAX_Y_POSITION)
+        )
+      );
   }
 }
