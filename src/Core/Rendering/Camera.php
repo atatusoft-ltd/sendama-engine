@@ -121,7 +121,7 @@ class Camera implements CameraInterface
 
     foreach ($this->scene->getUIElements() as $uiElement)
     {
-      if ($uiElement->isEnabled())
+      if ($uiElement->isActive())
       {
         $uiElement->render();
       }
@@ -144,7 +144,7 @@ class Camera implements CameraInterface
 
     foreach ($this->scene->getUIElements() as $uiElement)
     {
-      if ($uiElement->isEnabled())
+      if ($uiElement->isActive())
       {
         $uiElement->renderAt($x, $y);
       }
@@ -166,7 +166,7 @@ class Camera implements CameraInterface
 
     foreach ($this->scene->getUIElements() as $uiElement)
     {
-      if ($uiElement->isEnabled())
+      if ($uiElement->isActive())
       {
         $uiElement->erase();
       }
@@ -188,7 +188,7 @@ class Camera implements CameraInterface
 
     foreach ($this->scene->getUIElements() as $uiElement)
     {
-      if ($uiElement->isEnabled())
+      if ($uiElement->isActive())
       {
         $uiElement->eraseAt($x, $y);
       }

@@ -3,22 +3,15 @@
 namespace Sendama\Engine\Physics\Interfaces;
 
 use Sendama\Engine\Core\Interfaces\ComponentInterface;
+use Sendama\Engine\Core\Rect;
 
 /**
  * Interface ColliderInterface. Interface for colliders.
  *
  * @package Sendama\Engine\Physics\Interfaces
  */
-interface ColliderInterface extends ComponentInterface
+interface ColliderInterface extends ComponentInterface, CollisionDetectionStrategyInterface
 {
-  /**
-   * Check if this collider is touching another collider.
-   *
-   * @param ColliderInterface $collider The collider to check if this collider is touching.
-   * @return bool True if this collider is touching the other collider, false otherwise.
-   */
-  public function isTouching(ColliderInterface $collider): bool;
-
   /**
    * Check if this collider is a trigger.
    *
@@ -34,4 +27,19 @@ interface ColliderInterface extends ComponentInterface
    * @return void
    */
   public function setTrigger(bool $isTrigger): void;
+
+  /**
+   * Set the collision detection strategy for this collider.
+   *
+   * @param CollisionDetectionStrategyInterface $collisionDetectionStrategy The collision detection strategy.
+   * @return void
+   */
+  public function setCollisionDetectionStrategy(CollisionDetectionStrategyInterface $collisionDetectionStrategy): void;
+
+  /**
+   * Get the bounding box of this collider.
+   *
+   * @return Rect The bounding box of this collider.
+   */
+  public function getBoundingBox(): Rect;
 }

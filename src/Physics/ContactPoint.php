@@ -3,6 +3,7 @@
 namespace Sendama\Engine\Physics;
 
 use Sendama\Engine\Core\Vector2;
+use Sendama\Engine\Physics\Interfaces\ColliderInterface;
 
 /**
  * Represents a contact point between two colliders.
@@ -18,8 +19,8 @@ readonly class ContactPoint
    */
   public function __construct(
     protected Vector2 $point,
-    protected Collider $thisCollider,
-    protected Collider $otherCollider,
+    protected ColliderInterface $thisCollider,
+    protected ColliderInterface $otherCollider,
   )
   {
   }

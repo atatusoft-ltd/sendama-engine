@@ -3,6 +3,7 @@
 namespace Sendama\Engine\UI;
 
 use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
+use Sendama\Engine\Core\Scenes\SceneManager;
 use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\UI\Interfaces\UIElementInterface;
 
@@ -13,13 +14,6 @@ use Sendama\Engine\UI\Interfaces\UIElementInterface;
  */
 abstract class UIElement implements UIElementInterface
 {
-  /**
-   * Whether the UI element is enabled.
-   *
-   * @var bool
-   */
-  protected bool $enabled = true;
-
   /**
    * Whether the UI element is active.
    *
@@ -47,25 +41,25 @@ abstract class UIElement implements UIElementInterface
   /**
    * @inheritDoc
    */
-  public function enable(): void
+  public function activate(): void
   {
-    $this->enabled = true;
+    $this->active = true;
   }
 
   /**
    * @inheritDoc
    */
-  public function disable(): void
+  public function deactivate(): void
   {
-    $this->enabled = false;
+    $this->active = false;
   }
 
   /**
    * @inheritDoc
    */
-  public function isEnabled(): bool
+  public function isActive(): bool
   {
-    return $this->enabled;
+    return $this->active;
   }
 
   /**
@@ -106,5 +100,45 @@ abstract class UIElement implements UIElementInterface
   public function setName(string $name): void
   {
     $this->name = $name;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function find(string $uiElementName): ?UIElementInterface
+  {
+    if ($activeScene = SceneManager::getInstance()->getActiveScene())
+    {
+      foreach ($activeScene->getUIElements() as $element)
+      {
+        if ($element->getName() === $uiElementName)
+        {
+          return $element;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function findAll(string $uiElementName): array
+  {
+    $elements = [];
+
+    if ($activeScene = SceneManager::getInstance()->getActiveScene())
+    {
+      foreach ($activeScene->getUIElements() as $element)
+      {
+        if ($element->getName() === $uiElementName)
+        {
+          $elements[] = $element;
+        }
+      }
+    }
+
+    return $elements;
   }
 }

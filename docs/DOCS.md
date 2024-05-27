@@ -32,48 +32,48 @@ Sendama is a 2D game engine for terminal based games. It is written in PHP and i
 
 ## Installation
 
-### For Linux, BSD etc
+### Using the [Sendama CLI](https://github.com/atatusoft-ltd/sendama-console)
+The recommended way to install Sendama is through the CLI. You can install Sendama by running the following commands:
+
+```bash
+composer global require sendamaphp/console
+```
+
+For more information and setup see [Sendama CLI](https://github.com/atatusoft-ltd/sendama-console).
+
+#### Create a new game
+Once the CLI is installed, you can start a new game by running the following command:
+
+```bash
+sendama new mygame
+```
+
+This will create a new game in the current directory. You can get started by changing into the game directory and running the game:
+
+```bash
+cd mygame
+php mygame.php
+``` 
+
+### Using Composer
+#### For Linux, BSD etc
 ```bash
 mkdir /path/to/your/game
 composer init
+...
+composer require sendamaphp/engine
 ```
 
-Once you have run `composer init` you will be prompted to enter some information about your project. Once you have done that you can run the following command to install Sendama:
-```bash
-composer require atatusoft-ltd/sendama-engine
-```
+#### For Windows
+From the WSL terminal follow Linux instructions
 
-After you have installed Sendama you can start using it in your project. You may have to set the `vendor/autoload.php` file as the entry point for your game.
-
-### Example
-```php
-<?php
-
-require_once __DIR__ . '/vendor/autoload.php';
-
-use Sendama\Engine\Game;
-
-$game = new Game();
-$game->run();
-```
-
-### For Windows
-
-From the WSL terminal follow Linux instructions.
-
-### For OSX
+#### OSX
 ```bash
 mkdir /path/to/your/game
-
 composer init
+...
+composer require sendamaphp/engine
 ```
-
-Once you have run `composer init` you will be prompted to enter some information about your project. Once you have done that you can run the following command to install Sendama:
-```bash
-composer require atatusoft-ltd/sendama-engine
-```
-
-After you have installed Sendama you can start using it in your project. You may have to set the `vendor/autoload.php` file as the entry point for your game.
 
 ## Concept
 Sendama implements a simple game loop that allows you to create games by defining scenes and game objects. Scenes are the main building blocks of a game and are used to group game objects together. Game objects are the entities that make up a game and can be anything from a player character to a wall or a coin.
