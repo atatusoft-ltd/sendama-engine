@@ -3,10 +3,8 @@
 namespace Sendama\Engine\UI\Menus\Interfaces;
 
 use Assegai\Collections\ItemList;
-use Sendama\Engine\Core\Interfaces\CanRender;
-use Sendama\Engine\Core\Interfaces\CanUpdate;
 use Sendama\Engine\Core\Interfaces\ExecutionContextInterface;
-use Sendama\Engine\Events\Interfaces\SubjectInterface;
+use Sendama\Engine\Events\Interfaces\ObservableInterface;
 use Sendama\Engine\IO\Enumerations\Color;
 use Sendama\Engine\UI\Interfaces\UIElementInterface;
 
@@ -17,7 +15,7 @@ use Sendama\Engine\UI\Interfaces\UIElementInterface;
  */
 interface MenuInterface extends
   UIElementInterface,
-  SubjectInterface,
+  ObservableInterface,
   MenuGraphNodeInterface,
   ExecutionContextInterface
 {
