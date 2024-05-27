@@ -23,21 +23,23 @@ class AABBCollisionDetectionStrategy extends AbstractCollisionDetectionStrategy
       return false;
     }
 
-    $thisColliderBoundingBox = $this->collider->getBoundingBox();
-    $otherColliderBoundingBox = $collider->getBoundingBox();
+    $box1 = $this->collider->getBoundingBox();
+    $box2 = $collider->getBoundingBox();
 
     if (
-      $thisColliderBoundingBox->getX() < $otherColliderBoundingBox->getX() + $otherColliderBoundingBox->getWidth() + 1 &&
-      $thisColliderBoundingBox->getX() + $thisColliderBoundingBox->getWidth() + 1> $otherColliderBoundingBox->getX() &&
-      $thisColliderBoundingBox->getY() < $otherColliderBoundingBox->getY() + $otherColliderBoundingBox->getHeight() + 1 &&
-      $thisColliderBoundingBox->getY() + $thisColliderBoundingBox->getHeight() + 1 > $otherColliderBoundingBox->getY()
+      $box1->getX() < $box2->getX() + $box2->getWidth() &&
+      $box1->getX() + $box1->getWidth() > $box2->getX() &&
+      $box1->getY() < $box2->getY() + $box2->getHeight() &&
+      $box1->getY() + $box1->getHeight() > $box2->getY()
     )
     {
       Debug::log(__CLASS__ . ' detected a collision between ' . $this->collider->getGameObject()->getName() . ' and ' . $collider->getGameObject()->getName() . '.');
-      Debug::log(sprintf("box1.x < box2.x + box2.width: %s < %s + %s", $thisColliderBoundingBox->getX(), $otherColliderBoundingBox->getX(), $otherColliderBoundingBox->getWidth()));
-      Debug::log(sprintf("box1.x + box1.width > box2.x: %s + %s > %s", $thisColliderBoundingBox->getX(), $thisColliderBoundingBox->getWidth(), $otherColliderBoundingBox->getX()));
-      Debug::log(sprintf("box1.y < box2.y + box2.height: %s < %s + %s", $thisColliderBoundingBox->getY(), $otherColliderBoundingBox->getY(), $otherColliderBoundingBox->getHeight()));
-      Debug::log(sprintf("box1.y + box1.height > box2.y: %s + %s > %s", $thisColliderBoundingBox->getY(), $thisColliderBoundingBox->getHeight(), $otherColliderBoundingBox->getY()));
+      Debug::log($this->collider->getGameObject()->getName() . ' is at ' . $this->collider->getTransform()->getPosition());
+      Debug::log($collider->getGameObject()->getName() . ' is at ' . $collider->getTransform()->getPosition());
+      Debug::log(sprintf("box1.x < box2.x + box2.width: %s < %s + %s", $box1->getX(), $box2->getX(), $box2->getWidth()));
+      Debug::log(sprintf("box1.x + box1.width > box2.x: %s + %s > %s", $box1->getX(), $box1->getWidth(), $box2->getX()));
+      Debug::log(sprintf("box1.y < box2.y + box2.height: %s < %s + %s", $box1->getY(), $box2->getY(), $box2->getHeight()));
+      Debug::log(sprintf("box1.y + box1.height > box2.y: %s + %s > %s", $box1->getY(), $box1->getHeight(), $box2->getY()));
       return true;
     }
 

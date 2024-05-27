@@ -4,12 +4,11 @@ namespace Sendama\Engine\Physics;
 
 use Override;
 use Sendama\Engine\Core\Component;
-use Sendama\Engine\Core\Rect;
-use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\Physics\Interfaces\ColliderInterface;
 use Sendama\Engine\Physics\Interfaces\CollisionDetectionStrategyInterface;
 use Sendama\Engine\Physics\Strategies\AABBCollisionDetectionStrategy;
-use Sendama\Engine\Physics\Strategies\BasicCollisionDetectionStrategy;
+use Sendama\Engine\Physics\Strategies\SeparationBasedCollisionDetectionStrategy;
+use Sendama\Engine\Physics\Traits\BoundTrait;
 
 /**
  * The class Collider.
@@ -18,6 +17,8 @@ use Sendama\Engine\Physics\Strategies\BasicCollisionDetectionStrategy;
  */
 class Collider extends Component implements ColliderInterface
 {
+  use BoundTrait;
+
   /**
    * The physics.
    *
@@ -45,7 +46,7 @@ class Collider extends Component implements ColliderInterface
   public final function awake(): void
   {
     $this->physics = Physics::getInstance();
-    $this->collisionDetectionStrategy = new BasicCollisionDetectionStrategy($this);
+    $this->collisionDetectionStrategy = new SeparationBasedCollisionDetectionStrategy($this);
   }
 
   /**
@@ -78,43 +79,5 @@ class Collider extends Component implements ColliderInterface
   public function setCollisionDetectionStrategy(CollisionDetectionStrategyInterface $collisionDetectionStrategy): void
   {
     $this->collisionDetectionStrategy = $collisionDetectionStrategy;
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function getBoundingBox(): Rect
-  {
-    $x =
-      $this->getTransform()
-        ->getPosition()
-        ->getX() +
-      $this->getGameObject()
-        ->getSprite()
-        ->getPivot()
-        ->getX() -
-      $this->getGameObject()
-        ->getSprite()
-        ->getRect()
-        ->getX();
-    $y =
-      $this->getTransform()
-        ->getPosition()
-        ->getY() +
-      $this->getGameObject()
-        ->getSprite()
-        ->getPivot()
-        ->getY() -
-      $this->getGameObject()
-        ->getSprite()
-        ->getRect()
-        ->getY();
-    return new Rect(
-      new Vector2($x,$y),
-      new Vector2(
-        $this->getGameObject()->getSprite()->getRect()->getWidth(),
-        $this->getGameObject()->getSprite()->getRect()->getHeight()
-      )
-    );
   }
 }
