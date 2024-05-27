@@ -3,6 +3,7 @@
 namespace Sendama\Engine\UI;
 
 use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
+use Sendama\Engine\Core\Scenes\SceneManager;
 use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\UI\Interfaces\UIElementInterface;
 
@@ -99,5 +100,45 @@ abstract class UIElement implements UIElementInterface
   public function setName(string $name): void
   {
     $this->name = $name;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function find(string $uiElementName): ?UIElementInterface
+  {
+    if ($activeScene = SceneManager::getInstance()->getActiveScene())
+    {
+      foreach ($activeScene->getUIElements() as $element)
+      {
+        if ($element->getName() === $uiElementName)
+        {
+          return $element;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function findAll(string $uiElementName): array
+  {
+    $elements = [];
+
+    if ($activeScene = SceneManager::getInstance()->getActiveScene())
+    {
+      foreach ($activeScene->getUIElements() as $element)
+      {
+        if ($element->getName() === $uiElementName)
+        {
+          $elements[] = $element;
+        }
+      }
+    }
+
+    return $elements;
   }
 }

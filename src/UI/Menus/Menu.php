@@ -15,9 +15,11 @@ use Sendama\Engine\IO\Enumerations\AxisName;
 use Sendama\Engine\IO\Enumerations\Color;
 use Sendama\Engine\IO\Enumerations\KeyCode;
 use Sendama\Engine\IO\Input;
+use Sendama\Engine\UI\Interfaces\UIElementInterface;
 use Sendama\Engine\UI\Menus\Interfaces\MenuGraphNodeInterface;
 use Sendama\Engine\UI\Menus\Interfaces\MenuInterface;
 use Sendama\Engine\UI\Menus\Interfaces\MenuItemInterface;
+use Sendama\Engine\UI\UIElement;
 use Sendama\Engine\UI\Windows\Window;
 
 /**
@@ -27,6 +29,10 @@ use Sendama\Engine\UI\Windows\Window;
  */
 class Menu implements MenuInterface
 {
+  /**
+   * @var bool $activated
+   */
+  protected bool $activated = true;
   /**
    * @var MenuItemInterface|null $activeItem
    */
@@ -73,12 +79,13 @@ class Menu implements MenuInterface
    *
    * @param string $title The title of the menu.
    * @param string $description The description of the menu.
-   * @param Rect $dimensions
+   * @param Rect $dimensions The dimensions of the menu.
    * @param ItemList $items The items of the menu.
    * @param string $cursor The cursor of the menu.
    * @param Color $activeColor The active color of the menu.
    * @param array<KeyCode>|null $cancelKey The cancel key.
    * @param Closure|null $onCancel The on cancel callback.
+   * @param bool $canNavigate Whether the menu can navigate or not.
    */
   public function __construct(
     protected string   $title,
@@ -344,7 +351,7 @@ class Menu implements MenuInterface
    */
   public function onFocus(EventInterface $event): void
   {
-    // TODO: Implement onFocus() method.
+    $this->resume();
   }
 
   /**
@@ -352,7 +359,7 @@ class Menu implements MenuInterface
    */
   public function onBlur(EventInterface $event): void
   {
-    // Do nothing.
+    $this->suspend();
   }
 
   /**
@@ -505,30 +512,6 @@ class Menu implements MenuInterface
   /**
    * @inheritDoc
    */
-  public function enable(): void
-  {
-    $this->enabled = true;
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function disable(): void
-  {
-    $this->enabled = false;
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function isEnabled(): bool
-  {
-    return $this->enabled;
-  }
-
-  /**
-   * @inheritDoc
-   */
   public function resume(): void
   {
     $this->setActiveItemByIndex(0);
@@ -573,5 +556,57 @@ class Menu implements MenuInterface
   public function setName(string $name): void
   {
     $this->setTitle($name);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function activate(): void
+  {
+    $this->activated = true;
+    $this->start();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function deactivate(): void
+  {
+    $this->activated = false;
+    $this->stop();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function isActive(): bool
+  {
+    return $this->activated;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function find(string $uiElementName): ?self
+  {
+    return self::findAll($uiElementName)[0] ?? null;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function findAll(string $uiElementName): array
+  {
+    $elements = [];
+
+    foreach (SceneManager::getInstance()->getActiveScene()?->getUIElements() as $element)
+    {
+      if ($elements instanceof MenuInterface && $element->getName() === $uiElementName)
+      {
+        $elements[] = $element;
+      }
+    }
+
+    return $elements;
   }
 }
