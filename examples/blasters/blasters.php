@@ -5,7 +5,7 @@ require_once '../../vendor/autoload.php';
 
 use Sendama\Engine\Core\Scenes\TitleScene;
 use Sendama\Engine\Game;
-use Sendama\Engine\UI\Menus\MenuItem;
+use Sendama\Engine\UI\Menus\MenuItems\MenuItem;
 use Sendama\Examples\Blasters\Scenes\HighScoresScene;
 use Sendama\Examples\Blasters\Scenes\Level01;
 use Sendama\Examples\Blasters\Scenes\SettingsScene;

@@ -1,9 +1,9 @@
 <?php
 
 use Amasiye\Figlet\FontName;
-use Sendama\Engine\Game;
 use Sendama\Engine\Core\Scenes\TitleScene;
-use Sendama\Engine\UI\Menus\MenuItem;
+use Sendama\Engine\Game;
+use Sendama\Engine\UI\Menus\MenuItems\MenuItem;
 use Sendama\Examples\Collector\Scenes\Level01;
 use Sendama\Examples\Collector\Scenes\Level02;
 use Sendama\Examples\Collector\Scenes\SettingsScene;
