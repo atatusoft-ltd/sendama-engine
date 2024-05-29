@@ -4,6 +4,8 @@ namespace Sendama\Engine\Events\Interfaces;
 
 /**
  * Defines an object that can be observed for events.
+ *
+ * @package Sendama\Engine\Events\Interfaces
  */
 interface ObservableInterface
 {

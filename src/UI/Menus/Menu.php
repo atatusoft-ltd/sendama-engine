@@ -4,22 +4,23 @@ namespace Sendama\Engine\UI\Menus;
 
 use Assegai\Collections\ItemList;
 use Closure;
-use Sendama\Engine\Core\Interfaces\ExecutionContextInterface;
 use Sendama\Engine\Core\Rect;
 use Sendama\Engine\Core\Scenes\SceneManager;
 use Sendama\Engine\Core\Vector2;
-use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\Events\Interfaces\EventInterface;
+use Sendama\Engine\Events\Interfaces\ObservableInterface;
 use Sendama\Engine\Events\Interfaces\ObserverInterface;
+use Sendama\Engine\Events\Interfaces\StaticObserverInterface;
+use Sendama\Engine\Events\MenuEvent;
 use Sendama\Engine\IO\Enumerations\AxisName;
 use Sendama\Engine\IO\Enumerations\Color;
 use Sendama\Engine\IO\Enumerations\KeyCode;
 use Sendama\Engine\IO\Input;
-use Sendama\Engine\UI\Interfaces\UIElementInterface;
+use Sendama\Engine\UI\Menus\Interfaces\MenuControlInterface;
 use Sendama\Engine\UI\Menus\Interfaces\MenuGraphNodeInterface;
 use Sendama\Engine\UI\Menus\Interfaces\MenuInterface;
 use Sendama\Engine\UI\Menus\Interfaces\MenuItemInterface;
-use Sendama\Engine\UI\UIElement;
+use Sendama\Engine\UI\Windows\BorderPack;
 use Sendama\Engine\UI\Windows\Window;
 
 /**
@@ -88,18 +89,19 @@ class Menu implements MenuInterface
    * @param bool $canNavigate Whether the menu can navigate or not.
    */
   public function __construct(
-    protected string   $title,
-    protected string   $description = '',
-    protected Rect     $dimensions = new Rect(
+    protected string      $title,
+    protected string      $description = '',
+    protected Rect        $dimensions = new Rect(
       new Vector2(0, 0),
       new Vector2(DEFAULT_MENU_WIDTH, DEFAULT_MENU_HEIGHT)
     ),
-    protected ItemList $items = new ItemList(MenuItemInterface::class),
-    protected string   $cursor = '>',
-    protected Color    $activeColor = Color::BLUE,
-    protected ?array   $cancelKey = null,
-    protected ?Closure $onCancel = null,
-    protected bool     $canNavigate = true,
+    protected ItemList    $items = new ItemList(MenuItemInterface::class),
+    protected string      $cursor = '>',
+    protected Color       $activeColor = Color::BLUE,
+    protected ?array      $cancelKey = null,
+    protected ?Closure    $onCancel = null,
+    protected bool        $canNavigate = true,
+    BorderPack            $borderPack = new BorderPack('')
   )
   {
     if (! $this->canNavigate)
@@ -113,8 +115,20 @@ class Menu implements MenuInterface
       $this->description,
       $this->dimensions->getPosition(),
       $this->dimensions->getWidth(),
-      $this->dimensions->getHeight()
+      $this->dimensions->getHeight(),
+      $borderPack
     );
+  }
+
+  /**
+   * Sets the border of the menu.
+   *
+   * @param BorderPack $borderPack The border pack.
+   * @return void
+   */
+  public function setBorderPack(BorderPack $borderPack): void
+  {
+    $this->window->setBorderPack($borderPack);
   }
 
   /**
@@ -230,6 +244,10 @@ class Menu implements MenuInterface
     {
       $this->setActiveItem($item);
     }
+    if ($item instanceof MenuControlInterface)
+    {
+      $item->addObservers($this);
+    }
     $this->updateWindowContent();
   }
 
@@ -322,17 +340,23 @@ class Menu implements MenuInterface
   /**
    * @inheritDoc
    */
-  public function addObserver(string|ObserverInterface $observer): void
+  public function addObservers(ObserverInterface|StaticObserverInterface|string ...$observers): void
   {
-    $this->observers->add($observer);
+    foreach ($observers as $observer)
+    {
+      $this->observers->add($observer);
+    }
   }
 
   /**
    * @inheritDoc
    */
-  public function removeObserver(string|ObserverInterface $observer): void
+  public function removeObservers(ObserverInterface|StaticObserverInterface|string|null ...$observers): void
   {
-    $this->observers->removeAt($observer);
+    foreach ($observers as $observer)
+    {
+      $this->observers->remove($observer);
+    }
   }
 
   /**
@@ -342,6 +366,12 @@ class Menu implements MenuInterface
   {
     foreach ($this->observers as $observer)
     {
+      if ($observer instanceof StaticObserverInterface)
+      {
+        $observer::onNotify($this, $event);
+        continue;
+      }
+
       $observer->onNotify($event);
     }
   }
@@ -457,11 +487,17 @@ class Menu implements MenuInterface
      */
     foreach ($this->items as $itemIndex => $item)
     {
-      $output = '  ' . $item->getLabel();
+      $output = '  ' . match(true) {
+        $item instanceof MenuControlInterface => $item,
+        default => $item->getLabel()
+      };
 
       if ($itemIndex === $this->getActiveItemIndex())
       {
-        $output = sprintf("%s %s", $this->cursor, $item->getLabel());
+        $output = sprintf("%s %s", $this->cursor, match(true) {
+          $item instanceof MenuControlInterface => $item,
+          default => $item->getLabel()
+        });
       }
       $content[] = $output;
     }
@@ -608,5 +644,16 @@ class Menu implements MenuInterface
     }
 
     return $elements;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function onNotify(ObservableInterface $observable, EventInterface $event): void
+  {
+    if ($event instanceof MenuEvent)
+    {
+      $this->updateWindowContent();
+    }
   }
 }

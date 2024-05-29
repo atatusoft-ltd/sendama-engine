@@ -1,9 +1,10 @@
 <?php
 
-namespace Sendama\Engine\UI\Menus;
+namespace Sendama\Engine\UI\Menus\MenuItems;
 
 use Closure;
 use Sendama\Engine\Core\Interfaces\ExecutionContextInterface;
+use Sendama\Engine\UI\Menus\Interfaces;
 
 /**
  * The class MenuItem.
