@@ -13,7 +13,6 @@ use Serializable;
  * @template T
  */
 interface ComponentInterface extends
-  ActivatableInterface,
   CanResume,
   CanUpdate,
   CanStart,

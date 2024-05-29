@@ -4,7 +4,6 @@ namespace Sendama\Engine\Core\Behaviours;
 
 use Sendama\Engine\Core\Component;
 use Sendama\Engine\Core\GameObject;
-use Sendama\Engine\Core\Rendering\Renderer;
 use Sendama\Engine\Physics\Interfaces\ColliderInterface;
 use Sendama\Engine\Physics\Interfaces\CollisionInterface;
 

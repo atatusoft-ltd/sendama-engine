@@ -1,9 +1,9 @@
 <?php
 
 use Amasiye\Figlet\FontName;
-use Sendama\Engine\Game;
 use Sendama\Engine\Core\Scenes\TitleScene;
-use Sendama\Engine\UI\Menus\MenuItem;
+use Sendama\Engine\Game;
+use Sendama\Engine\UI\Menus\MenuItems\MenuItem;
 use Sendama\Examples\Collector\Scenes\Level01;
 use Sendama\Examples\Collector\Scenes\Level02;
 use Sendama\Examples\Collector\Scenes\SettingsScene;
@@ -14,6 +14,7 @@ function bootstrap(): void
 {
   $gameName = 'The Collector'; // This will be overwritten by the .env file
   $game = new Game($gameName);
+  $game->loadSettings();
 
   $settingsScene = new SettingsScene('Settings');
   $titleScene = new TitleScene('Title Screen');
@@ -31,14 +32,11 @@ function bootstrap(): void
     );
 
   $game->addScenes(
-    $titleScene,
-    $settingsScene,
-    new Level01('Level01'),
-    new Level02('Level02'),
-  );
-
-  $game
-    ->loadSettings()
+      $titleScene,
+      $settingsScene,
+      new Level01('Level01'),
+      new Level02('Level02'),
+    )
     ->run();
 }
 

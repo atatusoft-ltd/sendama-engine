@@ -596,7 +596,6 @@ class Game implements ObservableInterface
    */
   public function setState(GameStateInterface $state): void
   {
-    Debug::log("Setting game state to " . get_class($state));
     $this->previousState = $this->state;
     $this->state = $state;
   }

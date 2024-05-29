@@ -7,6 +7,7 @@ use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\Events\Interfaces\EventInterface;
 use Sendama\Engine\Events\Interfaces\ObserverInterface;
+use Sendama\Engine\Events\Interfaces\StaticObserverInterface;
 use Sendama\Engine\IO\Console\Console;
 use Sendama\Engine\IO\Console\Cursor;
 use Sendama\Engine\IO\Enumerations\Color;
@@ -258,17 +259,23 @@ class Window implements WindowInterface
   /**
    * @inheritDoc
    */
-  public function addObserver(string|ObserverInterface $observer): void
+  public function addObservers(ObserverInterface|StaticObserverInterface|string ...$observers): void
   {
-    $this->observers->add($observer);
+    foreach ($observers as $observer)
+    {
+      $this->observers->add($observer);
+    }
   }
 
   /**
    * @inheritDoc
    */
-  public function removeObserver(string|ObserverInterface $observer): void
+  public function removeObservers(ObserverInterface|StaticObserverInterface|string|null ...$observers): void
   {
-    $this->observers->remove($observer);
+    foreach ($observers as $observer)
+    {
+      $this->observers->remove($observer);
+    }
   }
 
   /**
@@ -278,6 +285,12 @@ class Window implements WindowInterface
   {
     foreach ($this->observers as $observer)
     {
+      if ($observer instanceof StaticObserverInterface)
+      {
+        $observer::onNotify($this, $event);
+        continue;
+      }
+
       $observer->onNotify($event);
     }
   }

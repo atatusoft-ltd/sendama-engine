@@ -9,7 +9,7 @@ use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\IO\Enumerations\KeyCode;
 use Sendama\Engine\UI\Menus\Interfaces\MenuItemInterface;
 use Sendama\Engine\UI\Menus\Menu;
-use Sendama\Engine\UI\Menus\MenuItem;
+use Sendama\Engine\UI\Menus\MenuItems\MenuItem;
 use Sendama\Engine\UI\Text\Text;
 
 class TitleScene extends AbstractScene

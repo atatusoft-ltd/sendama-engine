@@ -206,7 +206,7 @@ abstract class AbstractScene implements SceneInterface
 
     foreach ($this->uiElements as $uiElement)
     {
-      if ($uiElement->isEnabled())
+      if ($uiElement->isActive())
       {
         $uiElement->update();
       }
@@ -247,7 +247,7 @@ abstract class AbstractScene implements SceneInterface
 
     foreach ($this->uiElements as $uiElement)
     {
-      if ($uiElement->isEnabled())
+      if ($uiElement->isActive())
       {
         $uiElement->suspend();
       }
@@ -271,7 +271,7 @@ abstract class AbstractScene implements SceneInterface
 
     foreach ($this->uiElements as $uiElement)
     {
-      if ($uiElement->isEnabled())
+      if ($uiElement->isActive())
       {
         $uiElement->resume();
       }
@@ -458,11 +458,10 @@ abstract class AbstractScene implements SceneInterface
 
     foreach ($lines as $y => $line)
     {
-      $tiles = str_split($line);
-
-      foreach ($tiles as $x => $tile)
+      $lineLength = strlen($line);
+      for ($x = 0; $x < $lineLength; $x++)
       {
-        $buffer->set($x, $y, $tile);
+        $buffer->set($x, $y, $line[$x]);
       }
     }
 

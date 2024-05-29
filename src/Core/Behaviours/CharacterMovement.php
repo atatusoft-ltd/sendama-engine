@@ -5,8 +5,10 @@ namespace Sendama\Engine\Core\Behaviours;
 use Sendama\Engine\Core\Behaviours\Attributes\SerializeField;
 use Sendama\Engine\Core\Sprite;
 use Sendama\Engine\Core\Vector2;
+use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\IO\Enumerations\AxisName;
 use Sendama\Engine\IO\Input;
+use Sendama\Engine\Physics\CharacterController;
 
 class CharacterMovement extends Behaviour
 {
@@ -25,6 +27,7 @@ class CharacterMovement extends Behaviour
   #[SerializeField]
   private ?Sprite $downMovementSprite = null;
 
+  private ?CharacterController $characterController = null;
 
   /**
    * Gets the speed of the character.
@@ -68,6 +71,11 @@ class CharacterMovement extends Behaviour
     $this->downMovementSprite = $down;
   }
 
+  public function onStart(): void
+  {
+    $this->characterController = $this->getComponent(CharacterController::class);
+  }
+
   public function onUpdate(): void
   {
     $h = Input::getAxis(AxisName::HORIZONTAL);
@@ -94,7 +102,15 @@ class CharacterMovement extends Behaviour
 
       $velocity = new Vector2($h, $v);
       $velocity->scale($this->speed);
-      $this->getTransform()->translate($velocity);
+
+      if ($this->characterController)
+      {
+        $this->characterController->move($velocity);
+      }
+      else
+      {
+        $this->getTransform()->translate($velocity);
+      }
     }
   }
 }

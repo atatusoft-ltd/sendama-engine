@@ -4,20 +4,23 @@ namespace Sendama\Engine\UI\Menus;
 
 use Assegai\Collections\ItemList;
 use Closure;
-use Sendama\Engine\Core\Interfaces\ExecutionContextInterface;
 use Sendama\Engine\Core\Rect;
 use Sendama\Engine\Core\Scenes\SceneManager;
 use Sendama\Engine\Core\Vector2;
-use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\Events\Interfaces\EventInterface;
+use Sendama\Engine\Events\Interfaces\ObservableInterface;
 use Sendama\Engine\Events\Interfaces\ObserverInterface;
+use Sendama\Engine\Events\Interfaces\StaticObserverInterface;
+use Sendama\Engine\Events\MenuEvent;
 use Sendama\Engine\IO\Enumerations\AxisName;
 use Sendama\Engine\IO\Enumerations\Color;
 use Sendama\Engine\IO\Enumerations\KeyCode;
 use Sendama\Engine\IO\Input;
+use Sendama\Engine\UI\Menus\Interfaces\MenuControlInterface;
 use Sendama\Engine\UI\Menus\Interfaces\MenuGraphNodeInterface;
 use Sendama\Engine\UI\Menus\Interfaces\MenuInterface;
 use Sendama\Engine\UI\Menus\Interfaces\MenuItemInterface;
+use Sendama\Engine\UI\Windows\BorderPack;
 use Sendama\Engine\UI\Windows\Window;
 
 /**
@@ -27,6 +30,10 @@ use Sendama\Engine\UI\Windows\Window;
  */
 class Menu implements MenuInterface
 {
+  /**
+   * @var bool $activated
+   */
+  protected bool $activated = true;
   /**
    * @var MenuItemInterface|null $activeItem
    */
@@ -73,26 +80,28 @@ class Menu implements MenuInterface
    *
    * @param string $title The title of the menu.
    * @param string $description The description of the menu.
-   * @param Rect $dimensions
+   * @param Rect $dimensions The dimensions of the menu.
    * @param ItemList $items The items of the menu.
    * @param string $cursor The cursor of the menu.
    * @param Color $activeColor The active color of the menu.
    * @param array<KeyCode>|null $cancelKey The cancel key.
    * @param Closure|null $onCancel The on cancel callback.
+   * @param bool $canNavigate Whether the menu can navigate or not.
    */
   public function __construct(
-    protected string   $title,
-    protected string   $description = '',
-    protected Rect     $dimensions = new Rect(
+    protected string      $title,
+    protected string      $description = '',
+    protected Rect        $dimensions = new Rect(
       new Vector2(0, 0),
       new Vector2(DEFAULT_MENU_WIDTH, DEFAULT_MENU_HEIGHT)
     ),
-    protected ItemList $items = new ItemList(MenuItemInterface::class),
-    protected string   $cursor = '>',
-    protected Color    $activeColor = Color::BLUE,
-    protected ?array   $cancelKey = null,
-    protected ?Closure $onCancel = null,
-    protected bool     $canNavigate = true,
+    protected ItemList    $items = new ItemList(MenuItemInterface::class),
+    protected string      $cursor = '>',
+    protected Color       $activeColor = Color::BLUE,
+    protected ?array      $cancelKey = null,
+    protected ?Closure    $onCancel = null,
+    protected bool        $canNavigate = true,
+    BorderPack            $borderPack = new BorderPack('')
   )
   {
     if (! $this->canNavigate)
@@ -106,8 +115,20 @@ class Menu implements MenuInterface
       $this->description,
       $this->dimensions->getPosition(),
       $this->dimensions->getWidth(),
-      $this->dimensions->getHeight()
+      $this->dimensions->getHeight(),
+      $borderPack
     );
+  }
+
+  /**
+   * Sets the border of the menu.
+   *
+   * @param BorderPack $borderPack The border pack.
+   * @return void
+   */
+  public function setBorderPack(BorderPack $borderPack): void
+  {
+    $this->window->setBorderPack($borderPack);
   }
 
   /**
@@ -223,6 +244,10 @@ class Menu implements MenuInterface
     {
       $this->setActiveItem($item);
     }
+    if ($item instanceof MenuControlInterface)
+    {
+      $item->addObservers($this);
+    }
     $this->updateWindowContent();
   }
 
@@ -315,17 +340,23 @@ class Menu implements MenuInterface
   /**
    * @inheritDoc
    */
-  public function addObserver(string|ObserverInterface $observer): void
+  public function addObservers(ObserverInterface|StaticObserverInterface|string ...$observers): void
   {
-    $this->observers->add($observer);
+    foreach ($observers as $observer)
+    {
+      $this->observers->add($observer);
+    }
   }
 
   /**
    * @inheritDoc
    */
-  public function removeObserver(string|ObserverInterface $observer): void
+  public function removeObservers(ObserverInterface|StaticObserverInterface|string|null ...$observers): void
   {
-    $this->observers->removeAt($observer);
+    foreach ($observers as $observer)
+    {
+      $this->observers->remove($observer);
+    }
   }
 
   /**
@@ -335,6 +366,12 @@ class Menu implements MenuInterface
   {
     foreach ($this->observers as $observer)
     {
+      if ($observer instanceof StaticObserverInterface)
+      {
+        $observer::onNotify($this, $event);
+        continue;
+      }
+
       $observer->onNotify($event);
     }
   }
@@ -344,7 +381,7 @@ class Menu implements MenuInterface
    */
   public function onFocus(EventInterface $event): void
   {
-    // TODO: Implement onFocus() method.
+    $this->resume();
   }
 
   /**
@@ -352,7 +389,7 @@ class Menu implements MenuInterface
    */
   public function onBlur(EventInterface $event): void
   {
-    // Do nothing.
+    $this->suspend();
   }
 
   /**
@@ -450,11 +487,17 @@ class Menu implements MenuInterface
      */
     foreach ($this->items as $itemIndex => $item)
     {
-      $output = '  ' . $item->getLabel();
+      $output = '  ' . match(true) {
+        $item instanceof MenuControlInterface => $item,
+        default => $item->getLabel()
+      };
 
       if ($itemIndex === $this->getActiveItemIndex())
       {
-        $output = sprintf("%s %s", $this->cursor, $item->getLabel());
+        $output = sprintf("%s %s", $this->cursor, match(true) {
+          $item instanceof MenuControlInterface => $item,
+          default => $item->getLabel()
+        });
       }
       $content[] = $output;
     }
@@ -505,30 +548,6 @@ class Menu implements MenuInterface
   /**
    * @inheritDoc
    */
-  public function enable(): void
-  {
-    $this->enabled = true;
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function disable(): void
-  {
-    $this->enabled = false;
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function isEnabled(): bool
-  {
-    return $this->enabled;
-  }
-
-  /**
-   * @inheritDoc
-   */
   public function resume(): void
   {
     $this->setActiveItemByIndex(0);
@@ -573,5 +592,68 @@ class Menu implements MenuInterface
   public function setName(string $name): void
   {
     $this->setTitle($name);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function activate(): void
+  {
+    $this->activated = true;
+    $this->start();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function deactivate(): void
+  {
+    $this->activated = false;
+    $this->stop();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function isActive(): bool
+  {
+    return $this->activated;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function find(string $uiElementName): ?self
+  {
+    return self::findAll($uiElementName)[0] ?? null;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function findAll(string $uiElementName): array
+  {
+    $elements = [];
+
+    foreach (SceneManager::getInstance()->getActiveScene()?->getUIElements() as $element)
+    {
+      if ($elements instanceof MenuInterface && $element->getName() === $uiElementName)
+      {
+        $elements[] = $element;
+      }
+    }
+
+    return $elements;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function onNotify(ObservableInterface $observable, EventInterface $event): void
+  {
+    if ($event instanceof MenuEvent)
+    {
+      $this->updateWindowContent();
+    }
   }
 }

@@ -3,13 +3,11 @@
 namespace Sendama\Engine\Core\Interfaces;
 
 /**
- * Interface ActivatableInterface. Represents an object that can be activated and deactivated.
+ * Interface CanActivate. Represents an object that can be activated or deactivated.
  *
  * @package Sendama\Engine\Core\Interfaces
- * @deprecated Use CanActivate instead. Will be removed in 0.3.0.
- * @since 0.1.0
  */
-interface ActivatableInterface
+interface CanActivate
 {
   /**
    * Activate the object.

@@ -7,7 +7,7 @@ use Sendama\Engine\Exceptions\NotImplementedException;
 
 /**
  * Class PlayClampedForeverStrategy
- * @package Sendama\Engine\Animation\Strategies
+ * @package Sendama\Engine\Animation\Engines
  */
 class PlayClampedForeverStrategy extends PlayStrategy
 {
