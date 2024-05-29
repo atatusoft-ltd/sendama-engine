@@ -42,4 +42,4 @@ jobs:
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
     - name: Run test suite
-      run: composer run test
+      run: composer analyze && composer test
