@@ -40,6 +40,7 @@
         "bin/sendama"
     ],
     "scripts": {
-        "test": "vendor/bin/pest tests"
+        "test": "vendor/bin/pest tests",
+        "analyze": "vendor/bin/phpstan analyse src tests --level 8"
     }
 }
