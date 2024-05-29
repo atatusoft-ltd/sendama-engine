@@ -14,6 +14,7 @@ function bootstrap(): void
 {
   $gameName = 'The Collector'; // This will be overwritten by the .env file
   $game = new Game($gameName);
+  $game->loadSettings();
 
   $settingsScene = new SettingsScene('Settings');
   $titleScene = new TitleScene('Title Screen');
@@ -31,14 +32,11 @@ function bootstrap(): void
     );
 
   $game->addScenes(
-    $titleScene,
-    $settingsScene,
-    new Level01('Level01'),
-    new Level02('Level02'),
-  );
-
-  $game
-    ->loadSettings()
+      $titleScene,
+      $settingsScene,
+      new Level01('Level01'),
+      new Level02('Level02'),
+    )
     ->run();
 }
 
