@@ -29,7 +29,7 @@
         "assegaiphp/collections":  "^0.3.2",
         "amasiye/figlet":  "^1.2",
         "vlucas/phpdotenv": "^5.6",
-        "symfony/console": "^7.0"
+        "league/climate": "^3.8"
     },
     "config": {
         "allow-plugins": {

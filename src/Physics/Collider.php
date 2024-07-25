@@ -46,7 +46,7 @@ class Collider extends Component implements ColliderInterface
   public final function awake(): void
   {
     $this->physics = Physics::getInstance();
-    $this->collisionDetectionStrategy = new SeparationBasedCollisionDetectionStrategy($this);
+    $this->collisionDetectionStrategy = new AABBCollisionDetectionStrategy($this);
   }
 
   /**
