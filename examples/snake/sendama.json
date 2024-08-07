@@ -1,0 +1,6 @@
+{
+  "name": "snake",
+  "description": "A simple 2D game where the player controls a snake that eats food.",
+  "version": "1.0.0",
+  "main": "snake.php"
+}

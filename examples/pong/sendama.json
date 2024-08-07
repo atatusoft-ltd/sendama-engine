@@ -1,0 +1,6 @@
+{
+  "name": "pong",
+  "description": "A simple 2D game where the player hits a ball with a paddle.",
+  "version": "1.0.0",
+  "main": "pong.php"
+}

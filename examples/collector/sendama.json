@@ -1,0 +1,6 @@
+{
+  "name": "collector",
+  "description": "A simple 2D game where you collect coins.",
+  "version": "1.0.0",
+  "main": "collector.php"
+}

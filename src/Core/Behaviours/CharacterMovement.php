@@ -5,7 +5,6 @@ namespace Sendama\Engine\Core\Behaviours;
 use Sendama\Engine\Core\Behaviours\Attributes\SerializeField;
 use Sendama\Engine\Core\Sprite;
 use Sendama\Engine\Core\Vector2;
-use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\IO\Enumerations\AxisName;
 use Sendama\Engine\IO\Input;
 use Sendama\Engine\Physics\CharacterController;
@@ -81,34 +80,23 @@ class CharacterMovement extends Behaviour
     $h = Input::getAxis(AxisName::HORIZONTAL);
     $v = Input::getAxis(AxisName::VERTICAL);
 
-    if  (abs($h) > 0 || abs($v) > 0)
-    {
-      if ($h > 0 && $this->rightMovementSprite)
-      {
+    if  (abs($h) > 0 || abs($v) > 0) {
+      if ($h > 0 && $this->rightMovementSprite) {
         $this->getRenderer()->setSprite($this->rightMovementSprite);
-      }
-      else if ($h < 0 && $this->leftMovementSprite)
-      {
+      } else if ($h < 0 && $this->leftMovementSprite) {
         $this->getRenderer()->setSprite($this->leftMovementSprite);
-      }
-      else if ($v > 0 && $this->upMovementSprite)
-      {
+      } else if ($v > 0 && $this->upMovementSprite) {
         $this->getRenderer()->setSprite($this->upMovementSprite);
-      }
-      else if ($v < 0 && $this->downMovementSprite)
-      {
+      } else if ($v < 0 && $this->downMovementSprite) {
         $this->getRenderer()->setSprite($this->downMovementSprite);
       }
 
       $velocity = new Vector2($h, $v);
       $velocity->scale($this->speed);
 
-      if ($this->characterController)
-      {
+      if ($this->characterController) {
         $this->characterController->move($velocity);
-      }
-      else
-      {
+      } else {
         $this->getTransform()->translate($velocity);
       }
     }
