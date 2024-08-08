@@ -330,10 +330,6 @@ class GameObject implements GameObjectInterface
   public function deactivate(): void
   {
     $this->active = false;
-    foreach ($this->components as $component)
-    {
-      $component->activate();
-    }
   }
 
   /**
@@ -353,10 +349,8 @@ class GameObject implements GameObjectInterface
    */
   public function broadcast(string $methodName, array $args = []): void
   {
-    foreach ($this->components as $component)
-    {
-      if (method_exists($component, $methodName))
-      {
+    foreach ($this->components as $component) {
+      if (method_exists($component, $methodName)) {
         $component->$methodName(...$args);
       }
     }
