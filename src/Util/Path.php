@@ -123,7 +123,7 @@ final class Path
    */
   public static function getWorkingDirectoryAssetsPath(): string
   {
-    return self::join(getcwd(), 'assets');
+    return self::join(getcwd() ?: '', 'assets');
   }
 
   /**
