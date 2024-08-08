@@ -9,18 +9,21 @@ use Sendama\Engine\Exceptions\FileNotFoundException;
 
 /**
  * Class Prefab is a class that represents a prefab in the engine.
+ *
  * @package Sendama\Engine\Core
  */
 class Prefab implements PrefabInterface
 {
   /**
    * Prefab constructor.
+   *
    * @param string $name The name of the prefab.
    */
   protected ?GameObjectInterface $gameObject = null;
 
   /**
    * Prefab constructor.
+   *
    * @param string $name The name of the prefab.
    */
   public function __construct(protected string $name)
@@ -83,8 +86,7 @@ class Prefab implements PrefabInterface
   {
     // TODO: Implement load() method.
     // Check if the file exists
-    if (! file_exists($path))
-    {
+    if (! file_exists($path)) {
       throw new FileNotFoundException("The file does not exist: $path");
     }
 
