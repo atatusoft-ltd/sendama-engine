@@ -46,9 +46,11 @@ class Console
    */
   public static function reset(): void
   {
-    system('tput reset');
-    echo "\033c";
-    self::cursor()->enableBlinking();
+    if (false === system('reset') ) {
+      echo "System reset failed";
+      echo "\033c";
+      self::cursor()->enableBlinking();
+    }
   }
 
   /**
@@ -183,7 +185,7 @@ class Console
   /**
    * Writes a single character to the console at the specified position.
    *
-   * @param string $char The character to write.
+   * @param string $character The character to write.
    * @param int $x The x position.
    * @param int $y The y position.
    * @return void
