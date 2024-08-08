@@ -236,12 +236,9 @@ class GameObject implements GameObjectInterface
    */
   public function resume(): void
   {
-    if ($this->isActive())
-    {
-      foreach ($this->components as $component)
-      {
-        if ($component->isEnabled())
-        {
+    if ($this->isActive()) {
+      foreach ($this->components as $component) {
+        if ($component->isEnabled()) {
           $component->resume();
         }
       }
@@ -253,12 +250,9 @@ class GameObject implements GameObjectInterface
    */
   public function suspend(): void
   {
-    if ($this->isActive())
-    {
-      foreach ($this->components as $component)
-      {
-        if ($component->isEnabled())
-        {
+    if ($this->isActive()) {
+      foreach ($this->components as $component) {
+        if ($component->isEnabled()) {
           $component->suspend();
         }
       }
@@ -270,12 +264,9 @@ class GameObject implements GameObjectInterface
    */
   public function start(): void
   {
-    if ($this->isActive())
-    {
-      foreach ($this->components as $component)
-      {
-        if ($component->isEnabled())
-        {
+    if ($this->isActive()) {
+      foreach ($this->components as $component) {
+        if ($component->isEnabled()) {
           $component->start();
         }
       }
@@ -287,12 +278,9 @@ class GameObject implements GameObjectInterface
    */
   public function stop(): void
   {
-    if ($this->isActive())
-    {
-      foreach ($this->components as $component)
-      {
-        if ($component->isEnabled())
-        {
+    if ($this->isActive()) {
+      foreach ($this->components as $component) {
+        if ($component->isEnabled()) {
           $component->stop();
         }
       }
@@ -304,12 +292,9 @@ class GameObject implements GameObjectInterface
    */
   public function update(): void
   {
-    if ($this->isActive())
-    {
-      foreach ($this->components as $component)
-      {
-        if ($component->isEnabled())
-        {
+    if ($this->isActive()) {
+      foreach ($this->components as $component) {
+        if ($component->isEnabled()) {
           $component->update();
         }
       }
@@ -365,8 +350,7 @@ class GameObject implements GameObjectInterface
    */
   public function addComponent(string $componentType): Component
   {
-    if (! class_exists($componentType) )
-    {
+    if (! class_exists($componentType) ) {
       throw new InvalidArgumentException('The component type ' . $componentType . ' does not exist.');
     }
 
@@ -393,10 +377,8 @@ class GameObject implements GameObjectInterface
    */
   public function getComponentIndex(Component $component): int
   {
-    foreach ($this->components as $index => $c)
-    {
-      if ($component->equals($c))
-      {
+    foreach ($this->components as $index => $c) {
+      if ($component->equals($c)) {
         return $index;
       }
     }
@@ -409,15 +391,12 @@ class GameObject implements GameObjectInterface
    */
   public function getComponent(string $componentClass): ?ComponentInterface
   {
-    if (! class_exists($componentClass) && ! interface_exists($componentClass) )
-    {
+    if (! class_exists($componentClass) && ! interface_exists($componentClass) ) {
       throw new InvalidArgumentException('The component type ' . $componentClass . ' does not exist.');
     }
 
-    foreach ($this->components as $component)
-    {
-      if ($component instanceof $componentClass)
-      {
+    foreach ($this->components as $component) {
+      if ($component instanceof $componentClass) {
         return $component;
       }
     }
@@ -430,8 +409,7 @@ class GameObject implements GameObjectInterface
    */
   public function getComponents(?string $componentClass = null): array
   {
-    if ($componentClass)
-    {
+    if ($componentClass) {
       return array_filter($this->components, fn(ComponentInterface $component) => $component instanceof $componentClass);
     }
 
@@ -443,15 +421,12 @@ class GameObject implements GameObjectInterface
    */
   public function getUIElement(string $uiElementClass): ?UIElementInterface
   {
-    if (! class_exists($uiElementClass) && ! interface_exists($uiElementClass) )
-    {
+    if (! class_exists($uiElementClass) && ! interface_exists($uiElementClass) ) {
       throw new InvalidArgumentException('The ui element type ' . $uiElementClass . ' does not exist.');
     }
 
-    foreach ($this->uiElements as $uiElement)
-    {
-      if ($uiElement instanceof $uiElementClass)
-      {
+    foreach ($this->uiElements as $uiElement) {
+      if ($uiElement instanceof $uiElementClass) {
         return $uiElement;
       }
     }
@@ -464,8 +439,7 @@ class GameObject implements GameObjectInterface
    */
   public function getUIElements(?string $uiElementClass = null): array
   {
-    if ($uiElementClass)
-    {
+    if ($uiElementClass) {
       return array_filter($this->uiElements, fn(UIElementInterface $uiElement) => $uiElement instanceof $uiElementClass);
     }
 
@@ -491,23 +465,19 @@ class GameObject implements GameObjectInterface
   ): GameObject
   {
     $clone = clone $original;
-    if ($position)
-    {
+    if ($position) {
       $clone->transform->setPosition($position);
     }
 
-    if ($rotation)
-    {
+    if ($rotation) {
       $clone->transform->setRotation($rotation);
     }
 
-    if ($scale)
-    {
+    if ($scale) {
       $clone->transform->setScale($scale);
     }
 
-    if ($parent)
-    {
+    if ($parent) {
       $clone->transform->setParent($parent);
     }
     return $clone;
@@ -522,10 +492,8 @@ class GameObject implements GameObjectInterface
    */
   public static function destroy(GameObject $gameObject, float $delay = 0.0): void
   {
-    if ($activeScene = SceneManager::getInstance()->getActiveScene())
-    {
+    if ($activeScene = SceneManager::getInstance()->getActiveScene()) {
       // Wait for the delay before destroying the game object.
-
 
       $activeScene->remove($gameObject);
       unset($gameObject);
@@ -537,13 +505,11 @@ class GameObject implements GameObjectInterface
    */
   public function setSprite(Texture2D|array|string $texture, Vector2 $position, Vector2 $size): void
   {
-    if (is_array($texture))
-    {
+    if (is_array($texture)) {
       $texture = new Texture2D($texture['path'], $texture['width'] ?? -1, $texture['height'] ?? -1);
     }
 
-    if (is_string($texture))
-    {
+    if (is_string($texture)) {
       $texture = new Texture2D($texture);
     }
 
