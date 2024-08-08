@@ -97,6 +97,9 @@ class Game implements ObservableInterface
    */
   private Cursor $consoleCursor;
 
+  /**
+   * @var Window $debugWindow
+   */
   private Window $debugWindow;
 
   /* Sentinel properties */
@@ -215,15 +218,11 @@ class Game implements ObservableInterface
   {
     Console::restoreSettings();
 
-    if (!empty($this->errors))
-    {
-      foreach ($this->errors as $error)
-      {
+    if (!empty($this->errors)) {
+      foreach ($this->errors as $error) {
         echo $error . PHP_EOL;
       }
-    }
-    else
-    {
+    } else {
       Console::reset();
     }
   }
