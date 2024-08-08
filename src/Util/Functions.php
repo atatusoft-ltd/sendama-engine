@@ -289,3 +289,29 @@ function instantiate(GameObject $original, Vector2 $position): GameObject
 
   return $newObject;
 }
+
+/**
+ * Checks if the given value is within the given range.
+ *
+ * @param int $value The value to check.
+ * @param int $min The minimum value.
+ * @param int $max The maximum value.
+ * @return bool Whether the value is within the range or not.
+ */
+function in_range(int $value, int $min, int $max): bool
+{
+  return $value >= $min && $value <= $max;
+}
+
+/**
+ * Checks if the given point is within the given bounds.
+ *
+ * @param Vector2 $point The point to check.
+ * @param Vector2 $min The minimum bounds.
+ * @param Vector2 $max The maximum bounds.
+ * @return bool Whether the point is within the bounds or not.
+ */
+function within_bounds(Vector2 $point, Vector2 $min, Vector2 $max): bool
+{
+  return in_range($point->getX(), $min->getX(), $max->getX()) && in_range($point->getY(), $min->getY(), $max->getY());
+}
