@@ -72,6 +72,11 @@ abstract class AbstractScene implements SceneInterface
   protected string $environmentTileMapData = '';
 
   /**
+   * @var bool $started
+   */
+  protected bool $started = false;
+
+  /**
    * Constructs a scene.
    *
    * @param string $name The name of the scene.
@@ -149,6 +154,8 @@ abstract class AbstractScene implements SceneInterface
   public abstract function awake(): void;
 
   /**
+   * Starts the scene.
+   *
    * @inheritDoc
    */
   public final function start(): void
@@ -158,18 +165,20 @@ abstract class AbstractScene implements SceneInterface
     $this->createWordsSpace();
     $this->loadStaticEnvironment();
 
-    foreach ($this->rootGameObjects as $gameObject)
-    {
+    foreach ($this->rootGameObjects as $gameObject) {
       $gameObject->start();
     }
 
-    foreach ($this->uiElements as $uiElement)
-    {
+    foreach ($this->uiElements as $uiElement) {
       $uiElement->start();
     }
+
+    $this->started = true;
   }
 
   /**
+   * Stops the scene.
+   *
    * @inheritDoc
    */
   public final function stop(): void
@@ -187,6 +196,24 @@ abstract class AbstractScene implements SceneInterface
     }
 
     $this->getCamera()->clearScreen();
+
+    $this->started = false;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function isStarted(): bool
+  {
+    return $this->started;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function isStopped(): bool
+  {
+    return ! $this->isStarted();
   }
 
   /**
@@ -401,17 +428,17 @@ abstract class AbstractScene implements SceneInterface
    */
   public function add(GameObjectInterface|UIElementInterface $object): void
   {
-    if ($object instanceof GameObjectInterface)
-    {
+    if ($object instanceof GameObjectInterface) {
       $this->rootGameObjects[] = $object;
-      if ($collider = $object->getComponent(ColliderInterface::class))
-      {
+      if ($collider = $object->getComponent(ColliderInterface::class)) {
         $this->physics->addCollider($collider);
       }
-    }
-    else
-    {
+    } else {
       $this->uiElements[] = $object;
+    }
+
+    if ($this->isStarted()) {
+      $object->start();
     }
   }
 
@@ -420,17 +447,17 @@ abstract class AbstractScene implements SceneInterface
    */
   public function remove(UIElementInterface|GameObjectInterface $object): void
   {
-    if ($object instanceof GameObjectInterface)
-    {
+    if ($object instanceof GameObjectInterface) {
       $this->rootGameObjects = array_filter($this->rootGameObjects, fn($item) => $item !== $object, $this->rootGameObjects);
-      if ($collider = $object->getComponent('Collider'))
-      {
+      if ($collider = $object->getComponent('Collider')) {
         $this->physics->removeCollider($collider);
       }
-    }
-    else
-    {
+    } else {
       $this->uiElements = array_filter($this->uiElements, fn($item) => $item !== $object, $this->uiElements);
+    }
+
+    if ($this->isStopped()) {
+      $object->stop();
     }
   }
 

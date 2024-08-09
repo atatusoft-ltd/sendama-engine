@@ -35,18 +35,18 @@ interface SceneInterface extends CanStart, CanUpdate, CanRender, CanResume, CanA
   public function loadSceneSettings(?array $settings = null): self;
 
   /**
-   * Starts the scene.
+   * Checks if the scene has started.
    *
-   * @return void
+   * @return bool True if the scene has started, false otherwise.
    */
-  public function start(): void;
+  public function isStarted(): bool;
 
   /**
-   * Stops the scene.
+   * Checks if the scene has stopped.
    *
-   * @return void
+   * @return bool True if the scene has stopped, false otherwise.
    */
-  public function stop(): void;
+  public function isStopped(): bool;
 
   /**
    * Updates the scene.
