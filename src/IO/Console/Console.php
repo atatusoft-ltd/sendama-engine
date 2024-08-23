@@ -7,6 +7,8 @@ use Sendama\Engine\Core\Grid;
 use Sendama\Engine\Core\Rect;
 use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\IO\Enumerations\Color;
+use Sendama\Engine\UI\Modals\ModalManager;
+use Sendama\Engine\UI\Windows\Enumerations\WindowPosition;
 
 /**
  * Console is a static class that provides console functionality.
@@ -374,7 +376,7 @@ class Console
    */
   public static function alert(string $message, string $title = 'Alert', int $width = DEFAULT_DIALOG_WIDTH): void
   {
-    // TODO: Implement alert() method.
+    ModalManager::getInstance()->alert($message, $title, $width);
   }
 
   /**
@@ -387,8 +389,7 @@ class Console
    */
   public static function confirm(string $message, string $title = 'Confirm', int $width = DEFAULT_DIALOG_WIDTH): bool
   {
-    // TODO: Implement confirm() method.
-    return true;
+    return ModalManager::getInstance()->confirm($message, $title, $width);
   }
 
   /**
@@ -402,8 +403,7 @@ class Console
    */
   public static function prompt(string $message, string $title = 'Prompt', string $default = '', int $width = DEFAULT_DIALOG_WIDTH): string
   {
-    // TODO: Implement prompt() method.
-    return '';
+    return ModalManager::getInstance()->prompt($message, $title, $default, $width);
   }
 
   /**
@@ -419,7 +419,27 @@ class Console
    */
   public static function select(string $message, array $options, string $title = '', int $default = 0, ?Vector2 $position = null, int $width = DEFAULT_DIALOG_WIDTH): int
   {
-    // TODO: Implement select() method.
-    return -1;
+    return ModalManager::getInstance()->select($message, $options, $title, $default, $position, $width);
+  }
+
+  /**
+   * Shows a text dialog with the given message and title.
+   *
+   * @param string $message The message to show.
+   * @param string $title The title of the dialog.
+   * @param string $help The help text.
+   * @param WindowPosition $position The position of the dialog.
+   * @param float $charactersPerSecond The number of characters to show per second.
+   * @return void
+   */
+  public static function showText(
+    string $message,
+    string $title = '',
+    string $help = '',
+    WindowPosition $position = WindowPosition::BOTTOM,
+    float $charactersPerSecond = 1
+  ): void
+  {
+    ModalManager::getInstance()->showText($message, $title, $help, $position, $charactersPerSecond);
   }
 }

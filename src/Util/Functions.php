@@ -9,6 +9,7 @@ use Sendama\Engine\Events\GameEvent;
 use Sendama\Engine\Events\Interfaces\EventInterface;
 use Sendama\Engine\Exceptions\Scenes\SceneNotFoundException;
 use Sendama\Engine\IO\Console\Console;
+use Sendama\Engine\UI\Windows\Enumerations\WindowPosition;
 
 
 /* Application */
@@ -25,7 +26,7 @@ function getGameName(): string
  */
 function quitGame(?int $code = null): void
 {
-  EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::QUIT, $code));
+  EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::QUIT, data: $code));
 }
 
 /**
@@ -196,7 +197,7 @@ function prompt(
  * Shows a select dialog with the given message and title. Returns the index of the selected option.
  *
  * @param string $message The message to show.
- * @param array $options The options to show.
+ * @param string[] $options The options to show.
  * @param string $title The title of the dialog. Defaults to "Select".
  * @param int $default The default option. Defaults to 0.
  * @param Vector2|null $position The position of the dialog. Defaults to null.
@@ -236,6 +237,15 @@ function show_text(
   Console::showText($message, $title, $help, $position, $charactersPerSecond);
 }
 
+/**
+ * Creates a new notification with the given channel, title, text, and duration.
+ *
+ * @param NotificationChannel $channel The channel to send the notification to.
+ * @param string $title The title of the notification.
+ * @param string $text The text of the notification.
+ * @param NotificationDuration|float $duration The duration of the notification.
+ * @return void
+ */
 function notify(
   NotificationChannel $channel,
   string $title,
