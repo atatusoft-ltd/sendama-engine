@@ -2,7 +2,9 @@
 
 namespace Sendama\Engine\IO\Console;
 
+use Exception;
 use Sendama\Engine\Core\Grid;
+use Sendama\Engine\Core\Rect;
 use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\IO\Enumerations\Color;
 
@@ -160,6 +162,20 @@ class Console
   public static function setSize(int $width, int $height): void
   {
     echo "\033[8;$height;{$width}t";
+  }
+
+  /**
+   * Returns the terminal size.
+   *
+   * @return Rect The terminal size.
+   * @throws Exception If the terminal size cannot be retrieved.
+   */
+  public static function getSize(): Rect
+  {
+    $width = passthru("tput cols") ?: throw new Exception('Failed to get terminal width.');
+    $height = passthru("tput lines") ?: throw new Exception('Failed to get terminal height.');
+
+    return new Rect(new Vector2(1, 1), new Vector2($width, $height));
   }
 
   /**

@@ -185,13 +185,11 @@ abstract class AbstractScene implements SceneInterface
   {
     Debug::log("Scene stopped: " . $this->name);
 
-    foreach ($this->rootGameObjects as $gameObject)
-    {
+    foreach ($this->rootGameObjects as $gameObject) {
       $gameObject->stop();
     }
 
-    foreach ($this->uiElements as $uiElement)
-    {
+    foreach ($this->uiElements as $uiElement) {
       $uiElement->stop();
     }
 
@@ -225,16 +223,14 @@ abstract class AbstractScene implements SceneInterface
 
     foreach ($this->rootGameObjects as $gameObject)
     {
-      if ($gameObject->isActive())
-      {
+      if ($gameObject->isActive()) {
         $gameObject->update();
       }
     }
 
     foreach ($this->uiElements as $uiElement)
     {
-      if ($uiElement->isActive())
-      {
+      if ($uiElement->isActive()) {
         $uiElement->update();
       }
     }
@@ -264,10 +260,8 @@ abstract class AbstractScene implements SceneInterface
    */
   public final function suspend(): void
   {
-    foreach ($this->rootGameObjects as $gameObject)
-    {
-      if ($gameObject->isActive())
-      {
+    foreach ($this->rootGameObjects as $gameObject) {
+      if ($gameObject->isActive()) {
         $gameObject->suspend();
       }
     }
