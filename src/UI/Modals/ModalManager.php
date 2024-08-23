@@ -2,11 +2,13 @@
 
 namespace Sendama\Engine\UI\Modals;
 
+use Assegai\Collections\Stack;
 use Sendama\Engine\Core\Interfaces\CanRender;
 use Sendama\Engine\Core\Interfaces\CanResume;
 use Sendama\Engine\Core\Interfaces\CanStart;
 use Sendama\Engine\Core\Interfaces\CanUpdate;
 use Sendama\Engine\Core\Interfaces\SingletonInterface;
+use Sendama\Engine\UI\Modals\Interfaces\ModalInterface;
 
 /**
  * The Modal manager class is responsible for creating, managing and disposing of modals.
@@ -15,14 +17,42 @@ use Sendama\Engine\Core\Interfaces\SingletonInterface;
  */
 class ModalManager implements SingletonInterface, CanStart, CanUpdate, CanRender, CanResume
 {
+  /**
+   * @var ModalManager|null $instance The instance of the modal manager.
+   */
   protected static ?ModalManager $instance = null;
+
+  /**
+   * @var Stack<ModalInterface> $modals The stack of modals.
+   */
+  protected Stack $modals;
+
+  public function __construct()
+  {
+    $this->modals = new Stack(ModalInterface::class);
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * @return self
+   */
+  public static function getInstance(): self
+  {
+    if (!self::$instance)
+    {
+      self::$instance = new self();
+    }
+
+    return self::$instance;
+  }
 
   /**
    * @inheritDoc
    */
   public function render(): void
   {
-    // TODO: Implement render() method.
+    $this->getCurrentModal()->render();
   }
 
   /**
@@ -69,18 +99,42 @@ class ModalManager implements SingletonInterface, CanStart, CanUpdate, CanRender
   }
 
   /**
-   * @inheritDoc
-   *
-   * @return self
+   * @return ModalInterface|null The current modal.
    */
-  public static function getInstance(): self
+  private function getCurrentModal(): ?ModalInterface
   {
-    // TODO: Implement getInstance() method.
-    if (!self::$instance)
-    {
-      self::$instance = new self();
-    }
+    return $this->modals->peek();
+  }
 
-    return self::$instance;
+  /**
+   * Displays an alert box with the specified message and an OK button.
+   *
+   * @param string $message The message to display.
+   * @param string $title The title of the alert.
+   * @param int $width The width of the alert.
+   * @return void
+   */
+  public function alert(string $message, string $title = '', int $width = DEFAULT_DIALOG_WIDTH): void
+  {
+    $this->modals->push(new AlertModal($message, $title, $width));
+    $this->modals->peek()->open();
+    $this->modals->pop();
+  }
+
+  /**
+   * Displays a confirmation box with the specified message and an OK and Cancel button.
+   *
+   * @param string $message The message to display.
+   * @param string $title The title of the alert.
+   * @param int $width The width of the alert.
+   * @return bool The result of the confirmation.
+   */
+  public function confirm(string $message, string $title = '', int $width = DEFAULT_DIALOG_WIDTH): bool
+  {
+    $this->modals->push(new ConfirmModal($message, $title, $width));
+    $result = $this->modals->peek()->open();
+    $this->modals->pop();
+
+    return (bool)$result;
   }
 }
