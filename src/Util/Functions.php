@@ -9,6 +9,7 @@ use Sendama\Engine\Events\GameEvent;
 use Sendama\Engine\Events\Interfaces\EventInterface;
 use Sendama\Engine\Exceptions\Scenes\SceneNotFoundException;
 use Sendama\Engine\IO\Console\Console;
+use Sendama\Engine\UI\Windows\Enumerations\WindowPosition;
 
 
 /* Application */
@@ -25,7 +26,7 @@ function getGameName(): string
  */
 function quitGame(?int $code = null): void
 {
-  EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::QUIT, $code));
+  EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::QUIT, data: $code));
 }
 
 /**
@@ -196,7 +197,7 @@ function prompt(
  * Shows a select dialog with the given message and title. Returns the index of the selected option.
  *
  * @param string $message The message to show.
- * @param array $options The options to show.
+ * @param string[] $options The options to show.
  * @param string $title The title of the dialog. Defaults to "Select".
  * @param int $default The default option. Defaults to 0.
  * @param Vector2|null $position The position of the dialog. Defaults to null.
