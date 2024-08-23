@@ -237,6 +237,15 @@ function show_text(
   Console::showText($message, $title, $help, $position, $charactersPerSecond);
 }
 
+/**
+ * Creates a new notification with the given channel, title, text, and duration.
+ *
+ * @param NotificationChannel $channel The channel to send the notification to.
+ * @param string $title The title of the notification.
+ * @param string $text The text of the notification.
+ * @param NotificationDuration|float $duration The duration of the notification.
+ * @return void
+ */
 function notify(
   NotificationChannel $channel,
   string $title,
