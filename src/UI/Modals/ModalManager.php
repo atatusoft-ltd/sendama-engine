@@ -8,7 +8,9 @@ use Sendama\Engine\Core\Interfaces\CanResume;
 use Sendama\Engine\Core\Interfaces\CanStart;
 use Sendama\Engine\Core\Interfaces\CanUpdate;
 use Sendama\Engine\Core\Interfaces\SingletonInterface;
+use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\UI\Modals\Interfaces\ModalInterface;
+use Sendama\Engine\UI\Windows\Enumerations\WindowPosition;
 
 /**
  * The Modal manager class is responsible for creating, managing and disposing of modals.
@@ -52,7 +54,7 @@ class ModalManager implements SingletonInterface, CanStart, CanUpdate, CanRender
    */
   public function render(): void
   {
-    $this->getCurrentModal()->render();
+    $this->renderAt();
   }
 
   /**
@@ -60,42 +62,60 @@ class ModalManager implements SingletonInterface, CanStart, CanUpdate, CanRender
    */
   public function renderAt(?int $x = null, ?int $y = null): void
   {
-    // TODO: Implement renderAt() method.
+    $this->getCurrentModal()->render();
   }
 
+  /**
+   * @inheritDoc
+   */
   public function erase(): void
   {
-    // TODO: Implement erase() method.
+    $this->eraseAt();
   }
 
+  /**
+   * @inheritDoc
+   */
   public function eraseAt(?int $x = null, ?int $y = null): void
   {
-    // TODO: Implement eraseAt() method.
+    $this->getCurrentModal()->erase();
   }
 
+  /**
+   * @inheritDoc
+   */
   public function resume(): void
   {
-    // TODO: Implement resume() method.
+    // Do nothing.
   }
 
+  /**
+   * @inheritDoc
+   */
   public function suspend(): void
   {
-    // TODO: Implement suspend() method.
+    // Do nothing.
   }
 
+  /**
+   * @inheritDoc
+   */
   public function start(): void
   {
-    // TODO: Implement start() method.
+    // Do nothing.
   }
 
+  /**
+   * @inheritDoc
+   */
   public function stop(): void
   {
-    // TODO: Implement stop() method.
+    // Do nothing.
   }
 
   public function update(): void
   {
-    // TODO: Implement update() method.
+    $this->getCurrentModal()->update();
   }
 
   /**
@@ -136,5 +156,82 @@ class ModalManager implements SingletonInterface, CanStart, CanUpdate, CanRender
     $this->modals->pop();
 
     return (bool)$result;
+  }
+
+  /**
+   * Displays a dialog box that prompts the user for input with specified message and an OK and Cancel button.
+   *
+   * @param string $message The message to display.
+   * @param string $title The title of the alert.
+   * @param string $default The default value of the prompt.
+   * @param int $width The width of the alert.
+   * @return string The result of the prompt.
+   */
+  public function prompt(string $message, string $title = '', string $default = '', int $width = DEFAULT_DIALOG_WIDTH): string
+  {
+    $modal = new PromptModal($message, $title, $default, $width);
+    $modal->setContent($message);
+    $this->modals->push($modal);
+
+    return '';
+  }
+
+  /**
+   * Displays a dialog box that prompts the user to select an option from a list of options.
+   *
+   * @param string $message The message to display.
+   * @param array $options The options to display.
+   * @param string $title The title of the dialog box.
+   * @param int $default The default option.
+   * @param Vector2|null $position
+   * @param int $width The width of the dialog box.
+   * @return int
+   */
+  public function select(
+    string $message,
+    array $options,
+    string $title = '',
+    int $default = 0,
+    ?Vector2 $position = null,
+    int $width = DEFAULT_SELECT_DIALOG_WIDTH
+  ): int
+  {
+    $position = $position ?? new Vector2(0, 0);
+    $this->modals->push(new SelectModal(
+      $message,
+      $options,
+      $title,
+      $default,
+      $position->getX(),
+      $position->getY(),
+      $width
+    ));
+    $result = $this->modals->peek()->open();
+    $this->modals->pop();
+
+    return (int)$result;
+  }
+
+  /**
+   * Displays a dialog box with a message.
+   *
+   * @param string $message The message to display.
+   * @param string $title The title of the dialog box.
+   * @param string $help The help text to display.
+   * @param WindowPosition $position The position of the dialog box.
+   * @param float $charactersPerSecond The number of characters to display per second.
+   * @return void
+   */
+  public function showText(
+    string $message,
+    string $title = '',
+    string $help = '',
+    WindowPosition $position = WindowPosition::BOTTOM,
+    float $charactersPerSecond = 1
+  ): void
+  {
+    $this->modals->push(new TextBoxModal($message, $title, $help, $position, charactersPerSecond: $charactersPerSecond));
+    $this->modals->peek()->open();
+    $this->modals->pop();
   }
 }
