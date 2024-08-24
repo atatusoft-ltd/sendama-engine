@@ -32,7 +32,7 @@ class SettingsScene extends AbstractScene
     Debug::log(var_export($this->settings, true));
     $leftMargin = round(DEFAULT_SCREEN_WIDTH / 2 - $settingsMenuWidth / 2);
     $topMargin = round(DEFAULT_SCREEN_HEIGHT / 2 - $settingsMenuHeight / 2);
-    $settingsMenuBorderPack = new BorderPack(Path::join(Path::getAssetsDirectory(), 'border-packs', 'slim.border.php'));
+    $settingsMenuBorderPack = new BorderPack(Path::join(Path::getVendorAssetsDirectory(), 'border-packs', 'slim.border.php'));
 
     $settingsPosition = new Vector2($leftMargin, $topMargin);
     $settingsSize = new Vector2($settingsMenuWidth, $settingsMenuHeight);

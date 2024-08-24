@@ -8,7 +8,7 @@ require 'vendor/autoload.php';
 $width = 40;
 $height = 5;
 
-$borderPack = new BorderPack(Path::getAssetsDirectory() . '/border-packs/default.border.php');
+$borderPack = new BorderPack(Path::getVendorAssetsDirectory() . '/border-packs/default.border.php');
 
 echo $borderPack->getTopLeftCorner();
 

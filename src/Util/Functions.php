@@ -9,6 +9,10 @@ use Sendama\Engine\Events\GameEvent;
 use Sendama\Engine\Events\Interfaces\EventInterface;
 use Sendama\Engine\Exceptions\Scenes\SceneNotFoundException;
 use Sendama\Engine\IO\Console\Console;
+use Sendama\Engine\Messaging\Notifications\Enumerations\NotificationChannel;
+use Sendama\Engine\Messaging\Notifications\Enumerations\NotificationDuration;
+use Sendama\Engine\Messaging\Notifications\Notification;
+use Sendama\Engine\Messaging\Notifications\NotificationsManager;
 use Sendama\Engine\UI\Windows\Enumerations\WindowPosition;
 
 
@@ -254,7 +258,7 @@ function notify(
 ): void
 {
   $notification = new Notification($channel, $title, $text, $duration);
-  NotificationManager::getInstance()->notify($notification);
+  NotificationsManager::getInstance()->notify($notification);
 }
 
 /* Events */

@@ -643,7 +643,7 @@ class Game implements ObservableInterface
       if (!file_exists($this->getSettings('splash_texture')))
       {
         Debug::warn("Splash screen texture not found: {$this->settings['splash_texture']}");
-        $this->settings['splash_texture'] = Path::join(Path::getAssetsDirectory(), DEFAULT_SPLASH_TEXTURE_PATH);
+        $this->settings['splash_texture'] = Path::join(Path::getVendorAssetsDirectory(), DEFAULT_SPLASH_TEXTURE_PATH);
       }
 
       Debug::info("Loading splash screen texture");
