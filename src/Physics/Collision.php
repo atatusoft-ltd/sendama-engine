@@ -8,14 +8,17 @@ use Sendama\Engine\Physics\Interfaces\CollisionInterface;
 
 /**
  * Collision class. Represents a collision between two colliders.
+ *
+ * @template T
+ * @implements CollisionInterface<T>
  */
 class Collision implements CollisionInterface
 {
   /**
    * Collision constructor.
    *
-   * @param Collider $collider The collider that collided.
-   * @param ContactPoint[] $contacts The contacts of the collision.
+   * @param Collider<T> $collider The collider that collided.
+   * @param ContactPoint<T>[] $contacts The contacts of the collision.
    */
   public function __construct(
     protected Collider $collider,

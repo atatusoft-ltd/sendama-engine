@@ -6,26 +6,31 @@ use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\Physics\Interfaces\ColliderInterface;
 use Sendama\Engine\Physics\Strategies\AbstractCollisionDetectionStrategy;
 
+/**
+ * The class BasicCollisionDetectionStrategy.
+ *
+ * @package Sendama\Engine\Physics\Strategies
+ * @template T
+ */
 class BasicCollisionDetectionStrategy extends AbstractCollisionDetectionStrategy
 {
 
   /**
    * @inheritDoc
+   *
+   * @param ColliderInterface<T> $collider The collider to check if it is touching.
    */
   public function isTouching(ColliderInterface $collider): bool
   {
-    if ($this->collider->getGameObject()->getName() === $collider->getGameObject()->getName())
-    {
+    if ($this->collider->getGameObject()->getName() === $collider->getGameObject()->getName()) {
       return false;
     }
 
-    if ($this->collider->getTransform()->getPosition()->getX() !== $collider->getTransform()->getPosition()->getX())
-    {
+    if ($this->collider->getTransform()->getPosition()->getX() !== $collider->getTransform()->getPosition()->getX()) {
       return false;
     }
 
-    if ($this->collider->getTransform()->getPosition()->getY() !== $collider->getTransform()->getPosition()->getY())
-    {
+    if ($this->collider->getTransform()->getPosition()->getY() !== $collider->getTransform()->getPosition()->getY()) {
       return false;
     }
 

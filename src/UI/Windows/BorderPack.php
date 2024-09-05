@@ -9,6 +9,7 @@ use Sendama\Engine\UI\Windows\Interfaces\BorderPackInterface;
  * Class BorderPack. Represents a border pack.
  *
  * @package Sendama\Engine\UI\Windows
+ * @noinspection PhpUnused
  */
 class BorderPack implements BorderPackInterface
 {

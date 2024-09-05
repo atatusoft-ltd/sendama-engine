@@ -62,7 +62,7 @@ class ModalManager implements SingletonInterface, CanStart, CanUpdate, CanRender
    */
   public function renderAt(?int $x = null, ?int $y = null): void
   {
-    $this->getCurrentModal()->render();
+    $this->getCurrentModal()?->renderAt($x, $y);
   }
 
   /**
@@ -78,7 +78,7 @@ class ModalManager implements SingletonInterface, CanStart, CanUpdate, CanRender
    */
   public function eraseAt(?int $x = null, ?int $y = null): void
   {
-    $this->getCurrentModal()->erase();
+    $this->getCurrentModal()?->eraseAt($x, $y);
   }
 
   /**
@@ -115,7 +115,7 @@ class ModalManager implements SingletonInterface, CanStart, CanUpdate, CanRender
 
   public function update(): void
   {
-    $this->getCurrentModal()->update();
+    $this->getCurrentModal()?->update();
   }
 
   /**
@@ -123,6 +123,10 @@ class ModalManager implements SingletonInterface, CanStart, CanUpdate, CanRender
    */
   private function getCurrentModal(): ?ModalInterface
   {
+    if ( $this->modals->isEmpty() ) {
+      return null;
+    }
+
     return $this->modals->peek();
   }
 
@@ -180,7 +184,7 @@ class ModalManager implements SingletonInterface, CanStart, CanUpdate, CanRender
    * Displays a dialog box that prompts the user to select an option from a list of options.
    *
    * @param string $message The message to display.
-   * @param array $options The options to display.
+   * @param array<string, mixed> $options The options to display.
    * @param string $title The title of the dialog box.
    * @param int $default The default option.
    * @param Vector2|null $position

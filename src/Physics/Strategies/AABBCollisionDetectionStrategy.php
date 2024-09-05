@@ -15,6 +15,9 @@ class AABBCollisionDetectionStrategy extends AbstractCollisionDetectionStrategy
 
   /**
    * @inheritDoc
+   *
+   * @template T
+   * @param ColliderInterface<T> $collider The collider to check if it is touching.
    */
   public function isTouching(ColliderInterface $collider): bool
   {

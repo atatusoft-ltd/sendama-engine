@@ -27,7 +27,6 @@ use Sendama\Engine\UI\Windows\WindowPadding;
 
 abstract class Modal implements ModalInterface
 {
-
   /**
    * @var bool $showing Whether the modal is showing or not.
    */
@@ -40,6 +39,10 @@ abstract class Modal implements ModalInterface
    * @var ItemList<ObserverInterface> $observers The observers of the modal.
    */
   protected ItemList $observers;
+  /**
+   * @var ItemList<StaticObserverInterface> $staticObservers The static observers of the modal.
+   */
+  protected ItemList $staticObservers;
   /**
    * @var mixed $value The value of the modal.
    */
@@ -77,6 +80,17 @@ abstract class Modal implements ModalInterface
    */
   protected int $topMargin = 0;
 
+  /**
+   * @param string $message
+   * @param string $title
+   * @param int|null $x
+   * @param int|null $y
+   * @param int|null $width
+   * @param int|null $height
+   * @param string[] $buttons
+   * @param string|null $help
+   * @param BorderPackInterface $borderPack
+   */
   public function __construct(
     string $message,
     protected string $title = '',
@@ -90,6 +104,7 @@ abstract class Modal implements ModalInterface
   )
   {
     $this->observers = new ItemList(ObserverInterface::class);
+    $this->staticObservers = new ItemList(StaticObserverInterface::class);
     $this->eventManager = EventManager::getInstance();
 
     $alignment = new WindowAlignment(HorizontalAlignment::CENTER, VerticalAlignment::MIDDLE);
@@ -97,7 +112,7 @@ abstract class Modal implements ModalInterface
 
     $this->window = new Window(
       $this->title,
-      $this->help,
+      $this->help ?? '',
       new Vector2($this->x ?? 0, $this->y ?? 0),
       $this->width ?? DEFAULT_DIALOG_WIDTH,
       $this->height ?? DEFAULT_DIALOG_HEIGHT,
@@ -150,7 +165,7 @@ abstract class Modal implements ModalInterface
 
     for ($row = 0; $row < $height; $row++) {
       Console::cursor()->moveTo($leftMargin + ($this->x ?? 0), $topMargin + $row + ($this->y ?? 0));
-      echo str_repeat(' ', $this->width);
+      echo str_repeat(' ', $this->width ?? 0);
     }
   }
 
@@ -320,7 +335,7 @@ abstract class Modal implements ModalInterface
    */
   public function getHelp(): string
   {
-    return $this->help;
+    return $this->help ?? '';
   }
 
   /**
@@ -336,7 +351,7 @@ abstract class Modal implements ModalInterface
    */
   public function getHelpLength(): int
   {
-    return strlen($this->help);
+    return strlen($this->getHelp());
   }
 
   /**
@@ -353,7 +368,15 @@ abstract class Modal implements ModalInterface
   public function addObservers(string|StaticObserverInterface|ObserverInterface ...$observers): void
   {
     foreach ($observers as $observer) {
-      $this->observers->add($observer);
+      if (is_object($observer)) {
+        if (get_class($observer) === ObserverInterface::class) {
+          $this->observers->add($observer);
+        }
+
+        if (get_class($observer) === StaticObserverInterface::class) {
+          $this->staticObservers->add($observer);
+        }
+      }
     }
   }
 
@@ -363,7 +386,15 @@ abstract class Modal implements ModalInterface
   public function removeObservers(string|StaticObserverInterface|ObserverInterface|null ...$observers): void
   {
     foreach ($observers as $observer) {
-      $this->observers->remove($observer);
+      if (is_object($observer)) {
+        if (get_class($observer) === ObserverInterface::class) {
+          $this->observers->remove($observer);
+        }
+
+        if (get_class($observer) === StaticObserverInterface::class) {
+          $this->staticObservers->remove($observer);
+        }
+      }
     }
   }
 
@@ -375,6 +406,11 @@ abstract class Modal implements ModalInterface
     foreach ($this->observers as $observer) {
       /** @var ObserverInterface $observer */
       $observer->onNotify($this, $event);
+    }
+
+    foreach ($this->staticObservers as $observer) {
+      /** @var StaticObserverInterface $observer */
+      $observer::onNotify($this, $event);
     }
   }
 
@@ -426,7 +462,7 @@ abstract class Modal implements ModalInterface
 
     $output =
       $this->borderPack->getVerticalBorder() .
-      str_replace($this->buttons[$this->activeIndex] ?? '', Color::apply($this->buttons[$this->activeIndex] ?? '', $activeColor->value), $output) .
+      str_replace($this->buttons[$this->activeIndex] ?? '', Color::apply($activeColor, $this->buttons[$this->activeIndex] ?? ''), $output) .
       $this->borderPack->getVerticalBorder();
     echo $output;
   }
@@ -438,8 +474,7 @@ abstract class Modal implements ModalInterface
    */
   protected function renderBottomBorder(): void
   {
-    $helpLength = strlen($this->help);
-    $horizontalBorder = str_repeat($this->borderPack->getHorizontalBorder(), $this->width - $helpLength - 3);
+    $horizontalBorder = str_repeat($this->borderPack->getHorizontalBorder(), $this->width - $this->getHelpLength() - 3);
     $output = $this->borderPack->getBottomLeftCorner() .
       $this->borderPack->getHorizontalBorder() .
       $this->help .

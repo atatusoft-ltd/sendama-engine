@@ -2,7 +2,6 @@
 
 namespace Sendama\Engine\UI\Modals;
 
-use Override;
 use Sendama\Engine\IO\Enumerations\KeyCode;
 use Sendama\Engine\IO\Input;
 use Sendama\Engine\UI\Windows\BorderPack;
@@ -10,12 +9,7 @@ use Sendama\Engine\UI\Windows\Enumerations\WindowPosition;
 use Sendama\Engine\UI\Windows\Interfaces\BorderPackInterface;
 use Sendama\Engine\UI\Windows\Window;
 
-/**
- * This class represents a modal that displays a message in a text box.
- *
- * @package Sendama\Engine\UI\Modals
- */
-class TextModal extends Modal
+class TextBoxModal extends Modal
 {
   /**
    * @var bool Whether the text is currently being printed.
@@ -84,7 +78,6 @@ class TextModal extends Modal
   /**
    * @inheritDoc
    */
-  #[Override]
   public function setHelp(string $help): void
   {
     parent::setHelp($help);
@@ -120,11 +113,6 @@ class TextModal extends Modal
     }
   }
 
-  /**
-   * Updates the content of the window.
-   *
-   * @return void
-   */
   public function updateContent(): void
   {
     if ($this->isPrinting) {

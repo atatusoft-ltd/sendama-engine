@@ -11,7 +11,7 @@ use Sendama\Engine\Core\Sprite as Frame;
  *
  * Represents an animation clip.
  */
-class AnimationClip implements Interfaces\AnimationClipInterface
+class AnimationClip implements AnimationClipInterface
 {
   /**
    * AnimationClip constructor.

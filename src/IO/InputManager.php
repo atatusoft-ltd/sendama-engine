@@ -11,6 +11,8 @@ use Sendama\Engine\IO\Enumerations\KeyCode;
 
 /**
  * InputManager handles input from the user.
+ *
+ * @package Sendama\Engine\IO
  */
 class InputManager
 {
@@ -102,17 +104,9 @@ class InputManager
   public static function handleInput(): void
   {
     self::$previousKeyPress = self::$keyPress;
-    self::$keyPress = fgets(STDIN);
+    self::$keyPress = fgets(STDIN) ?: '';
 
-    if (false === self::$keyPress)
-    {
-      throw new RuntimeException('Failed to read input.');
-    }
-
-    if (self::$keyPress)
-    {
-      EventManager::getInstance()->dispatchEvent(event: new KeyboardEvent(key: self::getKey(keyPress: self::$keyPress)));
-    }
+    EventManager::getInstance()->dispatchEvent(event: new KeyboardEvent(key: self::getKey(keyPress: self::$keyPress)));
   }
 
   /**
@@ -123,37 +117,26 @@ class InputManager
    */
   public static function getAxis(AxisName|string $axisName): float
   {
-    if (is_string($axisName))
-    {
+    if (is_string($axisName)) {
       /** @var ?Button $axis */
       $axis = array_filter(self::$buttons, fn(Button $button) => $button->getName() === $axisName)[0] ?? null;
-      if (is_null($axis))
-      {
+      if (is_null($axis)) {
         return 0;
       }
 
       return $axis->getValue();
     }
 
-    if ($axisName === AxisName::HORIZONTAL)
-    {
-      if (self::isAnyKeyPressed([KeyCode::LEFT, KeyCode::A, KeyCode::a]))
-      {
+    if ($axisName === AxisName::HORIZONTAL) {
+      if (self::isAnyKeyPressed([KeyCode::LEFT, KeyCode::A, KeyCode::a])) {
         return -1;
-      }
-      else if (self::isAnyKeyPressed([KeyCode::RIGHT, KeyCode::D, KeyCode::d]))
-      {
+      } else if (self::isAnyKeyPressed([KeyCode::RIGHT, KeyCode::D, KeyCode::d])) {
         return 1;
       }
-    }
-    else if ($axisName === AxisName::VERTICAL)
-    {
-      if (self::isAnyKeyPressed([KeyCode::UP, KeyCode::W, KeyCode::w]))
-      {
+    } else if ($axisName === AxisName::VERTICAL) {
+      if (self::isAnyKeyPressed([KeyCode::UP, KeyCode::W, KeyCode::w])) {
         return -1;
-      }
-      else if (self::isAnyKeyPressed([KeyCode::DOWN, KeyCode::S, KeyCode::s]))
-      {
+      } else if (self::isAnyKeyPressed([KeyCode::DOWN, KeyCode::S, KeyCode::s])) {
         return 1;
       }
     }
@@ -175,15 +158,13 @@ class InputManager
   /**
    * Checks if all keys are pressed.
    *
-   * @param array $keyCodes The key codes to check.
+   * @param KeyCode[] $keyCodes The key codes to check.
    * @return bool Returns true if all keys are pressed, false otherwise.
    */
   public static function areAllKeysPressed(array $keyCodes): bool
   {
-    foreach ($keyCodes as $keyCode)
-    {
-      if (!self::isKeyPressed($keyCode))
-      {
+    foreach ($keyCodes as $keyCode) {
+      if (!self::isKeyPressed($keyCode)) {
         return false;
       }
     }
@@ -198,13 +179,12 @@ class InputManager
    */
   public static function isAnyKeyPressed(array $keyCodes): bool
   {
-    foreach ($keyCodes as $keyCode)
-    {
-      if (self::isKeyDown($keyCode))
-      {
+    foreach ($keyCodes as $keyCode) {
+      if (self::isKeyDown($keyCode)) {
         return true;
       }
     }
+
     return false;
   }
 
@@ -216,13 +196,12 @@ class InputManager
    */
   public static function isAnyKeyReleased(array $keyCodes): bool
   {
-    foreach ($keyCodes as $keyCode)
-    {
-      if (self::isKeyUp($keyCode))
-      {
+    foreach ($keyCodes as $keyCode) {
+      if (self::isKeyUp($keyCode)) {
         return true;
       }
     }
+
     return false;
   }
 
@@ -262,10 +241,8 @@ class InputManager
    */
   public static function isButtonDown(string $buttonName): bool
   {
-    foreach (self::$buttons as $button)
-    {
-      if ($button->getName() === $buttonName)
-      {
+    foreach (self::$buttons as $button) {
+      if ($button->getName() === $buttonName) {
         return self::isAnyKeyPressed($button->getPositiveKeys());
       }
     }
@@ -281,8 +258,7 @@ class InputManager
    */
   public static function addAxes(VirtualAxis ...$axes): void
   {
-    foreach ($axes as $axis)
-    {
+    foreach ($axes as $axis) {
       self::$axes[] = $axis;
     }
   }
@@ -292,6 +268,7 @@ class InputManager
    *
    * @param string $axisName The name of the axis.
    * @return VirtualAxis|null Returns the axis if found, null otherwise.
+   * @phpstan-ignore method.unused
    */
   private static function findAxis(string $axisName): ?VirtualAxis
   {
@@ -306,8 +283,7 @@ class InputManager
    */
   private static function getKey(?string $keyPress): string
   {
-    if (is_null($keyPress))
-    {
+    if (is_null($keyPress)) {
       return '';
     }
 
