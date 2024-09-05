@@ -10,11 +10,15 @@ use Sendama\Engine\Physics\Strategies\AbstractCollisionDetectionStrategy;
  * The class SeparationBasedCollisionDetectionStrategy.
  *
  * @package Sendama\Engine\Physics\Strategies
+ *
+ * @template T
  */
 class SeparationBasedCollisionDetectionStrategy extends AbstractCollisionDetectionStrategy
 {
   /**
    * @inheritDoc
+   *
+   * @param ColliderInterface<T> $collider The collider to check if it is touching.
    */
   public function isTouching(ColliderInterface $collider): bool
   {

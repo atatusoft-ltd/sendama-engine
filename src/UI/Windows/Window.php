@@ -31,6 +31,14 @@ class Window implements WindowInterface
    * @var ItemList<ObserverInterface> $observers
    */
   protected ItemList $observers;
+
+  /**
+   * @var ItemList<StaticObserverInterface> $staticObservers
+   */
+  protected ItemList $staticObservers;
+  /**
+   * @var Cursor $cursor
+   */
   protected Cursor $cursor;
 
   /**
@@ -216,12 +224,11 @@ class Window implements WindowInterface
 
     // Render content
     $linesOfContent = $this->getLinesOfContent();
-    if (!$linesOfContent)
-    {
+    if (!$linesOfContent) {
       $linesOfContent = [''];
     }
-    foreach ($linesOfContent as $index => $line)
-    {
+
+    foreach ($linesOfContent as $index => $line) {
       $this->cursor->moveTo($leftMargin, $topMargin + $index + $topBorderHeight);
       echo mb_substr($line, 0, $this->width);
     }
@@ -249,8 +256,7 @@ class Window implements WindowInterface
     $leftMargin = $this->position->getX() + $x;
     $topMargin = $this->position->getY() + $y;
 
-    for ($i = 0; $i < $this->height; $i++)
-    {
+    for ($i = 0; $i < $this->height; $i++) {
       $this->cursor->moveTo($leftMargin, $topMargin + $i);
       echo str_repeat(' ', $this->width);
     }
@@ -261,9 +267,16 @@ class Window implements WindowInterface
    */
   public function addObservers(ObserverInterface|StaticObserverInterface|string ...$observers): void
   {
-    foreach ($observers as $observer)
-    {
-      $this->observers->add($observer);
+    foreach ($observers as $observer) {
+      if ( is_object($observer) ) {
+        if (get_class($observer) === ObserverInterface::class) {
+          $this->observers->add($observer);
+        }
+
+        if (get_class($observer) === StaticObserverInterface::class) {
+          $this->staticObservers->add($observer);
+        }
+      }
     }
   }
 
@@ -272,9 +285,16 @@ class Window implements WindowInterface
    */
   public function removeObservers(ObserverInterface|StaticObserverInterface|string|null ...$observers): void
   {
-    foreach ($observers as $observer)
-    {
-      $this->observers->remove($observer);
+    foreach ($observers as $observer) {
+      if ( is_object($observer) ) {
+        if (get_class($observer) === ObserverInterface::class) {
+          $this->observers->remove($observer);
+        }
+
+        if (get_class($observer) === StaticObserverInterface::class) {
+          $this->staticObservers->remove($observer);
+        }
+      }
     }
   }
 
@@ -283,15 +303,12 @@ class Window implements WindowInterface
    */
   public function notify(EventInterface $event): void
   {
-    foreach ($this->observers as $observer)
-    {
-      if ($observer instanceof StaticObserverInterface)
-      {
-        $observer::onNotify($this, $event);
-        continue;
-      }
-
+    foreach ($this->observers as $observer) {
       $observer->onNotify($event);
+    }
+
+    foreach ($this->staticObservers as $observer) {
+      $observer::onNotify($event);
     }
   }
 
@@ -428,9 +445,9 @@ class Window implements WindowInterface
       $rightPaddingLength = max(ceil($totalPadding / 2), 0);
 
       $output = $this->borderPack->getVerticalBorder();
-      $contentRender = str_repeat(' ', max($leftPaddingLength, 0));
+      $contentRender = str_repeat(' ', (int)max($leftPaddingLength, 0));
       $contentRender .= $content;
-      $contentRender .= str_repeat(' ', max($rightPaddingLength, 0));
+      $contentRender .= str_repeat(' ', (int)max($rightPaddingLength, 0));
 
       $output .= str_pad($contentRender, $this->width - 2, ' ', STR_PAD_BOTH);
       $output .= $this->borderPack->getVerticalBorder();

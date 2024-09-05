@@ -7,6 +7,8 @@ use Sendama\Engine\Physics\Interfaces\ColliderInterface;
 
 /**
  * Represents a contact point between two colliders.
+ *
+ * @template T
  */
 readonly class ContactPoint
 {
@@ -14,8 +16,8 @@ readonly class ContactPoint
    * ContactPoint constructor.
    *
    * @param Vector2 $point The point of contact.
-   * @param Collider $thisCollider The collider of the game object that this contact point belongs to.
-   * @param Collider $otherCollider The collider of the other game object that this contact point belongs to.
+   * @param ColliderInterface<T> $thisCollider The collider of the game object that this contact point belongs to.
+   * @param ColliderInterface<T> $otherCollider The collider of the other game object that this contact point belongs to.
    */
   public function __construct(
     protected Vector2 $point,
@@ -38,9 +40,9 @@ readonly class ContactPoint
   /**
    * Get the collider of the game object that this contact point belongs to.
    *
-   * @return Collider The collider of the game object that this contact point belongs to.
+   * @return ColliderInterface<T> The collider of the game object that this contact point belongs to.
    */
-  public function getThisCollider(): Collider
+  public function getThisCollider(): ColliderInterface
   {
     return $this->thisCollider;
   }
@@ -48,9 +50,9 @@ readonly class ContactPoint
   /**
    * Get the collider of the other game object that this contact point belongs to.
    *
-   * @return Collider The collider of the other game object that this contact point belongs to.
+   * @return ColliderInterface<T> The collider of the other game object that this contact point belongs to.
    */
-  public function getOtherCollider(): Collider
+  public function getOtherCollider(): ColliderInterface
   {
     return $this->otherCollider;
   }

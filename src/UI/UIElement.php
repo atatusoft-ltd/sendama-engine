@@ -36,6 +36,15 @@ abstract class UIElement implements UIElementInterface
     protected Vector2 $size = new Vector2(0, 0),
   )
   {
+    $this->awake();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function awake(): void
+  {
+    // Do nothing.
   }
 
   /**

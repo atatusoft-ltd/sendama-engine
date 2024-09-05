@@ -26,6 +26,11 @@ abstract class AbstractMenuControl extends MenuItem implements MenuControlInterf
   protected ItemList $observers;
 
   /**
+   * @var ItemList<StaticObserverInterface> The list of static observers.
+   */
+  protected ItemList $staticObservers;
+
+  /**
    * Constructs a menu control.
    *
    * @param string $label The label of the menu control.
@@ -44,6 +49,7 @@ abstract class AbstractMenuControl extends MenuItem implements MenuControlInterf
   {
     parent::__construct($label, $description, $icon, $callback);
     $this->observers = new ItemList(ObserverInterface::class);
+    $this->staticObservers = new ItemList(StaticObserverInterface::class);
   }
 
 
@@ -71,15 +77,13 @@ abstract class AbstractMenuControl extends MenuItem implements MenuControlInterf
     $v = Input::getAxis(AxisName::VERTICAL);
     $h = Input::getAxis(AxisName::HORIZONTAL);
 
-    if (abs($v) > 0)
-    {
-      $this->onVerticalInput($v);
+    if (abs($v) > 0) {
+      $this->onVerticalInput((int)$v);
       $this->notify(new MenuEvent(MenuEventType::ITEM_RECEIVED_VERTICAL_INPUT));
     }
 
-    if (abs($h) > 0)
-    {
-      $this->onHorizontalInput($h);
+    if (abs($h) > 0) {
+      $this->onHorizontalInput((int)$h);
       $this->notify(new MenuEvent(MenuEventType::ITEM_RECEIVED_HORIZONTAL_INPUT));
     }
   }
@@ -89,9 +93,16 @@ abstract class AbstractMenuControl extends MenuItem implements MenuControlInterf
    */
   public function addObservers(ObserverInterface|StaticObserverInterface|string ...$observers): void
   {
-    foreach ($observers as $observer)
-    {
-      $this->observers->add($observer);
+    foreach ($observers as $observer) {
+      if (is_object($observer)) {
+        if (get_class($observer) === ObserverInterface::class) {
+          $this->observers->add($observer);
+        }
+
+        if (get_class($observer) === StaticObserverInterface::class) {
+          $this->staticObservers->add($observer);
+        }
+      }
     }
   }
 
@@ -100,9 +111,16 @@ abstract class AbstractMenuControl extends MenuItem implements MenuControlInterf
    */
   public function removeObservers(ObserverInterface|StaticObserverInterface|string|null ...$observers): void
   {
-    foreach ($observers as $observer)
-    {
-      $this->observers->remove($observer);
+    foreach ($observers as $observer) {
+      if (is_object($observer)) {
+        if (get_class($observer) === ObserverInterface::class) {
+          $this->observers->remove($observer);
+        }
+
+        if (get_class($observer) === StaticObserverInterface::class) {
+          $this->staticObservers->remove($observer);
+        }
+      }
     }
   }
 
@@ -111,15 +129,12 @@ abstract class AbstractMenuControl extends MenuItem implements MenuControlInterf
    */
   public function notify(EventInterface $event): void
   {
-    foreach ($this->observers as $observer)
-    {
-      if ($observer instanceof StaticObserverInterface)
-      {
-        $observer::onNotify($this, $event);
-        continue;
-      }
-
+    foreach ($this->observers as $observer) {
       $observer->onNotify($event);
+    }
+
+    foreach ($this->staticObservers as $observer) {
+      $observer::onNotify($event);
     }
   }
 }

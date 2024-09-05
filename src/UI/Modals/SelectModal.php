@@ -63,6 +63,10 @@ class SelectModal implements ModalInterface
    */
   protected ItemList $observers;
   /**
+   * @var ItemList<StaticObserverInterface> $staticObservers The static observers.
+   */
+  protected ItemList $staticObservers;
+  /**
    * @var EventManager $eventManager The event manager.
    */
   protected EventManager $eventManager;
@@ -107,10 +111,11 @@ class SelectModal implements ModalInterface
   )
   {
     $this->observers = new ItemList(ObserverInterface::class);
+    $this->staticObservers = new ItemList(StaticObserverInterface::class);
     $this->eventManager = EventManager::getInstance();
     $this->setOptions($options);
     $this->setTitle($title);
-    $this->setHelp($help);
+    $this->setHelp($help ?? 'c:cancel');
   }
 
   /**
@@ -126,7 +131,7 @@ class SelectModal implements ModalInterface
   /**
    * Sets the options.
    *
-   * @param array $options The options.
+   * @param array<string, mixed> $options The options.
    * @return void
    */
   public function setOptions(array $options): void
@@ -167,7 +172,7 @@ class SelectModal implements ModalInterface
     $leftMargin = $this->x + ($x ?? 0);
     $topMargin = $this->y + ($y ?? 0);
 
-    $this->erase($leftMargin, $topMargin);
+    $this->eraseAt($leftMargin, $topMargin);
     $this->renderTopBorder($leftMargin, $topMargin);
     $this->renderOptions($leftMargin, $topMargin + 1);
     $this->renderBottomBorder($leftMargin, $topMargin + $this->getModalHeight() - 1);
@@ -191,7 +196,7 @@ class SelectModal implements ModalInterface
     $modalHeight = max($this->height, $this->getModalHeight());
 
     for ($row = $topMargin; $row < $topMargin + $modalHeight; $row++) {
-      Console::write(str_repeat(' ', $this->width), $leftMargin, $row);
+      Console::write(str_repeat(' ', $this->width ?? 0), $leftMargin, $row);
     }
   }
 
@@ -318,7 +323,7 @@ class SelectModal implements ModalInterface
    */
   public function getHelp(): string
   {
-    return $this->help;
+    return $this->help ?? '';
   }
 
   /**
@@ -397,7 +402,15 @@ class SelectModal implements ModalInterface
   public function addObservers(string|StaticObserverInterface|ObserverInterface ...$observers): void
   {
     foreach ($observers as $observer) {
-      $this->observers->add($observer);
+      if (is_object($observer)) {
+        if (get_class($observer) === StaticObserverInterface::class) {
+          $this->staticObservers->add($observer);
+        }
+
+        if (get_class($observer) ===ObserverInterface::class ) {
+          $this->observers->add($observer);
+        }
+      }
     }
   }
 
@@ -407,7 +420,15 @@ class SelectModal implements ModalInterface
   public function removeObservers(string|StaticObserverInterface|ObserverInterface|null ...$observers): void
   {
     foreach ($observers as $observer) {
-      $this->observers->remove($observer);
+      if (is_object($observer)) {
+        if (get_class($observer) === StaticObserverInterface::class) {
+          $this->staticObservers->remove($observer);
+        }
+
+        if (get_class($observer) === ObserverInterface::class) {
+          $this->observers->remove($observer);
+        }
+      }
     }
   }
 

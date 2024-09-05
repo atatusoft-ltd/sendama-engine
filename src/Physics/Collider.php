@@ -14,6 +14,9 @@ use Sendama\Engine\Physics\Traits\BoundTrait;
  * The class Collider.
  *
  * @package Sendama\Engine\Physics
+ *
+ * @template T
+ * @implements ColliderInterface<T>
  */
 class Collider extends Component implements ColliderInterface
 {
@@ -22,7 +25,7 @@ class Collider extends Component implements ColliderInterface
   /**
    * The physics.
    *
-   * @var Physics|null
+   * @var Physics<T>|null
    */
   protected ?Physics $physics = null;
 

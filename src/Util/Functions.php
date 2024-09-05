@@ -285,7 +285,7 @@ function broadcast(EventInterface $event): void
 function strip_ansi(string $input): string
 {
   $pattern = "/\e\[[0-9;]*m/";
-  return preg_replace($pattern, '', $input);
+  return preg_replace($pattern, '', $input) ?? '';
 }
 
 /* Game Objects */
@@ -328,4 +328,18 @@ function in_range(int $value, int $min, int $max): bool
 function within_bounds(Vector2 $point, Vector2 $min, Vector2 $max): bool
 {
   return in_range($point->getX(), $min->getX(), $max->getX()) && in_range($point->getY(), $min->getY(), $max->getY());
+}
+
+if (! function_exists('env') ) {
+  /**
+   * Gets the value of an environment variable.
+   *
+   * @param string $key The environment variable key.
+   * @param mixed|null $default The default value to return if the environment variable is not set.
+   * @return mixed
+   */
+  function env(string $key, mixed $default = null): mixed
+  {
+    return $_ENV[$key] ?? $default;
+  }
 }

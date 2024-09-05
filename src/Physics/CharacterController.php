@@ -17,24 +17,38 @@ use Sendama\Engine\Physics\Interfaces\CollisionInterface;
  * movement and will be constrained by collisions.
  *
  * @package Sendama\Engine\Physics
+ *
+ * @template T
+ * @extends Collider<mixed>
  */
 class CharacterController extends Collider implements ObservableInterface
 {
   /**
    * The observers.
    *
-   * @var ItemList
+   * @var ItemList<ObserverInterface>
    */
   protected ItemList $observers;
 
   /**
-   * @var array<CollisionInterface> The previous collisions.
+   * @var ItemList<StaticObserverInterface>
+   */
+  protected ItemList $staticObservers;
+
+  /**
+   * @var array<CollisionInterface<T>> The previous collisions.
    */
   private array $previousCollisions = [];
 
   public function onStart(): void
   {
-    $this->observers = new ItemList(ObserverInterface::class);
+    /** @var ItemList<ObserverInterface> $observers */
+    $observers = new ItemList(ObserverInterface::class);
+    $this->observers = $observers;
+
+    /** @var ItemList<StaticObserverInterface> $staticObservers */
+    $staticObservers = new ItemList(StaticObserverInterface::class);
+    $this->staticObservers = $staticObservers;
   }
 
   /**
@@ -45,14 +59,14 @@ class CharacterController extends Collider implements ObservableInterface
    */
   public function move(Vector2 $motion): void
   {
-    $collisions = $this->physics->checkCollisions($this, $motion);
+    $collisions = $this->physics?->checkCollisions($this, $motion);
     $canMove = true;
 
     // If there are collisions, resolve them.
-    foreach ($collisions as $collision)
-    {
-      if ($collision->getContact(0)->getSeparation())
-      $this->resolveCollision($collision);
+    foreach ($collisions ?? [] as $collision) {
+      if ($collision->getContact(0)?->getSeparation()) {
+        $this->resolveCollision($collision);
+      }
     }
 
     // If there are no collisions, move the character.
@@ -62,7 +76,7 @@ class CharacterController extends Collider implements ObservableInterface
   /**
    * Resolves the collision.
    *
-   * @param mixed $collision The collision.
+   * @param CollisionInterface<T> $collision The collision.
    * @return void
    */
   private function resolveCollision(CollisionInterface $collision): void
@@ -75,12 +89,12 @@ class CharacterController extends Collider implements ObservableInterface
 
     $collision
       ->getContact(0)
-      ->getThisCollider()
+      ?->getThisCollider()
       ->getGameObject()
       ->broadcast($methodName, ['collision' => $collision]);
     $collision
       ->getContact(0)
-      ->getOtherCollider()
+      ?->getOtherCollider()
       ->getGameObject()
       ->broadcast($methodName, ['collision' => $collision]);
 
@@ -92,9 +106,16 @@ class CharacterController extends Collider implements ObservableInterface
    */
   public function addObservers(string|StaticObserverInterface|ObserverInterface ...$observers): void
   {
-    foreach ($observers as $observer)
-    {
-      $this->observers->add($observer);
+    foreach ($observers as $observer) {
+      if (is_object($observer)) {
+        if (get_class($observer) === ObserverInterface::class) {
+          $this->observers->add($observer);
+        }
+
+        if (get_class($observer) === StaticObserverInterface::class) {
+          $this->staticObservers->add($observer);
+        }
+      }
     }
   }
 
@@ -103,9 +124,17 @@ class CharacterController extends Collider implements ObservableInterface
    */
   public function removeObservers(string|StaticObserverInterface|ObserverInterface|null ...$observers): void
   {
-    foreach ($observers as $observer)
-    {
-      $this->observers->remove($observer);
+    foreach ($observers as $observer) {
+      if (is_object($observer)) {
+        if (get_class($observer) === ObserverInterface::class) {
+          $this->observers->remove($observer);
+        }
+
+        if (get_class($observer) === StaticObserverInterface::class) {
+          $this->staticObservers->remove($observer);
+        }
+      }
+
     }
   }
 
@@ -114,24 +143,27 @@ class CharacterController extends Collider implements ObservableInterface
    */
   public function notify(EventInterface $event): void
   {
-    foreach ($this->observers as $observer)
-    {
-      $observer->onNotify($event);
+    /** @var ObserverInterface $observer */
+    foreach ($this->observers as $observer) {
+      $observer->onNotify($this, $event);
+    }
+
+    /** @var StaticObserverInterface $staticObserver */
+    foreach ($this->staticObservers as $staticObserver) {
+      $staticObserver::onNotify($this, $event);
     }
   }
 
   /**
    * Checks if the previous collisions includes the collision.
    *
-   * @param mixed $collision The collision.
+   * @param CollisionInterface<T> $collision The collision.
    * @return bool
    */
   private function previousCollisionsIncludes(CollisionInterface $collision): bool
   {
-    foreach ($this->previousCollisions as $previousCollision)
-    {
-      if ($previousCollision->getContact(0)?->getOtherCollider() === $collision->getContact(0)?->getOtherCollider())
-      {
+    foreach ($this->previousCollisions as $previousCollision) {
+      if ($previousCollision->getContact(0)?->getOtherCollider() === $collision->getContact(0)?->getOtherCollider()) {
         return true;
       }
     }

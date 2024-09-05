@@ -14,13 +14,22 @@ use Sendama\Engine\Physics\Traits\BoundTrait;
  * The class Rigidbody.
  *
  * @package Sendama\Engine\Physics
+ *
+ * @template T
+ * @implements ColliderInterface<T>
  */
 class Rigidbody extends Component implements ColliderInterface
 {
   use BoundTrait;
 
+  /**
+   * @var CollisionDetectionStrategyInterface|null The collision detection strategy.
+   */
   protected ?CollisionDetectionStrategyInterface $collisionDetectionStrategy = null;
 
+  /**
+   * @inheritDoc
+   */
   public function onStart(): void
   {
     $this->collisionDetectionStrategy = new AABBCollisionDetectionStrategy($this);
@@ -28,10 +37,16 @@ class Rigidbody extends Component implements ColliderInterface
 
   /**
    * @inheritDoc
+   *
+   * @param ColliderInterface<T> $collider The collider to check if it is touching.
    */
   public function isTouching(ColliderInterface $collider): bool
   {
-    return $this->collisionDetectionStrategy?->isTouching($collider);
+    if (!$this->collisionDetectionStrategy) {
+      return false;
+    }
+
+    return $this->collisionDetectionStrategy->isTouching($collider);
   }
 
   /**

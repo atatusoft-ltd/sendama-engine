@@ -17,6 +17,11 @@ use Sendama\Engine\UI\Windows\Window;
 use Sendama\Engine\UI\Windows\WindowAlignment;
 use Sendama\Engine\UI\Windows\WindowPadding;
 
+/**
+ * The Notification class.
+ *
+ * @package Sendama\Engine\Messaging\Notifications
+ */
 class Notification implements NotificationInterface
 {
   /**
@@ -44,7 +49,7 @@ class Notification implements NotificationInterface
    */
   protected WindowPadding $contentPadding;
   /**
-   * @var array The notification content.
+   * @var string[] The notification content.
    */
   protected array $content = [];
   /**

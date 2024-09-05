@@ -119,7 +119,7 @@ class NotificationsManager implements SingletonInterface, CanResume, CanRender, 
    */
   public function renderAt(?int $x = null, ?int $y = null): void
   {
-    $this->getActiveNotification()?->render($x + $this->leftMargin, $y + $this->topMargin);
+    $this->getActiveNotification()?->renderAt($x + $this->leftMargin, $y + $this->topMargin);
   }
 
   /**
@@ -135,7 +135,7 @@ class NotificationsManager implements SingletonInterface, CanResume, CanRender, 
    */
   public function eraseAt(?int $x = null, ?int $y = null): void
   {
-    $this->getActiveNotification()?->erase($x + $this->leftMargin, $y + $this->topMargin);
+    $this->getActiveNotification()?->eraseAt($x + $this->leftMargin, $y + $this->topMargin);
   }
 
   /**
@@ -204,7 +204,11 @@ class NotificationsManager implements SingletonInterface, CanResume, CanRender, 
   protected function openActiveNotification(): void
   {
     $this->getActiveNotification()?->open();
-    $this->nextNotificationShowTime = Time::getTime() + $this->getActiveNotification()?->getDuration() ?? 0;
+    $this->nextNotificationShowTime = 0;
+
+    if ($activeNotification = $this->getActiveNotification()) {
+      $this->nextNotificationShowTime = Time::getTime() + $activeNotification->getDuration();
+    }
   }
 
   /**

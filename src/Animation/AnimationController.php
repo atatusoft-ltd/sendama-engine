@@ -26,7 +26,7 @@ class AnimationController extends Component implements AnimationControllerInterf
    */
   protected AnimationControllerStateInterface $state;
   /**
-   * @var AnimationClip[] The array of clips.
+   * @var AnimationClipInterface[] The array of clips.
    */
   protected array $clips = [];
   /**

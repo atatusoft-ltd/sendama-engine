@@ -24,8 +24,7 @@ class SceneState extends GameState
    */
   public function update(): void
   {
-    if (Input::isKeyDown($this->context->getSettings('pause_key')))
-    {
+    if (Input::isKeyDown($this->context->getSettings('pause_key'))) {
       $this->suspend();
     }
 
@@ -38,7 +37,9 @@ class SceneState extends GameState
    */
   public function suspend(): void
   {
-    $this->context->setState($this->context->getState('paused'));
+    if ($pauseState = $this->context->getState('paused')) {
+      $this->context->setState($pauseState);
+    }
   }
 
   /**
