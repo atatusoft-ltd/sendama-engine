@@ -35,7 +35,7 @@ class MenuItem implements Interfaces\MenuItemInterface
    */
   public function execute(?ExecutionContextInterface $context = null): void
   {
-    $this->callback?->call($context);
+    $this->callback?->call($context ?? $this);
   }
 
   /**

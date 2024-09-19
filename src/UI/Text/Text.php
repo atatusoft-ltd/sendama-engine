@@ -26,7 +26,7 @@ class Text extends UIElement
   /**
    * The raw lines of the text.
    *
-   * @var array
+   * @var string[]
    */
   protected array $rawLines = [];
 
@@ -148,7 +148,7 @@ class Text extends UIElement
    */
   public function renderAt(?int $x = null, ?int $y = null): void
   {
-    Console::writeLines($this->rawLines, $x, $y);
+    Console::writeLines($this->rawLines, $x ?? 0, $y ?? 0);
   }
 
   /**
@@ -190,12 +190,13 @@ class Text extends UIElement
   /**
    * Returns the raw lines of the text.
    *
-   * @return array The raw lines of the text.
+   * @return string[] The raw lines of the text.
    * @throws Exception If the text is empty.
    */
   protected function getRawLines(): array
   {
-    $rawLines = explode("\n", $this->figlet?->render($this->getText()));
+    $render = $this->figlet?->render($this->getText());
+    $rawLines = explode("\n", $render ?? '');
 
     foreach ($rawLines as $line)
     {

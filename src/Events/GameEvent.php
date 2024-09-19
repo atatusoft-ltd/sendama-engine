@@ -20,13 +20,25 @@ readonly class GameEvent extends Event
    * @param GameEventType $gameEventType The type of GameEvent.
    * @param EventTargetInterface|null $target The event target. Defaults to null.
    * @param DateTimeInterface $timestamp The timestamp. Defaults to now.
+   * @param mixed|null $data The data associated with the event. Defaults to null.
    */
   public function __construct(
     public GameEventType $gameEventType,
     ?EventTargetInterface $target = null,
-    DateTimeInterface $timestamp = new DateTimeImmutable()
+    DateTimeInterface $timestamp = new DateTimeImmutable(),
+    protected mixed $data = null,
   )
   {
     parent::__construct(EventType::GAME, $target, $timestamp);
+  }
+
+  /**
+   * Gets the data associated with the event.
+   *
+   * @return mixed The data associated with the event.
+   */
+  public function getData(): mixed
+  {
+    return $this->data;
   }
 }

@@ -12,7 +12,8 @@ interface CollisionDetectionStrategyInterface
   /**
    * Checks if the collider is touching the given collider.
    *
-   * @param ColliderInterface $collider The collider to check if it is touching.
+   * @template T
+   * @param ColliderInterface<T> $collider The collider to check if it is touching.
    * @return bool True if the collider is touching the given collider, false otherwise.
    */
   public function isTouching(ColliderInterface $collider): bool;

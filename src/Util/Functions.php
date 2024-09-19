@@ -9,6 +9,11 @@ use Sendama\Engine\Events\GameEvent;
 use Sendama\Engine\Events\Interfaces\EventInterface;
 use Sendama\Engine\Exceptions\Scenes\SceneNotFoundException;
 use Sendama\Engine\IO\Console\Console;
+use Sendama\Engine\Messaging\Notifications\Enumerations\NotificationChannel;
+use Sendama\Engine\Messaging\Notifications\Enumerations\NotificationDuration;
+use Sendama\Engine\Messaging\Notifications\Notification;
+use Sendama\Engine\Messaging\Notifications\NotificationsManager;
+use Sendama\Engine\UI\Windows\Enumerations\WindowPosition;
 
 
 /* Application */
@@ -25,7 +30,7 @@ function getGameName(): string
  */
 function quitGame(?int $code = null): void
 {
-  EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::QUIT, $code));
+  EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::QUIT, data: $code));
 }
 
 /**
@@ -196,7 +201,7 @@ function prompt(
  * Shows a select dialog with the given message and title. Returns the index of the selected option.
  *
  * @param string $message The message to show.
- * @param array $options The options to show.
+ * @param string[] $options The options to show.
  * @param string $title The title of the dialog. Defaults to "Select".
  * @param int $default The default option. Defaults to 0.
  * @param Vector2|null $position The position of the dialog. Defaults to null.
@@ -236,6 +241,15 @@ function show_text(
   Console::showText($message, $title, $help, $position, $charactersPerSecond);
 }
 
+/**
+ * Creates a new notification with the given channel, title, text, and duration.
+ *
+ * @param NotificationChannel $channel The channel to send the notification to.
+ * @param string $title The title of the notification.
+ * @param string $text The text of the notification.
+ * @param NotificationDuration|float $duration The duration of the notification.
+ * @return void
+ */
 function notify(
   NotificationChannel $channel,
   string $title,
@@ -244,7 +258,7 @@ function notify(
 ): void
 {
   $notification = new Notification($channel, $title, $text, $duration);
-  NotificationManager::getInstance()->notify($notification);
+  NotificationsManager::getInstance()->notify($notification);
 }
 
 /* Events */
@@ -271,7 +285,7 @@ function broadcast(EventInterface $event): void
 function strip_ansi(string $input): string
 {
   $pattern = "/\e\[[0-9;]*m/";
-  return preg_replace($pattern, '', $input);
+  return preg_replace($pattern, '', $input) ?? '';
 }
 
 /* Game Objects */
@@ -314,4 +328,18 @@ function in_range(int $value, int $min, int $max): bool
 function within_bounds(Vector2 $point, Vector2 $min, Vector2 $max): bool
 {
   return in_range($point->getX(), $min->getX(), $max->getX()) && in_range($point->getY(), $min->getY(), $max->getY());
+}
+
+if (! function_exists('env') ) {
+  /**
+   * Gets the value of an environment variable.
+   *
+   * @param string $key The environment variable key.
+   * @param mixed|null $default The default value to return if the environment variable is not set.
+   * @return mixed
+   */
+  function env(string $key, mixed $default = null): mixed
+  {
+    return $_ENV[$key] ?? $default;
+  }
 }

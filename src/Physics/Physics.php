@@ -13,11 +13,12 @@ use Sendama\Engine\Physics\Interfaces\CollisionInterface;
  * Class Physics. Defines the global physics engine and its helper methods and properties.
  *
  * @package Sendama\Engine\Physics
+ * @template T
  */
 final class Physics implements SingletonInterface
 {
   /**
-   * @var self|null
+   * @var self<T>|null
    */
   protected static ?self $instance = null;
   /**
@@ -25,7 +26,7 @@ final class Physics implements SingletonInterface
    */
   protected float $gravity = 9.81;
   /**
-   * @var ItemList<ColliderInterface> The colliders in the physics engine.
+   * @var ItemList<ColliderInterface<T>> The colliders in the physics engine.
    */
   protected ItemList $colliders;
 
@@ -35,18 +36,20 @@ final class Physics implements SingletonInterface
   private function __construct()
   {
     // This is a private constructor to prevent users from creating a new instance of the Physics class.
-    $this->colliders = new ItemList(ColliderInterface::class);
+    /** @var ItemList<ColliderInterface<T>> $colliders */
+    $colliders = new ItemList(ColliderInterface::class);
+
+    $this->colliders = $colliders;
   }
 
   /**
    * @inheritDoc
    *
-   * @return self
+   * @return self<T>
    */
   public static function getInstance(): self
   {
-    if (self::$instance === null)
-    {
+    if (self::$instance === null) {
       self::$instance = new self();
     }
 
@@ -58,13 +61,13 @@ final class Physics implements SingletonInterface
    */
   public static function simulate(): void
   {
-
+    // This method will be called once per frame to simulate the physics in the scene.
   }
 
   /**
    * Adds a collider to the physics engine.
    *
-   * @param ColliderInterface $collider The collider to add.
+   * @param ColliderInterface<T> $collider The collider to add.
    */
   public function addCollider(ColliderInterface $collider): void
   {
@@ -74,13 +77,12 @@ final class Physics implements SingletonInterface
   /**
    * Removes a collider from the physics engine.
    *
-   * @param ColliderInterface $collider The collider to remove.
+   * @param ColliderInterface<T> $collider The collider to remove.
    * @return void
    */
   public function removeCollider(ColliderInterface $collider): void
   {
-    if (! $this->colliders->remove($collider) )
-    {
+    if (! $this->colliders->remove($collider) ) {
       Debug::warn("Failed to remove collider from physics engine.");
     }
   }
@@ -88,18 +90,16 @@ final class Physics implements SingletonInterface
   /**
    * Checks for collisions between the given collider and all other colliders in the physics engine.
    *
-   * @param ColliderInterface $collider The collider to check for collisions.
+   * @param ColliderInterface<T> $collider The collider to check for collisions.
    * @param Vector2 $motion The motion of the collider.
-   * @return array<CollisionInterface> The collisions found.
+   * @return array<CollisionInterface<T>> The collisions found.
    */
   public function checkCollisions(ColliderInterface $collider, Vector2 $motion): array
   {
     $collisions = [];
 
-    foreach ($this->colliders as $otherCollider)
-    {
-      if ($collider->isTouching($otherCollider))
-      {
+    foreach ($this->colliders as $otherCollider) {
+      if ($collider->isTouching($otherCollider)) {
         $collisions[] = new Collision($otherCollider, [
           new ContactPoint(
             Vector2::sum($collider->getTransform()->getPosition(), $motion),

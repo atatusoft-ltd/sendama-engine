@@ -9,6 +9,8 @@ use Sendama\Engine\Core\Rect;
  * Interface ColliderInterface. Interface for colliders.
  *
  * @package Sendama\Engine\Physics\Interfaces
+ * @template T
+ * @extends ComponentInterface<T>
  */
 interface ColliderInterface extends ComponentInterface, CollisionDetectionStrategyInterface
 {

@@ -12,7 +12,7 @@ use Sendama\Engine\Events\MapEvent;
 use Sendama\Engine\Events\MenuEvent;
 use Sendama\Engine\Events\ModalEvent;
 use Sendama\Engine\Events\MovementEvent;
-use Sendama\Engine\Events\NotificationEventType;
+use Sendama\Engine\Events\NotificationEvent;
 use Sendama\Engine\Events\SceneEvent;
 use Sendama\Engine\Events\TimeEvent;
 
@@ -33,5 +33,5 @@ enum EventType: string
   case MODAL = ModalEvent::class;
   case MENU = MenuEvent::class;
   case GAME_PLAY = GameplayEvent::class;
-  case NOTIFICATION = NotificationEventType::class;
+  case NOTIFICATION = NotificationEvent::class;
 }

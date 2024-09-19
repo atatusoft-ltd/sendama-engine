@@ -107,11 +107,11 @@ final class Path
   }
 
   /**
-   * Returns the path the assets' directory.
+   * Returns the path the assets' directory of the game engine.
    *
    * @return string The path to the assets' directory.
    */
-  public static function getAssetsDirectory(): string
+  public static function getVendorAssetsDirectory(): string
   {
     return self::join(self::getProjectRootPath(), 'assets');
   }

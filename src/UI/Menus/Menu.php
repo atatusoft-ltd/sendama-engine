@@ -43,6 +43,10 @@ class Menu implements MenuInterface
    */
   protected ItemList $observers;
   /**
+   * @var ItemList<StaticObserverInterface> $staticObservers
+   */
+  protected ItemList $staticObservers;
+  /**
    * @var MenuGraphNodeInterface|null $topSibling
    */
   protected ?MenuGraphNodeInterface $topSibling = null;
@@ -81,7 +85,7 @@ class Menu implements MenuInterface
    * @param string $title The title of the menu.
    * @param string $description The description of the menu.
    * @param Rect $dimensions The dimensions of the menu.
-   * @param ItemList $items The items of the menu.
+   * @param ItemList<MenuItemInterface> $items The items of the menu.
    * @param string $cursor The cursor of the menu.
    * @param Color $activeColor The active color of the menu.
    * @param array<KeyCode>|null $cancelKey The cancel key.
@@ -104,12 +108,12 @@ class Menu implements MenuInterface
     BorderPack            $borderPack = new BorderPack('')
   )
   {
-    if (! $this->canNavigate)
-    {
+    if (! $this->canNavigate) {
       $this->cursor = '';
     }
 
     $this->observers = new ItemList(ObserverInterface::class);
+    $this->staticObservers = new ItemList(StaticObserverInterface::class);
     $this->window = new Window(
       $this->title,
       $this->description,
@@ -118,6 +122,8 @@ class Menu implements MenuInterface
       $this->dimensions->getHeight(),
       $borderPack
     );
+
+    $this->awake();
   }
 
   /**
@@ -168,20 +174,17 @@ class Menu implements MenuInterface
    */
   public function update(): void
   {
-    if ($this->canNavigate)
-    {
+    if ($this->canNavigate) {
       $this->handleNavigation();
 
       // Handle submitting the active item.
-      if (Input::isKeyDown(KeyCode::ENTER))
-      {
+      if (Input::isKeyDown(KeyCode::ENTER)) {
         $this->getActiveItem()?->execute($this);
       }
     }
 
     // Handle cancel the menu.
-    if ($this->cancelKey && Input::isAnyKeyPressed($this->cancelKey))
-    {
+    if ($this->cancelKey && Input::isAnyKeyPressed($this->cancelKey)) {
       $this->onCancel?->call($this);
     }
   }
@@ -220,6 +223,8 @@ class Menu implements MenuInterface
 
   /**
    * @inheritDoc
+   *
+   * @return ItemList<MenuItemInterface>
    */
   public function getItems(): ItemList
   {
@@ -228,6 +233,8 @@ class Menu implements MenuInterface
 
   /**
    * @inheritDoc
+   *
+   * @param ItemList<MenuItemInterface> $items
    */
   public function setItems(ItemList $items): void
   {
@@ -240,14 +247,14 @@ class Menu implements MenuInterface
   public function addItem(MenuItemInterface $item): void
   {
     $this->items->add($item);
-    if (!$this->getActiveItem())
-    {
+    if (!$this->getActiveItem()) {
       $this->setActiveItem($item);
     }
-    if ($item instanceof MenuControlInterface)
-    {
+
+    if ($item instanceof MenuControlInterface) {
       $item->addObservers($this);
     }
+
     $this->updateWindowContent();
   }
 
@@ -306,10 +313,8 @@ class Menu implements MenuInterface
   {
     $index = -1;
 
-    foreach ($this->items as $i => $item)
-    {
-      if ($item === $this->activeItem)
-      {
+    foreach ($this->items as $i => $item) {
+      if ($item === $this->activeItem) {
         $index = $i;
         break;
       }
@@ -342,9 +347,16 @@ class Menu implements MenuInterface
    */
   public function addObservers(ObserverInterface|StaticObserverInterface|string ...$observers): void
   {
-    foreach ($observers as $observer)
-    {
-      $this->observers->add($observer);
+    foreach ($observers as $observer) {
+      if (is_object($observer)) {
+        if (get_class($observer) === ObserverInterface::class) {
+          $this->observers->add($observer);
+        }
+
+        if (get_class($observer) === StaticObserverInterface::class) {
+          $this->staticObservers->add($observer);
+        }
+      }
     }
   }
 
@@ -353,9 +365,16 @@ class Menu implements MenuInterface
    */
   public function removeObservers(ObserverInterface|StaticObserverInterface|string|null ...$observers): void
   {
-    foreach ($observers as $observer)
-    {
-      $this->observers->remove($observer);
+    foreach ($observers as $observer) {
+      if (is_object($observer)) {
+        if (get_class($observer) === ObserverInterface::class) {
+          $this->observers->remove($observer);
+        }
+
+        if (get_class($observer) === StaticObserverInterface::class) {
+          $this->staticObservers->remove($observer);
+        }
+      }
     }
   }
 
@@ -364,15 +383,16 @@ class Menu implements MenuInterface
    */
   public function notify(EventInterface $event): void
   {
-    foreach ($this->observers as $observer)
-    {
-      if ($observer instanceof StaticObserverInterface)
-      {
-        $observer::onNotify($this, $event);
-        continue;
+    foreach ($this->observers as $observer) {
+      if (is_object($observer)) {
+        if (get_class($observer) === ObserverInterface::class) {
+          $observer->onNotify($this, $event);
+        }
       }
 
-      $observer->onNotify($event);
+      if (get_class($observer) === StaticObserverInterface::class) {
+        $observer::onNotify($this, $event);
+      }
     }
   }
 
@@ -485,15 +505,13 @@ class Menu implements MenuInterface
      * @var int $itemIndex
      * @var MenuItemInterface $item
      */
-    foreach ($this->items as $itemIndex => $item)
-    {
+    foreach ($this->items as $itemIndex => $item) {
       $output = '  ' . match(true) {
         $item instanceof MenuControlInterface => $item,
         default => $item->getLabel()
       };
 
-      if ($itemIndex === $this->getActiveItemIndex())
-      {
+      if ($itemIndex === $this->getActiveItemIndex()) {
         $output = sprintf("%s %s", $this->cursor, match(true) {
           $item instanceof MenuControlInterface => $item,
           default => $item->getLabel()
@@ -529,20 +547,26 @@ class Menu implements MenuInterface
   {
     $v = Input::getAxis(AxisName::VERTICAL);
 
-    if ($v < 0)
-    {
+    if ($v < 0) {
       // Move up.
       $this->setActiveItemByIndex(wrap($this->getActiveItemIndex() - 1, 0, $this->items->count() - 1));
     }
 
-    if ($v > 0)
-    {
+    if ($v > 0) {
       // Move down
       $this->setActiveItemByIndex(wrap($this->getActiveItemIndex() + 1, 0, $this->items->count() - 1));
     }
 
     // Update the window content
     $this->updateWindowContent();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function awake(): void
+  {
+    // Do nothing.
   }
 
   /**
@@ -625,7 +649,9 @@ class Menu implements MenuInterface
    */
   public static function find(string $uiElementName): ?self
   {
-    return self::findAll($uiElementName)[0] ?? null;
+    /** @var ?Menu $element */
+    $element = self::findAll($uiElementName)[0] ?? null;
+    return $element;
   }
 
   /**
@@ -635,10 +661,8 @@ class Menu implements MenuInterface
   {
     $elements = [];
 
-    foreach (SceneManager::getInstance()->getActiveScene()?->getUIElements() as $element)
-    {
-      if ($elements instanceof MenuInterface && $element->getName() === $uiElementName)
-      {
+    foreach (SceneManager::getInstance()->getActiveScene()?->getUIElements() ?? [] as $element) {
+      if ($element instanceof MenuInterface && $element->getName() === $uiElementName) {
         $elements[] = $element;
       }
     }
@@ -651,8 +675,7 @@ class Menu implements MenuInterface
    */
   public function onNotify(ObservableInterface $observable, EventInterface $event): void
   {
-    if ($event instanceof MenuEvent)
-    {
+    if ($event instanceof MenuEvent) {
       $this->updateWindowContent();
     }
   }

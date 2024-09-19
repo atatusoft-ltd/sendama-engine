@@ -8,6 +8,13 @@ use Sendama\Engine\Physics\ContactPoint;
 use Sendama\Engine\Physics\Engines\AbstractPhysicsEngine;
 use Sendama\Engine\Physics\Interfaces\ColliderInterface;
 
+/**
+ * Class SimplePhysicsEngine. A simple physics engine that checks for collisions by checking if colliders are touching.
+ *
+ * @package Sendama\Engine\Physics\Engines
+ * @template T
+ * @extends AbstractPhysicsEngine<T>
+ */
 class ShapeBasedPhysicsEngine extends AbstractPhysicsEngine
 {
 

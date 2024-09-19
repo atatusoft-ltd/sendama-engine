@@ -9,6 +9,7 @@ use Sendama\Engine\UI\Windows\Interfaces\BorderPackInterface;
  * Class BorderPack. Represents a border pack.
  *
  * @package Sendama\Engine\UI\Windows
+ * @noinspection PhpUnused
  */
 class BorderPack implements BorderPackInterface
 {
@@ -193,14 +194,12 @@ class BorderPack implements BorderPackInterface
    */
   protected function loadTextures(): void
   {
-    if (! file_exists($this->path) )
-    {
+    if (! file_exists($this->path) ) {
       Debug::warn("The border pack path '$this->path' does not exist.");
       return;
     }
 
-    if (! str_ends_with($this->path, self::FILE_EXTENSION) )
-    {
+    if (! str_ends_with($this->path, self::FILE_EXTENSION) ) {
       Debug::warn("The border pack path '$this->path' does not have the correct file extension.");
       return;
     }
@@ -214,8 +213,7 @@ class BorderPack implements BorderPackInterface
      */
     $borderPack = require $this->path;
 
-    if (! is_array($borderPack) )
-    {
+    if (! is_array($borderPack) ) {
       Debug::warn("The border pack path '$this->path' does not return an array.");
       return;
     }
@@ -224,8 +222,7 @@ class BorderPack implements BorderPackInterface
       ! key_exists('corners', $borderPack) ||
       ! key_exists('borders', $borderPack) ||
       ! key_exists('connectors', $borderPack)
-    )
-    {
+    ) {
       Debug::warn("The border pack path '$this->path' does not have the correct keys.");
       return;
     }

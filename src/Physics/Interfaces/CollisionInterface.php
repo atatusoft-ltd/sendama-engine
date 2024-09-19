@@ -8,6 +8,8 @@ use Sendama\Engine\Physics\ContactPoint;
 
 /**
  * Interface CollisionInterface. Represents a collision between two colliders.
+ *
+ * @template T
  */
 interface CollisionInterface
 {
@@ -29,14 +31,14 @@ interface CollisionInterface
    * Get the contact point of the collision.
    *
    * @param int $index The index of the contact point.
-   * @return ContactPoint|null The contact point of the collision.
+   * @return ContactPoint<T>|null The contact point of the collision.
    */
   public function getContact(int $index): ?ContactPoint;
 
   /**
    * Get all the contact points of the collision.
    *
-   * @return ContactPoint[] The contact points of the collision.
+   * @return ContactPoint<T>[] The contact points of the collision.
    */
   public function getContacts(): array;
 }

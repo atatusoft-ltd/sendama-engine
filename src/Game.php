@@ -138,6 +138,7 @@ class Game implements ObservableInterface
    * @param string $name The name of the game.
    * @param int $screenWidth The width of the game screen.
    * @param int $screenHeight The height of the game screen.
+   * @throws Exception
    */
   public function __construct(
     private readonly string $name,
@@ -146,8 +147,7 @@ class Game implements ObservableInterface
   )
   {
     // Load environment variables
-    if (file_exists(getcwd() . '/.env'))
-    {
+    if (file_exists(getcwd() . '/.env')) {
       $dotenv = Dotenv::createImmutable(getcwd());
       $dotenv->load();
     }
@@ -197,6 +197,18 @@ class Game implements ObservableInterface
       $this->uiManager
     );
     $this->state = $this->sceneState;
+
+    // Handle Signals
+    pcntl_signal(SIGWINCH, function () {
+      $terminalSize = Console::getSize();
+      $currentScreenWidth = $terminalSize->getWidth();
+      $currentScreenHeight = $terminalSize->getHeight();
+
+      $this->screenWidth = min($currentScreenWidth, $this->screenWidth, DEFAULT_SCREEN_WIDTH);
+      $this->screenHeight = min($currentScreenHeight, $this->screenHeight, DEFAULT_SCREEN_HEIGHT);
+
+      Debug::log("SIGWINCH received");
+    });
 
     // Handle exceptions
     set_exception_handler(function (Throwable|Exception|Error $exception) {
@@ -631,7 +643,7 @@ class Game implements ObservableInterface
       if (!file_exists($this->getSettings('splash_texture')))
       {
         Debug::warn("Splash screen texture not found: {$this->settings['splash_texture']}");
-        $this->settings['splash_texture'] = Path::join(Path::getAssetsDirectory(), DEFAULT_SPLASH_TEXTURE_PATH);
+        $this->settings['splash_texture'] = Path::join(Path::getVendorAssetsDirectory(), DEFAULT_SPLASH_TEXTURE_PATH);
       }
 
       Debug::info("Loading splash screen texture");

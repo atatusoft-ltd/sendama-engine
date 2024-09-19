@@ -54,14 +54,14 @@ interface MenuInterface extends
   /**
    * Returns a list of items in the menu.
    *
-   * @return ItemList The list of items in the menu.
+   * @return ItemList<MenuItemInterface> The list of items in the menu.
    */
   public function getItems(): ItemList;
 
   /**
    * Sets the list of items in the menu.
    *
-   * @param ItemList $items The list of items in the menu.
+   * @param ItemList<MenuItemInterface> $items The list of items in the menu.
    * @return void
    */
   public function setItems(ItemList $items): void;
