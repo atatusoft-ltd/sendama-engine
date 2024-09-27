@@ -144,10 +144,11 @@ class Game implements ObservableInterface
     private readonly string $name,
     private readonly int $screenWidth = DEFAULT_SCREEN_WIDTH,
     private readonly int $screenHeight = DEFAULT_SCREEN_HEIGHT,
+    private readonly ?string $workingDirectory = null
   )
   {
     // Load environment variables
-    if (file_exists(getcwd() . '/.env')) {
+    if (file_exists($this->workingDirectory ?? getcwd() . '/.env')) {
       $dotenv = Dotenv::createImmutable(getcwd());
       $dotenv->load();
     }
@@ -166,13 +167,13 @@ class Game implements ObservableInterface
     $this->debugWindow          = new Window();
 
     // Initialize observers
-    $this->observers = new ItemList(ObserverInterface::class);
-    $this->staticObservers = new ItemList(StaticObserverInterface::class);
+    $this->observers            = new ItemList(ObserverInterface::class);
+    $this->staticObservers      = new ItemList(StaticObserverInterface::class);
 
     // Load default settings
     $this->initializeSettings();
 
-    $this->sceneState = new SceneState(
+    $this->sceneState           = new SceneState(
       $this,
       $this->sceneManager,
       $this->eventManager,
@@ -180,7 +181,7 @@ class Game implements ObservableInterface
       $this->notificationsManager,
       $this->uiManager
     );
-    $this->modalState = new ModalState(
+    $this->modalState           = new ModalState(
       $this,
       $this->sceneManager,
       $this->eventManager,
@@ -188,7 +189,7 @@ class Game implements ObservableInterface
       $this->notificationsManager,
       $this->uiManager
     );
-    $this->pausedState = new PausedState(
+    $this->pausedState          = new PausedState(
       $this,
       $this->sceneManager,
       $this->eventManager,
@@ -200,12 +201,12 @@ class Game implements ObservableInterface
 
     // Handle Signals
     pcntl_signal(SIGWINCH, function () {
-      $terminalSize = Console::getSize();
-      $currentScreenWidth = $terminalSize->getWidth();
-      $currentScreenHeight = $terminalSize->getHeight();
+      $terminalSize             = Console::getSize();
+      $currentScreenWidth       = $terminalSize->getWidth();
+      $currentScreenHeight      = $terminalSize->getHeight();
 
-      $this->screenWidth = min($currentScreenWidth, $this->screenWidth, DEFAULT_SCREEN_WIDTH);
-      $this->screenHeight = min($currentScreenHeight, $this->screenHeight, DEFAULT_SCREEN_HEIGHT);
+      $this->screenWidth        = min($currentScreenWidth, $this->screenWidth, DEFAULT_SCREEN_WIDTH);
+      $this->screenHeight       = min($currentScreenHeight, $this->screenHeight, DEFAULT_SCREEN_HEIGHT);
 
       Debug::info("SIGWINCH received");
     });
@@ -307,8 +308,7 @@ class Game implements ObservableInterface
    */
   public function run(): void
   {
-    try
-    {
+    try {
       $sleepTime = (int)(1000000 / $this->getSettings('fps'));
       $this->start();
       $nextFrameTime = microtime(true) + 1;
@@ -631,8 +631,7 @@ class Game implements ObservableInterface
       Debug::info("Rendering splash screen texture");
       foreach ($splashScreenRows as $rowIndex => $row) {
         $this->consoleCursor->moveTo((int)$leftMargin, (int)($topMargin + $rowIndex));
-        echo $row;
-//        Console::writeLine($row, (int)$leftMargin, (int)($topMargin + $rowIndex));
+        Console::output()->write($row);
       }
 
       $duration = (int) ($this->getSettings('splash_screen_duration') * 1000000);
