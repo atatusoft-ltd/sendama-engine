@@ -11,9 +11,14 @@ use Sendama\Engine\Util\Path;
  */
 class Debug
 {
+  /**
+   * @var string|null $logDirectory The directory to write the log files to.
+   */
   private static ?string $logDirectory = null;
+  /**
+   * @var LogLevel $logLevel The log level.
+   */
   private static LogLevel $logLevel = LogLevel::DEBUG;
-
   /**
    * The Debug constructor.
    */
@@ -22,7 +27,9 @@ class Debug
   }
 
   /**
-   * @param string $logDirectory
+   * Sets the log directory.
+   *
+   * @param string $logDirectory The directory to write the log files to.
    * @return void
    */
   public static function setLogDirectory(string $logDirectory): void
@@ -37,8 +44,7 @@ class Debug
    */
   public static function getLogDirectory(): string
   {
-    if (self::$logDirectory === null)
-    {
+    if (self::$logDirectory === null) {
       self::$logDirectory = Path::join(getcwd(), DEFAULT_LOGS_DIR);
     }
 
@@ -69,30 +75,26 @@ class Debug
     LogLevel $logLevel = LogLevel::DEBUG
   ): void
   {
-    if (self::$logLevel->getPriority() > $logLevel->getPriority())
-    {
+    $filename = Path::join(self::getLogDirectory(),  'debug.log');
+
+    if (self::$logLevel->getPriority() > $logLevel->getPriority()) {
       return;
     }
 
-    $filename = Path::join(self::getLogDirectory(),  'debug.log');
 
-    if (!file_exists($filename))
-    {
-      if (!is_writeable(self::getLogDirectory()))
-      {
+    if (!file_exists($filename)) {
+      if (!is_writeable(self::getLogDirectory())) {
         throw new RuntimeException("The directory, " . self::getLogDirectory() . ", is not writable.");
       }
 
-      if (false === $file = fopen($filename, 'w'))
-      {
+      if (false === $file = fopen($filename, 'w')) {
         throw new RuntimeException("Failed to create the debug log file.");
       }
       fclose($file);
     }
 
     $message = sprintf("[%s] %s - %s", date('Y-m-d H:i:s'), $prefix, $message) . PHP_EOL;
-    if (false === error_log($message, 3, $filename))
-    {
+    if (false === error_log($message, 3, $filename)) {
       throw new RuntimeException("Failed to write to the debug log.");
     }
   }
@@ -106,22 +108,18 @@ class Debug
    */
   public static function error(string $message, string $prefix = '[ERROR]'): void
   {
-    if (self::$logLevel->getPriority() > LogLevel::ERROR->getPriority())
-    {
+    if (self::$logLevel->getPriority() > LogLevel::ERROR->getPriority()) {
       return;
     }
 
     $filename = Path::join(self::getLogDirectory(),  'error.log');
 
-    if (!file_exists($filename))
-    {
-      if (!is_writeable(self::getLogDirectory()))
-      {
+    if (!file_exists($filename)) {
+      if (!is_writeable(self::getLogDirectory())) {
         throw new RuntimeException("The directory, " . self::getLogDirectory() . ", is not writable.");
       }
 
-      if (false === $file = fopen($filename, 'w'))
-      {
+      if (false === $file = fopen($filename, 'w')) {
         throw new RuntimeException("Failed to create the error log file.");
       }
 
@@ -129,8 +127,7 @@ class Debug
     }
 
     $message = sprintf("[%s] %s - %s", date('Y-m-d H:i:s'), $prefix, $message) . PHP_EOL;
-    if (false === error_log($message, 3, $filename))
-    {
+    if (false === error_log($message, 3, $filename)) {
       throw new RuntimeException("Failed to write to the debug log.");
     }
   }
