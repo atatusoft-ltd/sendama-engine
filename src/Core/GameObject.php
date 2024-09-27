@@ -290,6 +290,20 @@ class GameObject implements GameObjectInterface
   /**
    * @inheritDoc
    */
+  public function fixedUpdate(): void
+  {
+    if ($this->isActive()) {
+      foreach ($this->components as $component) {
+        if ($component->isEnabled()) {
+          $component->fixedUpdate();
+        }
+      }
+    }
+  }
+
+  /**
+   * @inheritDoc
+   */
   public function update(): void
   {
     if ($this->isActive()) {
