@@ -12,7 +12,7 @@ use Sendama\Engine\Core\Rect;
  * @template T
  * @extends ComponentInterface<T>
  */
-interface ColliderInterface extends ComponentInterface, CollisionDetectionStrategyInterface
+interface ColliderInterface extends ComponentInterface, CollisionDetectionStrategyInterface, SimulatorInterface
 {
   /**
    * Check if this collider is a trigger.
