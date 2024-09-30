@@ -6,8 +6,7 @@ use Override;
 use Sendama\Engine\Core\Component;
 use Sendama\Engine\Physics\Interfaces\ColliderInterface;
 use Sendama\Engine\Physics\Interfaces\CollisionDetectionStrategyInterface;
-use Sendama\Engine\Physics\Strategies\AABBCollisionDetectionStrategy;
-use Sendama\Engine\Physics\Strategies\SeparationBasedCollisionDetectionStrategy;
+use Sendama\Engine\Physics\Strategies\SimpleCollisionDetectionStrategy;
 use Sendama\Engine\Physics\Traits\BoundTrait;
 
 /**
@@ -49,7 +48,7 @@ class Collider extends Component implements ColliderInterface
   public final function awake(): void
   {
     $this->physics = Physics::getInstance();
-    $this->collisionDetectionStrategy = new AABBCollisionDetectionStrategy($this);
+    $this->collisionDetectionStrategy = new SimpleCollisionDetectionStrategy($this);
   }
 
   /**
@@ -82,5 +81,23 @@ class Collider extends Component implements ColliderInterface
   public function setCollisionDetectionStrategy(CollisionDetectionStrategyInterface $collisionDetectionStrategy): void
   {
     $this->collisionDetectionStrategy = $collisionDetectionStrategy;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function configure(array $options = []): void
+  {
+    // Do nothing
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function simulate(): void
+  {
+    if (method_exists($this->getGameObject())) {
+      $this->getGameObject()->fixedUpdate();
+    }
   }
 }

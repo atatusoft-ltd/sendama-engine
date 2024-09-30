@@ -2,12 +2,14 @@
 
 namespace Sendama\Engine\Physics\Interfaces;
 
+use Sendama\Engine\Interfaces\ConfigurableInterface;
+
 /**
  * Interface CollisionDetectionStrategyInterface
  *
  * This interface defines the methods that a collision detection strategy must implement.
  */
-interface CollisionDetectionStrategyInterface
+interface CollisionDetectionStrategyInterface extends ConfigurableInterface
 {
   /**
    * Checks if the collider is touching the given collider.

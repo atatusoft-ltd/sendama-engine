@@ -3,11 +3,9 @@
 namespace Sendama\Engine\Physics;
 
 use Sendama\Engine\Core\Component;
-use Sendama\Engine\Core\Rect;
-use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\Physics\Interfaces\ColliderInterface;
 use Sendama\Engine\Physics\Interfaces\CollisionDetectionStrategyInterface;
-use Sendama\Engine\Physics\Strategies\AABBCollisionDetectionStrategy;
+use Sendama\Engine\Physics\Strategies\SimpleCollisionDetectionStrategy;
 use Sendama\Engine\Physics\Traits\BoundTrait;
 
 /**
@@ -32,7 +30,7 @@ class Rigidbody extends Component implements ColliderInterface
    */
   public function onStart(): void
   {
-    $this->collisionDetectionStrategy = new AABBCollisionDetectionStrategy($this);
+    $this->collisionDetectionStrategy = new SimpleCollisionDetectionStrategy($this);
   }
 
   /**
@@ -71,5 +69,21 @@ class Rigidbody extends Component implements ColliderInterface
   public function setCollisionDetectionStrategy(CollisionDetectionStrategyInterface $collisionDetectionStrategy): void
   {
     $this->collisionDetectionStrategy = $collisionDetectionStrategy;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function configure(array $options = []): void
+  {
+    // Do nothing
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function simulate(): void
+  {
+    // TODO: Implement simulate() method.
   }
 }

@@ -3,11 +3,13 @@
 namespace Sendama\Engine\Physics;
 
 use Assegai\Collections\ItemList;
+use Sendama\Engine\Core\Grid;
 use Sendama\Engine\Core\Interfaces\SingletonInterface;
 use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\Physics\Interfaces\ColliderInterface;
 use Sendama\Engine\Physics\Interfaces\CollisionInterface;
+use Sendama\Engine\Physics\Interfaces\SimulatorInterface;
 
 /**
  * Class Physics. Defines the global physics engine and its helper methods and properties.
@@ -15,7 +17,7 @@ use Sendama\Engine\Physics\Interfaces\CollisionInterface;
  * @package Sendama\Engine\Physics
  * @template T
  */
-final class Physics implements SingletonInterface
+final class Physics implements SingletonInterface, SimulatorInterface
 {
   /**
    * @var self<T>|null
@@ -29,6 +31,10 @@ final class Physics implements SingletonInterface
    * @var ItemList<ColliderInterface<T>> The colliders in the physics engine.
    */
   protected ItemList $colliders;
+  /**
+   * @var Grid The static collision map. This is used for detecting collisions with static objects in the scene.
+   */
+  protected Grid $staticCollisionMap;
 
   /**
    * Physics constructor.
@@ -40,6 +46,8 @@ final class Physics implements SingletonInterface
     $colliders = new ItemList(ColliderInterface::class);
 
     $this->colliders = $colliders;
+
+    $this->staticCollisionMap = new Grid(100, 100);
   }
 
   /**
@@ -59,9 +67,16 @@ final class Physics implements SingletonInterface
   /**
    * Simulates the physics in the Scene.
    */
-  public static function simulate(): void
+  public function simulate(): void
   {
     // This method will be called once per frame to simulate the physics in the scene.
+    # Get clean slate of physics world
+
+    # Update the physics world
+
+    # Record the collisions
+
+    # Dispatch the collisions
   }
 
   /**
@@ -111,5 +126,46 @@ final class Physics implements SingletonInterface
     }
 
     return $collisions;
+  }
+
+  /**
+   * Loads the static collision map.
+   *
+   * @param Grid $grid The grid to load.
+   * @return void
+   */
+  public function loadStaticCollisionMap(Grid $grid): void
+  {
+    $this->staticCollisionMap = $grid;
+  }
+
+  /**
+   * Checks if the given position is touching a static object.
+   *
+   * @param Vector2 $position The position to check.
+   * @return bool Whether the given position is touching a static object or not.
+   */
+  public function isTouchingStaticObject(Vector2 $position): bool
+  {
+    [$x, $y] = [$position->getX(), $position->getY()];
+
+    return $this->staticCollisionMap->get($x, $y) === 1;
+  }
+
+  /**
+   * Checks if the given position is touching a dynamic object.
+   *
+   * @param Vector2 $position The position to check.
+   * @return bool Whether the given position is touching a dynamic object or not.
+   */
+  public function isTouchingDynamicObject(Vector2 $position): bool
+  {
+    foreach ($this->colliders as $collider) {
+      if ($collider->getTransform()->getPosition() === $position) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
