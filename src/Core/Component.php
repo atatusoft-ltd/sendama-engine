@@ -243,10 +243,29 @@ abstract class Component implements ComponentInterface
   /**
    * @inheritDoc
    */
+  public final function fixedUpdate(): void
+  {
+    if ($this->isEnabled()) {
+      $this->onFixedUpdate();
+    }
+  }
+
+  /**
+   * Called once every physics step.
+   *
+   * @return void
+   */
+  public function onFixedUpdate(): void
+  {
+    // Do nothing
+  }
+
+  /**
+   * @inheritDoc
+   */
   public final function update(): void
   {
-    if ($this->isEnabled())
-    {
+    if ($this->isEnabled()) {
       $this->onUpdate();
     }
   }

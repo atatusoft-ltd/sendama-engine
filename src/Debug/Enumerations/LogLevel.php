@@ -23,9 +23,9 @@ enum LogLevel: string
     return match ($this) {
       LogLevel::FATAL => 0,
       LogLevel::ERROR => 1,
-      LogLevel::WARN => 2,
-      LogLevel::DEBUG => 3,
-      LogLevel::INFO => 4,
+      LogLevel::WARN  => 2,
+      LogLevel::INFO  => 3,
+      LogLevel::DEBUG => 4,
     };
   }
 }

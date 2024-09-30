@@ -2,7 +2,6 @@
 
 namespace Sendama\Engine\Core\Scenes;
 
-use Sendama\Engine\Core\GameObject;
 use Sendama\Engine\Core\Grid;
 use Sendama\Engine\Core\Interfaces\GameObjectInterface;
 use Sendama\Engine\Core\Rect;
@@ -91,8 +90,7 @@ abstract class AbstractScene implements SceneInterface
 
     $this->awake();
 
-    if ($this->environmentTileMapPath)
-    {
+    if ($this->environmentTileMapPath) {
       $this->loadEnvironmentTileMapData();
     }
   }
@@ -126,13 +124,11 @@ abstract class AbstractScene implements SceneInterface
    */
   public final function loadSceneSettings(?array $settings = null): self
   {
-    foreach ($settings as $key => $value)
-    {
+    foreach ($settings as $key => $value) {
       $this->settings[$key] = $value;
     }
 
-    if (isset($this->settings['screen_width']) && isset($this->settings['screen_height']))
-    {
+    if (isset($this->settings['screen_width']) && isset($this->settings['screen_height'])) {
       $oldViewport = $this->camera->getViewport();
       $this->camera->setViewport(
         new Rect(
@@ -160,7 +156,7 @@ abstract class AbstractScene implements SceneInterface
    */
   public final function start(): void
   {
-    Debug::log("Scene started: " . $this->name);
+    Debug::info("Scene started: " . $this->name);
   
     $this->createWordsSpace();
     $this->loadStaticEnvironment();
@@ -183,7 +179,7 @@ abstract class AbstractScene implements SceneInterface
    */
   public final function stop(): void
   {
-    Debug::log("Scene stopped: " . $this->name);
+    Debug::info("Scene stopped: " . $this->name);
 
     foreach ($this->rootGameObjects as $gameObject) {
       $gameObject->stop();
@@ -221,15 +217,13 @@ abstract class AbstractScene implements SceneInterface
   {
     $this->physics->simulate();
 
-    foreach ($this->rootGameObjects as $gameObject)
-    {
+    foreach ($this->rootGameObjects as $gameObject) {
       if ($gameObject->isActive()) {
         $gameObject->update();
       }
     }
 
-    foreach ($this->uiElements as $uiElement)
-    {
+    foreach ($this->uiElements as $uiElement) {
       if ($uiElement->isActive()) {
         $uiElement->update();
       }
@@ -266,10 +260,8 @@ abstract class AbstractScene implements SceneInterface
       }
     }
 
-    foreach ($this->uiElements as $uiElement)
-    {
-      if ($uiElement->isActive())
-      {
+    foreach ($this->uiElements as $uiElement) {
+      if ($uiElement->isActive()) {
         $uiElement->suspend();
       }
     }
@@ -282,18 +274,14 @@ abstract class AbstractScene implements SceneInterface
   {
     $this->camera->renderWorldSpace();
 
-    foreach ($this->rootGameObjects as $gameObject)
-    {
-      if ($gameObject->isActive())
-      {
+    foreach ($this->rootGameObjects as $gameObject) {
+      if ($gameObject->isActive()) {
         $gameObject->resume();
       }
     }
 
-    foreach ($this->uiElements as $uiElement)
-    {
-      if ($uiElement->isActive())
-      {
+    foreach ($this->uiElements as $uiElement) {
+      if ($uiElement->isActive()) {
         $uiElement->resume();
       }
     }
@@ -412,9 +400,14 @@ abstract class AbstractScene implements SceneInterface
     return $this->worldsSpace;
   }
 
-  public function getCollisionWorldSpace()
+  /**
+   * Returns the collision world space.
+   *
+   * @return Grid The collision world space.
+   */
+  public function getCollisionWorldSpace(): Grid
   {
-    
+    return $this->collisionWorldSpace;
   }
 
   /**
@@ -468,8 +461,7 @@ abstract class AbstractScene implements SceneInterface
   private function loadStaticEnvironment(): void
   {
     // Return if no tile map data
-    if (! $this->environmentTileMapData)
-    {
+    if (! $this->environmentTileMapData) {
       return;
     }
 
@@ -477,11 +469,9 @@ abstract class AbstractScene implements SceneInterface
     $buffer = new Grid();
     $lines = explode("\n", $this->environmentTileMapData);
 
-    foreach ($lines as $y => $line)
-    {
+    foreach ($lines as $y => $line) {
       $lineLength = strlen($line);
-      for ($x = 0; $x < $lineLength; $x++)
-      {
+      for ($x = 0; $x < $lineLength; $x++) {
         $buffer->set($x, $y, $line[$x]);
       }
     }
@@ -495,20 +485,18 @@ abstract class AbstractScene implements SceneInterface
   /**
    * Loads the environment tile map data from a file on disk.
    *
-   * @param string|null $path
+   * @param string|null $path The path to the environment tile map file.
    * @return void
    * @throws FileNotFoundException If the file does not exist.
    */
   private function loadEnvironmentTileMapData(?string $path = null): void
   {
     // Check if the file exists
-    if (! file_exists($this->getAbsoluteEnvironmentTileMapPath()) )
-    {
+    if (! file_exists($this->getAbsoluteEnvironmentTileMapPath()) ) {
       throw new FileNotFoundException($this->getAbsoluteEnvironmentTileMapPath());
     }
 
-    if (! is_file($this->getAbsoluteEnvironmentTileMapPath()) )
-    {
+    if (! is_file($this->getAbsoluteEnvironmentTileMapPath()) ) {
       throw new FileNotFoundException($this->getAbsoluteEnvironmentTileMapPath());
     }
 
