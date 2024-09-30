@@ -77,8 +77,7 @@ final class Path
    */
   public static function init(false|string $currentWorkingDirectory, string $gameFileDirectory): void
   {
-    if ($currentWorkingDirectory === false)
-    {
+    if ($currentWorkingDirectory === false) {
       throw new UtilityException('Unable to get current working directory.');
     }
 

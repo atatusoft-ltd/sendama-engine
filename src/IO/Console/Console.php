@@ -9,6 +9,9 @@ use Sendama\Engine\Core\Vector2;
 use Sendama\Engine\IO\Enumerations\Color;
 use Sendama\Engine\UI\Modals\ModalManager;
 use Sendama\Engine\UI\Windows\Enumerations\WindowPosition;
+use Symfony\Component\Console\Formatter\OutputFormatterInterface;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Console is a static class that provides console functionality.
@@ -441,5 +444,19 @@ class Console
   ): void
   {
     ModalManager::getInstance()->showText($message, $title, $help, $position, $charactersPerSecond);
+  }
+
+  /**
+   * Returns a new output stream.
+   *
+   * @return OutputInterface The output stream.
+   */
+  public static function output(
+    int $verbosity = OutputInterface::VERBOSITY_NORMAL,
+    ?bool $decorated = null,
+    ?OutputFormatterInterface $formatter = null
+  ): OutputInterface
+  {
+    return new ConsoleOutput($verbosity, $decorated, $formatter);
   }
 }

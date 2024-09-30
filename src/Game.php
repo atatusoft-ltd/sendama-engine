@@ -144,10 +144,11 @@ class Game implements ObservableInterface
     private readonly string $name,
     private readonly int $screenWidth = DEFAULT_SCREEN_WIDTH,
     private readonly int $screenHeight = DEFAULT_SCREEN_HEIGHT,
+    private readonly ?string $workingDirectory = null
   )
   {
     // Load environment variables
-    if (file_exists(getcwd() . '/.env')) {
+    if (file_exists($this->workingDirectory ?? getcwd() . '/.env')) {
       $dotenv = Dotenv::createImmutable(getcwd());
       $dotenv->load();
     }
@@ -166,13 +167,13 @@ class Game implements ObservableInterface
     $this->debugWindow          = new Window();
 
     // Initialize observers
-    $this->observers = new ItemList(ObserverInterface::class);
-    $this->staticObservers = new ItemList(StaticObserverInterface::class);
+    $this->observers            = new ItemList(ObserverInterface::class);
+    $this->staticObservers      = new ItemList(StaticObserverInterface::class);
 
     // Load default settings
     $this->initializeSettings();
 
-    $this->sceneState = new SceneState(
+    $this->sceneState           = new SceneState(
       $this,
       $this->sceneManager,
       $this->eventManager,
@@ -180,7 +181,7 @@ class Game implements ObservableInterface
       $this->notificationsManager,
       $this->uiManager
     );
-    $this->modalState = new ModalState(
+    $this->modalState           = new ModalState(
       $this,
       $this->sceneManager,
       $this->eventManager,
@@ -188,7 +189,7 @@ class Game implements ObservableInterface
       $this->notificationsManager,
       $this->uiManager
     );
-    $this->pausedState = new PausedState(
+    $this->pausedState          = new PausedState(
       $this,
       $this->sceneManager,
       $this->eventManager,
@@ -200,14 +201,14 @@ class Game implements ObservableInterface
 
     // Handle Signals
     pcntl_signal(SIGWINCH, function () {
-      $terminalSize = Console::getSize();
-      $currentScreenWidth = $terminalSize->getWidth();
-      $currentScreenHeight = $terminalSize->getHeight();
+      $terminalSize             = Console::getSize();
+      $currentScreenWidth       = $terminalSize->getWidth();
+      $currentScreenHeight      = $terminalSize->getHeight();
 
-      $this->screenWidth = min($currentScreenWidth, $this->screenWidth, DEFAULT_SCREEN_WIDTH);
-      $this->screenHeight = min($currentScreenHeight, $this->screenHeight, DEFAULT_SCREEN_HEIGHT);
+      $this->screenWidth        = min($currentScreenWidth, $this->screenWidth, DEFAULT_SCREEN_WIDTH);
+      $this->screenHeight       = min($currentScreenHeight, $this->screenHeight, DEFAULT_SCREEN_HEIGHT);
 
-      Debug::log("SIGWINCH received");
+      Debug::info("SIGWINCH received");
     });
 
     // Handle exceptions
@@ -247,8 +248,7 @@ class Game implements ObservableInterface
    */
   public function loadSettings(?array $settings = null): self
   {
-    try
-    {
+    try {
       Debug::info("Loading environment settings");
       // Environment
       $this->settings['debug']                  = $_ENV['DEBUG_MODE'] ?? false;
@@ -269,8 +269,7 @@ class Game implements ObservableInterface
       $this->settings['initial_scene']          = 0 ?? throw new InitializationException("Initial scene not found");
 
       Debug::info('Loading splash screen settings');
-      if (isset($settings['splash_texture']))
-      {
+      if (isset($settings['splash_texture'])) {
         $this->settings['splash_texture'] = Path::join(getcwd(), $settings['splash_texture']);
       }
 
@@ -284,9 +283,7 @@ class Game implements ObservableInterface
 
       $this->sceneManager->loadSettings($this->settings);
       Debug::info("Game settings loaded");
-    }
-    catch (Exception $exception)
-    {
+    } catch (Exception $exception) {
       $this->handleException($exception);
     }
 
@@ -311,32 +308,27 @@ class Game implements ObservableInterface
    */
   public function run(): void
   {
-    try
-    {
+    try {
       $sleepTime = (int)(1000000 / $this->getSettings('fps'));
       $this->start();
       $nextFrameTime = microtime(true) + 1;
       $lastFrameCountSnapShot = $this->frameCount;
 
       Debug::info("Running game");
-      while ($this->isRunning)
-      {
+      while ($this->isRunning) {
         $this->handleInput();
         $this->update();
         $this->render();
 
         usleep($sleepTime);
 
-        if (microtime(true) >= $nextFrameTime)
-        {
+        if (microtime(true) >= $nextFrameTime) {
           $this->frameRate = $this->frameCount - $lastFrameCountSnapShot;
           $lastFrameCountSnapShot = $this->frameCount;
           $nextFrameTime = microtime(true) + 1;
         }
       }
-    }
-    catch (Exception $exception)
-    {
+    } catch (Exception $exception) {
       $this->handleException($exception);
     }
   }
@@ -375,12 +367,9 @@ class Game implements ObservableInterface
     $this->handleGameEvents();
 
     // Load the first scene
-    try
-    {
+    try {
       $this->sceneManager->loadScene($this->getSettings('initial_scene'));
-    }
-    catch (SceneNotFoundException $exception)
-    {
+    } catch (SceneNotFoundException $exception) {
       $this->handleException($exception);
     }
 
@@ -486,8 +475,7 @@ class Game implements ObservableInterface
     Debug::error($errorMessage);
     $this->stop();
 
-    if ($this->getSettings('debug'))
-    {
+    if ($this->getSettings('debug')) {
       exit($errorMessage);
     }
 
@@ -507,8 +495,7 @@ class Game implements ObservableInterface
     Debug::error($exception);
     $this->stop();
 
-    if ($this->getSettings('debug'))
-    {
+    if ($this->getSettings('debug')) {
       exit($exception);
     }
 
@@ -520,14 +507,10 @@ class Game implements ObservableInterface
    */
   public function addObservers(ObserverInterface|StaticObserverInterface|string ...$observers): void
   {
-    foreach ($observers as $observer)
-    {
-      if ($observer instanceof ObserverInterface)
-      {
+    foreach ($observers as $observer) {
+      if ($observer instanceof ObserverInterface) {
         $this->observers->add($observer);
-      }
-      else
-      {
+      } else {
         $this->staticObservers->add($observer);
       }
     }
@@ -538,21 +521,16 @@ class Game implements ObservableInterface
    */
   public function removeObservers(ObserverInterface|StaticObserverInterface|string|null ...$observers): void
   {
-    if (is_null($observers))
-    {
+    if (is_null($observers)) {
       $this->observers->clear();
       $this->staticObservers->clear();
       return;
     }
 
-    foreach ($observers as $observer)
-    {
-      if ($observer instanceof ObserverInterface)
-      {
+    foreach ($observers as $observer) {
+      if ($observer instanceof ObserverInterface) {
         $this->observers->remove($observer);
-      }
-      else
-      {
+      } else {
         $this->staticObservers->remove($observer);
       }
     }
@@ -563,22 +541,17 @@ class Game implements ObservableInterface
    */
   public function notify(EventInterface $event): void
   {
-    try
-    {
+    try {
       /** @var ObserverInterface $observer */
-      foreach ($this->observers as $observer)
-      {
+      foreach ($this->observers as $observer) {
         $observer->onNotify($this, $event);
       }
 
       /** @var StaticObserverInterface $observer */
-      foreach ($this->staticObservers as $observer)
-      {
+      foreach ($this->staticObservers as $observer) {
         $observer::onNotify($this, $event);
       }
-    }
-    catch (Exception $exception)
-    {
+    } catch (Exception $exception) {
       $this->handleException($exception);
     }
   }
@@ -591,8 +564,7 @@ class Game implements ObservableInterface
    */
   public function addScenes(SceneInterface ...$scenes): self
   {
-    foreach ($scenes as $scene)
-    {
+    foreach ($scenes as $scene) {
       $this->sceneManager->addScene($scene);
     }
 
@@ -634,14 +606,12 @@ class Game implements ObservableInterface
    */
   private function showSplashScreen(): void
   {
-    try
-    {
+    try {
       Debug::info("Showing splash screen");
       Console::setSize(MAX_SCREEN_WIDTH, MAX_SCREEN_HEIGHT);
 
       // Check if a splash texture can be loaded
-      if (!file_exists($this->getSettings('splash_texture')))
-      {
+      if (!file_exists($this->getSettings('splash_texture'))) {
         Debug::warn("Splash screen texture not found: {$this->settings['splash_texture']}");
         $this->settings['splash_texture'] = Path::join(Path::getVendorAssetsDirectory(), DEFAULT_SPLASH_TEXTURE_PATH);
       }
@@ -659,11 +629,9 @@ class Game implements ObservableInterface
       $topMargin = (MAX_SCREEN_HEIGHT / 2) - ($splashScreenHeight / 2);
 
       Debug::info("Rendering splash screen texture");
-      foreach ($splashScreenRows as $rowIndex => $row)
-      {
+      foreach ($splashScreenRows as $rowIndex => $row) {
         $this->consoleCursor->moveTo((int)$leftMargin, (int)($topMargin + $rowIndex));
-        echo $row;
-//        Console::writeLine($row, (int)$leftMargin, (int)($topMargin + $rowIndex));
+        Console::output()->write($row);
       }
 
       $duration = (int) ($this->getSettings('splash_screen_duration') * 1000000);
@@ -673,9 +641,7 @@ class Game implements ObservableInterface
       Console::clear();
 
       Debug::info("Splash screen hidden");
-    }
-    catch (Exception $exception)
-    {
+    } catch (Exception $exception) {
       $this->handleException($exception);
     }
   }
@@ -685,11 +651,10 @@ class Game implements ObservableInterface
    */
   private function handleGameEvents(): void
   {
-    try
-    {
+    try {
       // Handle game events
       $this->eventManager->addEventListener(EventType::GAME, function (GameEvent $event) {
-        Debug::log("Game event received");
+        Debug::info("Game event received");
         switch ($event->gameEventType)
         {
           case GameEventType::QUIT:
@@ -703,9 +668,7 @@ class Game implements ObservableInterface
         }
       });
 
-    }
-    catch (Exception $exception)
-    {
+    } catch (Exception $exception) {
       $this->handleException($exception);
     }
   }
@@ -717,8 +680,7 @@ class Game implements ObservableInterface
    */
   private function renderDebugInfo(): void
   {
-    if ($this->isDebug() && $this->showDebugInfo())
-    {
+    if ($this->isDebug() && $this->showDebugInfo()) {
       $content = [
         "FPS: $this->frameRate",
         "Delta: " . round(Time::getDeltaTime(), 2),
@@ -745,26 +707,27 @@ class Game implements ObservableInterface
 
     $this->settings['initial_scene']          = null;
 
-    // Splash screen settings
-    $this->settings['splash_texture']         = Path::join($this->settings['assets_path'], basename(DEFAULT_SPLASH_TEXTURE_PATH));
-    Debug::log("Splash screen texture init: {$this->settings['splash_texture']}");
-    $this->settings['splash_screen_duration'] = DEFAULT_SPLASH_SCREEN_DURATION;
-
     // Load environment settings
     $this->settings['debug']                  = $_ENV['DEBUG_MODE'] ?? false;
     $this->settings['debug_info']             = $_ENV['SHOW_DEBUG_INFO'] ?? false;
     $this->settings['log_level']              = $_ENV['LOG_LEVEL'] ?? 'info';
+    Debug::setLogLevel(LogLevel::tryFrom($this->getSettings('log_level')) ?? LogLevel::DEBUG);
+
     $this->settings['log_dir']                = Path::join(getcwd(), DEFAULT_LOGS_DIR);
-    Debug::log("Log directory initialized: {$this->settings['log_dir']}");
+    Debug::info("Log directory initialized: {$this->settings['log_dir']}");
 
     // Debug settings
     Debug::setLogDirectory($this->getSettings('log_dir'));
-    Debug::setLogLevel(LogLevel::tryFrom($this->getSettings('log_level')) ?? LogLevel::DEBUG);
     $this->debugWindow->setPosition([0, $this->settings['screen_height'] - self::DEBUG_WINDOW_HEIGHT]);
 
     // Input settings
     $this->settings['buttons']                = [];
     $this->settings['pause_key']              = $_ENV['PAUSE_KEY'] ?? KeyCode::ESCAPE;
+
+    // Splash screen settings
+    $this->settings['splash_texture']         = Path::join($this->settings['assets_path'], basename(DEFAULT_SPLASH_TEXTURE_PATH));
+    Debug::info("Splash screen texture init: {$this->settings['splash_texture']}");
+    $this->settings['splash_screen_duration'] = DEFAULT_SPLASH_SCREEN_DURATION;
 
     $this->sceneManager->loadSettings($this->settings);
     Debug::info("Game settings initialized");
@@ -782,8 +745,7 @@ class Game implements ObservableInterface
    */
   public static function quit(): void
   {
-    if (confirm("Are you sure you want to quit?", "", 40))
-    {
+    if (confirm("Are you sure you want to quit?", "", 40)) {
       EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::QUIT));
     }
   }

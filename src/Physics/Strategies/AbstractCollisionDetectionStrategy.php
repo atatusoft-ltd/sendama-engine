@@ -2,8 +2,10 @@
 
 namespace Sendama\Engine\Physics\Strategies;
 
+use Override;
 use Sendama\Engine\Physics\Interfaces\ColliderInterface;
 use Sendama\Engine\Physics\Interfaces\CollisionDetectionStrategyInterface;
+use Sendama\Engine\Physics\Physics;
 
 /**
  * The class AbstractCollisionDetectionStrategy.
@@ -12,6 +14,8 @@ use Sendama\Engine\Physics\Interfaces\CollisionDetectionStrategyInterface;
  */
 abstract class AbstractCollisionDetectionStrategy implements CollisionDetectionStrategyInterface
 {
+  protected Physics $physics;
+
   /**
    * AbstractCollisionDetectionStrategy constructor.
    *
@@ -21,5 +25,16 @@ abstract class AbstractCollisionDetectionStrategy implements CollisionDetectionS
   public final function __construct(protected ColliderInterface $collider)
   {
     // Constructor logic here
+    $this->physics = Physics::getInstance();
+    $this->configure();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  #[Override]
+  public function configure(array $options = []): void
+  {
+    // Do nothing
   }
 }
