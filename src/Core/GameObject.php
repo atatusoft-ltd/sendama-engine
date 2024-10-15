@@ -391,8 +391,8 @@ class GameObject implements GameObjectInterface
    */
   public function getComponentIndex(Component $component): int
   {
-    foreach ($this->components as $index => $c) {
-      if ($component->equals($c)) {
+    foreach ($this->components as $index => $gameObjectComponent) {
+      if ($component->equals($gameObjectComponent)) {
         return $index;
       }
     }
