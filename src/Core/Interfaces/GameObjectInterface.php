@@ -2,6 +2,8 @@
 
 namespace Sendama\Engine\Core\Interfaces;
 
+use Sendama\Engine\Core\Component;
+use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
 use Sendama\Engine\Core\Sprite;
 use Sendama\Engine\Core\Texture2D;
 use Sendama\Engine\Core\Vector2;
@@ -9,9 +11,18 @@ use Sendama\Engine\UI\Interfaces\UIElementInterface;
 
 /**
  * The GameObjectInterface
+ *
+ * @package Sendama\Engine\Core\Interfaces
  */
 interface GameObjectInterface extends CanCompare, CanResume, CanUpdate, CanStart, CanRender, CanActivate, FixedUpdateInterface
 {
+  /**
+   * Returns the scene of the game object.
+   *
+   * @return SceneInterface The scene of the game object.
+   */
+  public function getScene(): SceneInterface;
+
   /**
    * Sets the sprite of the game object
    *
@@ -64,6 +75,16 @@ interface GameObjectInterface extends CanCompare, CanResume, CanUpdate, CanStart
    * @return array<UIElementInterface> The UI elements of the specified class that are attached to the GameObject.
    */
   public function getUIElements(?string $uiElementClass = null): array;
+
+  /**
+   * Adds a component class of type $componentType to the game object.
+   *
+   * @template T
+   * @param class-string<T> $componentType
+   *
+   * @return T The component that was added.
+   */
+  public function addComponent(string $componentType): Component;
 
   /**
    * Creates a pool of game objects of the specified size. This is useful for creating a pool of bullets, enemies, etc.

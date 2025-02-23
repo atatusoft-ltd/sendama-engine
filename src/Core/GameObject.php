@@ -8,6 +8,7 @@ use Sendama\Engine\Core\Interfaces\CanEquate;
 use Sendama\Engine\Core\Interfaces\ComponentInterface;
 use Sendama\Engine\Core\Interfaces\GameObjectInterface;
 use Sendama\Engine\Core\Rendering\Renderer;
+use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
 use Sendama\Engine\Core\Scenes\SceneManager;
 use Sendama\Engine\UI\Interfaces\UIElementInterface;
 
@@ -71,11 +72,26 @@ class GameObject implements GameObjectInterface
   }
 
   /**
+   * @inheritDoc
+   */
+  public function getScene(): SceneInterface
+  {
+    return SceneManager::getInstance()->getActiveScene();
+  }
+
+  /**
    * @return void
    */
   public function __clone(): void
   {
     $this->hash = md5(__CLASS__) . '-' . uniqid($this->name, true);
+
+    $this->transform = clone $this->transform;
+    $this->renderer = clone $this->renderer;
+
+    if ($this->sprite) {
+      $this->sprite = clone $this->sprite;
+    }
   }
 
   /**
@@ -356,16 +372,16 @@ class GameObject implements GameObjectInterface
   }
 
   /**
-   * Adds a component class of type $componentType to the game object.
-   *
-   * @param class-string<Component> $componentType
-   *
-   * @return Component The component that was added.
+   * @inheritDoc
    */
   public function addComponent(string $componentType): Component
   {
     if (! class_exists($componentType) ) {
       throw new InvalidArgumentException('The component type ' . $componentType . ' does not exist.');
+    }
+
+    if (! is_subclass_of($componentType, Component::class)) {
+      throw new InvalidArgumentException('The component type ' . $componentType . ' is not a subclass of ' . Component::class);
     }
 
     $component = new $componentType($this);
@@ -391,8 +407,8 @@ class GameObject implements GameObjectInterface
    */
   public function getComponentIndex(Component $component): int
   {
-    foreach ($this->components as $index => $c) {
-      if ($component->equals($c)) {
+    foreach ($this->components as $index => $gameObjectComponent) {
+      if ($component->equals($gameObjectComponent)) {
         return $index;
       }
     }
@@ -479,6 +495,7 @@ class GameObject implements GameObjectInterface
   ): GameObject
   {
     $clone = clone $original;
+
     if ($position) {
       $clone->transform->setPosition($position);
     }
@@ -494,6 +511,7 @@ class GameObject implements GameObjectInterface
     if ($parent) {
       $clone->transform->setParent($parent);
     }
+
     return $clone;
   }
 
