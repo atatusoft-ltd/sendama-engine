@@ -93,37 +93,45 @@ class Menu implements MenuInterface
    * @param bool $canNavigate Whether the menu can navigate or not.
    */
   public function __construct(
-    protected string      $title,
-    protected string      $description = '',
-    protected Rect        $dimensions = new Rect(
+    protected string $title,
+    protected string $description = '',
+    protected Rect $dimensions = new Rect(
       new Vector2(0, 0),
       new Vector2(DEFAULT_MENU_WIDTH, DEFAULT_MENU_HEIGHT)
     ),
-    protected ItemList    $items = new ItemList(MenuItemInterface::class),
-    protected string      $cursor = '>',
-    protected Color       $activeColor = Color::BLUE,
-    protected ?array      $cancelKey = null,
-    protected ?Closure    $onCancel = null,
-    protected bool        $canNavigate = true,
-    BorderPack            $borderPack = new BorderPack('')
-  )
+    protected ItemList $items = new ItemList(MenuItemInterface::class),
+    protected string $cursor = '>',
+    protected Color $activeColor = Color::BLUE,
+    protected ?array $cancelKey = null,
+    protected ?Closure $onCancel = null,
+    protected bool $canNavigate = true,
+    BorderPack $borderPack = new BorderPack(''))
   {
-    if (! $this->canNavigate) {
+    if (!$this->canNavigate) {
       $this->cursor = '';
     }
 
     $this->observers = new ItemList(ObserverInterface::class);
     $this->staticObservers = new ItemList(StaticObserverInterface::class);
-    $this->window = new Window(
-      $this->title,
-      $this->description,
-      $this->dimensions->getPosition(),
-      $this->dimensions->getWidth(),
-      $this->dimensions->getHeight(),
-      $borderPack
-    );
+    $this->window = new Window($this->title, $this->description, $this->dimensions->getPosition(), $this->dimensions->getWidth(), $this->dimensions->getHeight(), $borderPack);
 
     $this->awake();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getPosition(): Vector2
+  {
+    return $this->dimensions->getPosition();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function awake(): void
+  {
+    // Do nothing.
   }
 
   /**
@@ -156,14 +164,6 @@ class Menu implements MenuInterface
   /**
    * @inheritDoc
    */
-  public function erase(): void
-  {
-    $this->window->erase();
-  }
-
-  /**
-   * @inheritDoc
-   */
   public function eraseAt(?int $x = null, ?int $y = null): void
   {
     $this->window->eraseAt($x, $y);
@@ -190,19 +190,104 @@ class Menu implements MenuInterface
   }
 
   /**
-   * @inheritDoc
+   * Handles navigation.
+   *
+   * @void
    */
-  public function getTitle(): string
+  private function handleNavigation(): void
   {
-    return $this->title;
+    $v = Input::getAxis(AxisName::VERTICAL);
+
+    if ($v < 0) {
+      // Move up.
+      $this->setActiveItemByIndex(wrap($this->getActiveItemIndex() - 1, 0, $this->items->count() - 1));
+    }
+
+    if ($v > 0) {
+      // Move down
+      $this->setActiveItemByIndex(wrap($this->getActiveItemIndex() + 1, 0, $this->items->count() - 1));
+    }
+
+    // Update the window content
+    $this->updateWindowContent();
   }
 
   /**
    * @inheritDoc
    */
-  public function setTitle(string $title): void
+  public function setActiveItemByIndex(int $index): void
   {
-    $this->title = $title;
+    $this->activeItem = $this->getItemByIndex($index);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getItemByIndex(int $index): ?MenuItemInterface
+  {
+    return $this->items->toArray()[$index] ?? null;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getActiveItemIndex(): int
+  {
+    $index = -1;
+
+    foreach ($this->items as $i => $item) {
+      if ($item === $this->activeItem) {
+        $index = $i;
+        break;
+      }
+    }
+
+    return $index;
+  }
+
+  /**
+   * Updates the content of the window.
+   */
+  public function updateWindowContent(): void
+  {
+    $content = [];
+
+    /**
+     * @var int $itemIndex
+     * @var MenuItemInterface $item
+     */
+    foreach ($this->items as $itemIndex => $item) {
+      $output = '  ' . match (true) {
+          $item instanceof MenuControlInterface => $item,
+          default => $item->getLabel()
+        };
+
+      if ($itemIndex === $this->getActiveItemIndex()) {
+        $output = sprintf("%s %s", $this->cursor, match (true) {
+          $item instanceof MenuControlInterface => $item,
+          default => $item->getLabel()
+        });
+      }
+      $content[] = $output;
+    }
+
+    $this->window->setContent($content);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getActiveItem(): ?MenuItemInterface
+  {
+    return $this->activeItem;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function setActiveItem(MenuItemInterface $item): void
+  {
+    $this->activeItem = $item;
   }
 
   /**
@@ -261,6 +346,24 @@ class Menu implements MenuInterface
   /**
    * @inheritDoc
    */
+  public function addObservers(ObserverInterface|StaticObserverInterface|string ...$observers): void
+  {
+    foreach ($observers as $observer) {
+      if (is_object($observer)) {
+        if (get_class($observer) === ObserverInterface::class) {
+          $this->observers->add($observer);
+        }
+
+        if (get_class($observer) === StaticObserverInterface::class) {
+          $this->staticObservers->add($observer);
+        }
+      }
+    }
+  }
+
+  /**
+   * @inheritDoc
+   */
   public function removeItem(MenuItemInterface $item): void
   {
     $this->items->remove($item);
@@ -277,9 +380,11 @@ class Menu implements MenuInterface
   /**
    * @inheritDoc
    */
-  public function getItemByIndex(int $index): ?MenuItemInterface
+  public function setActiveItemByLabel(string $label): void
   {
-    return $this->items->toArray()[$index] ?? null;
+    if ($item = $this->getItemByLabel($label)) {
+      $this->activeItem = $item;
+    }
   }
 
   /**
@@ -293,71 +398,43 @@ class Menu implements MenuInterface
   /**
    * @inheritDoc
    */
-  public function getActiveItem(): ?MenuItemInterface
+  public static function find(string $uiElementName): ?self
   {
-    return $this->activeItem;
+    /** @var ?Menu $element */
+    $element = self::findAll($uiElementName)[0] ?? null;
+    return $element;
   }
 
   /**
    * @inheritDoc
    */
-  public function setActiveItem(MenuItemInterface $item): void
+  public static function findAll(string $uiElementName): array
   {
-    $this->activeItem = $item;
-  }
+    $elements = [];
 
-  /**
-   * @inheritDoc
-   */
-  public function getActiveItemIndex(): int
-  {
-    $index = -1;
-
-    foreach ($this->items as $i => $item) {
-      if ($item === $this->activeItem) {
-        $index = $i;
-        break;
+    foreach (SceneManager::getInstance()->getActiveScene()?->getUIElements() ?? [] as $element) {
+      if ($element instanceof MenuInterface && $element->getName() === $uiElementName) {
+        $elements[] = $element;
       }
     }
 
-    return $index;
+    return $elements;
   }
 
   /**
    * @inheritDoc
    */
-  public function setActiveItemByIndex(int $index): void
+  public function getName(): string
   {
-    $this->activeItem = $this->getItemByIndex($index);
+    return $this->getTitle();
   }
 
   /**
    * @inheritDoc
    */
-  public function setActiveItemByLabel(string $label): void
+  public function getTitle(): string
   {
-    if ($item = $this->getItemByLabel($label))
-    {
-      $this->activeItem = $item;
-    }
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function addObservers(ObserverInterface|StaticObserverInterface|string ...$observers): void
-  {
-    foreach ($observers as $observer) {
-      if (is_object($observer)) {
-        if (get_class($observer) === ObserverInterface::class) {
-          $this->observers->add($observer);
-        }
-
-        if (get_class($observer) === StaticObserverInterface::class) {
-          $this->staticObservers->add($observer);
-        }
-      }
-    }
+    return $this->title;
   }
 
   /**
@@ -399,6 +476,16 @@ class Menu implements MenuInterface
   /**
    * @inheritDoc
    */
+  public function onNotify(ObservableInterface $observable, EventInterface $event): void
+  {
+    if ($event instanceof MenuEvent) {
+      $this->updateWindowContent();
+    }
+  }
+
+  /**
+   * @inheritDoc
+   */
   public function onFocus(EventInterface $event): void
   {
     $this->resume();
@@ -407,9 +494,34 @@ class Menu implements MenuInterface
   /**
    * @inheritDoc
    */
+  public function resume(): void
+  {
+    $this->setActiveItemByIndex(0);
+    $this->updateWindowContent();
+  }
+
+  /**
+   * @inheritDoc
+   */
   public function onBlur(EventInterface $event): void
   {
     $this->suspend();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function suspend(): void
+  {
+    $this->erase();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function erase(): void
+  {
+    $this->window->erase();
   }
 
   /**
@@ -495,119 +607,11 @@ class Menu implements MenuInterface
   }
 
   /**
-   * Updates the content of the window.
-   */
-  public function updateWindowContent(): void
-  {
-    $content = [];
-
-    /**
-     * @var int $itemIndex
-     * @var MenuItemInterface $item
-     */
-    foreach ($this->items as $itemIndex => $item) {
-      $output = '  ' . match(true) {
-        $item instanceof MenuControlInterface => $item,
-        default => $item->getLabel()
-      };
-
-      if ($itemIndex === $this->getActiveItemIndex()) {
-        $output = sprintf("%s %s", $this->cursor, match(true) {
-          $item instanceof MenuControlInterface => $item,
-          default => $item->getLabel()
-        });
-      }
-      $content[] = $output;
-    }
-
-    $this->window->setContent($content);
-  }
-
-  /**
    * @inheritDoc
    */
   public function getArgs(): array
   {
-    return [
-      'title' => $this->title,
-      'description' => $this->description,
-      'dimensions' => $this->dimensions,
-      'items' => $this->items,
-      'cursor' => $this->cursor,
-      'active_color' => $this->activeColor,
-    ];
-  }
-
-  /**
-   * Handles navigation.
-   *
-   * @void
-   */
-  private function handleNavigation(): void
-  {
-    $v = Input::getAxis(AxisName::VERTICAL);
-
-    if ($v < 0) {
-      // Move up.
-      $this->setActiveItemByIndex(wrap($this->getActiveItemIndex() - 1, 0, $this->items->count() - 1));
-    }
-
-    if ($v > 0) {
-      // Move down
-      $this->setActiveItemByIndex(wrap($this->getActiveItemIndex() + 1, 0, $this->items->count() - 1));
-    }
-
-    // Update the window content
-    $this->updateWindowContent();
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function awake(): void
-  {
-    // Do nothing.
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function resume(): void
-  {
-    $this->setActiveItemByIndex(0);
-    $this->updateWindowContent();
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function suspend(): void
-  {
-    $this->erase();
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function start(): void
-  {
-    // TODO: Implement start() method.
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function stop(): void
-  {
-    // TODO: Implement stop() method.
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function getName(): string
-  {
-    return $this->getTitle();
+    return ['title' => $this->title, 'description' => $this->description, 'dimensions' => $this->dimensions, 'items' => $this->items, 'cursor' => $this->cursor, 'active_color' => $this->activeColor,];
   }
 
   /**
@@ -616,6 +620,14 @@ class Menu implements MenuInterface
   public function setName(string $name): void
   {
     $this->setTitle($name);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function setTitle(string $title): void
+  {
+    $this->title = $title;
   }
 
   /**
@@ -630,10 +642,26 @@ class Menu implements MenuInterface
   /**
    * @inheritDoc
    */
+  public function start(): void
+  {
+    // Do nothing
+  }
+
+  /**
+   * @inheritDoc
+   */
   public function deactivate(): void
   {
     $this->activated = false;
     $this->stop();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function stop(): void
+  {
+    // Do nothing
   }
 
   /**
@@ -647,36 +675,26 @@ class Menu implements MenuInterface
   /**
    * @inheritDoc
    */
-  public static function find(string $uiElementName): ?self
+  public function setPosition(Vector2 $position): void
   {
-    /** @var ?Menu $element */
-    $element = self::findAll($uiElementName)[0] ?? null;
-    return $element;
+    $this->dimensions->setX($position->getX());
+    $this->dimensions->setY($position->getY());
   }
 
   /**
    * @inheritDoc
    */
-  public static function findAll(string $uiElementName): array
+  public function getSize(): Vector2
   {
-    $elements = [];
-
-    foreach (SceneManager::getInstance()->getActiveScene()?->getUIElements() ?? [] as $element) {
-      if ($element instanceof MenuInterface && $element->getName() === $uiElementName) {
-        $elements[] = $element;
-      }
-    }
-
-    return $elements;
+    return $this->dimensions->getSize();
   }
 
   /**
    * @inheritDoc
    */
-  public function onNotify(ObservableInterface $observable, EventInterface $event): void
+  public function setSize(Vector2 $size): void
   {
-    if ($event instanceof MenuEvent) {
-      $this->updateWindowContent();
-    }
+    $this->dimensions->setWidth($size->getX());
+    $this->dimensions->setHeight($size->getY());
   }
 }
