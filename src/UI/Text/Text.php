@@ -250,15 +250,4 @@ class Text extends UIElement
   {
     return $this->renderHeight;
   }
-
-  /**
-   * Sets the position of the UI element.
-   *
-   * @param Vector2 $position The position of the UI element.
-   * @return void
-   */
-  public function setPosition(Vector2 $position): void
-  {
-    $this->position = $position;
-  }
 }
