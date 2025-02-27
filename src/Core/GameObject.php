@@ -8,6 +8,7 @@ use Sendama\Engine\Core\Interfaces\CanEquate;
 use Sendama\Engine\Core\Interfaces\ComponentInterface;
 use Sendama\Engine\Core\Interfaces\GameObjectInterface;
 use Sendama\Engine\Core\Rendering\Renderer;
+use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
 use Sendama\Engine\Core\Scenes\SceneManager;
 use Sendama\Engine\UI\Interfaces\UIElementInterface;
 
@@ -64,81 +65,26 @@ class GameObject implements GameObjectInterface
   }
 
   /**
-   * Clones the original game object and returns the clone.
-   *
-   * @param GameObject $original The original game object to clone.
-   * @param Vector2|null $position The position of the clone.
-   * @param Vector2|null $rotation The rotation of the clone.
-   * @param Vector2|null $scale The scale of the clone.
-   * @param Transform|null $parent The parent of the clone.
-   * @return GameObject The clone of the original game object.
+   * @inheritDoc
    */
-  public static function instantiate(GameObject $original, ?Vector2 $position = null, ?Vector2 $rotation = null, ?Vector2 $scale = null, ?Transform $parent = null): GameObject
+  public function getScene(): SceneInterface
   {
-    $clone = clone $original;
-    if ($position) {
-      $clone->transform->setPosition($position);
-    }
-
-    if ($rotation) {
-      $clone->transform->setRotation($rotation);
-    }
-
-    if ($scale) {
-      $clone->transform->setScale($scale);
-    }
-
-    if ($parent) {
-      $clone->transform->setParent($parent);
-    }
-    return $clone;
+    return SceneManager::getInstance()->getActiveScene();
   }
 
   /**
-   * Destroys the game object after the specified delay. This removes the game object from the scene.
-   *
-   * @param GameObject $gameObject The game object to destroy.
-   * @param float $delay The delay before destroying the game object.
    * @return void
    */
-  public static function destroy(GameObject $gameObject, float $delay = 0.0): void
+  public function __clone(): void
   {
-    if ($activeScene = SceneManager::getInstance()->getActiveScene()) {
-      // Wait for the delay before destroying the game object.
+    $this->hash = md5(__CLASS__) . '-' . uniqid($this->name, true);
 
-      $activeScene->remove($gameObject);
-      unset($gameObject);
+    $this->transform = clone $this->transform;
+    $this->renderer = clone $this->renderer;
+
+    if ($this->sprite) {
+      $this->sprite = clone $this->sprite;
     }
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public static function pool(GameObjectInterface $gameObject, int $size): array
-  {
-    $pool = [];
-
-    for ($i = 0; $i < $size; ++$i) {
-      $pool[] = clone $gameObject;
-    }
-
-    return $pool;
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public static function find(string $gameObjectName): ?GameObjectInterface
-  {
-    if ($activeScene = SceneManager::getInstance()->getActiveScene()) {
-      foreach ($activeScene->getRootGameObjects() as $gameObject) {
-        if ($gameObject->getName() === $gameObjectName) {
-          return $gameObject;
-        }
-      }
-    }
-
-    return null;
   }
 
   /**
@@ -152,81 +98,13 @@ class GameObject implements GameObjectInterface
   }
 
   /**
-   * @inheritDoc
-   */
-  public static function findWithTag(string $gameObjectTag): ?GameObjectInterface
-  {
-    if ($activeScene = SceneManager::getInstance()->getActiveScene()) {
-      foreach ($activeScene->getRootGameObjects() as $gameObject) {
-        if ($gameObject->getTag() === $gameObjectTag) {
-          return $gameObject;
-        }
-      }
-    }
-
-    return null;
-  }
-
-  /**
    * Returns the tag of the game object.
    *
    * @return string The tag of the game object.
    */
   public function getTag(): string
   {
-    return $this->tag ?? '';
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public static function findAll(string $gameObjectName): array
-  {
-    $gameObjects = [];
-
-    if ($activeScene = SceneManager::getInstance()->getActiveScene()) {
-      foreach ($activeScene->getRootGameObjects() as $gameObject) {
-        if ($gameObject->getName() === $gameObjectName) {
-          $gameObjects[] = $gameObject;
-        }
-      }
-    }
-
-    return $gameObjects;
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public static function findAllWithTag(string $gameObjectTag): array
-  {
-    $gameObjects = [];
-
-    if ($activeScene = SceneManager::getInstance()->getActiveScene()) {
-      foreach ($activeScene->getRootGameObjects() as $gameObject) {
-        if ($gameObject->getTag() === $gameObjectTag) {
-          $gameObjects[] = $gameObject;
-        }
-      }
-    }
-
-    return $gameObjects;
-  }
-
-  /**
-   * @return void
-   */
-  public function __clone(): void
-  {
-    $this->hash = md5(__CLASS__) . '-' . uniqid($this->name, true);
-    $this->position = clone $this->position;
-    $this->rotation = clone $this->rotation;
-    $this->scale = clone $this->scale;
-    $this->renderer = clone $this->renderer;
-    $this->transform = clone $this->transform;
-    if (is_object($this->sprite)) {
-      $this->sprite = clone $this->sprite;
-    }
+    return $this->tag;
   }
 
   /**
@@ -240,11 +118,13 @@ class GameObject implements GameObjectInterface
   }
 
   /**
-   * @inheritDoc
+   * Returns the renderer for the game object.
+   *
+   * @return Renderer The renderer for the game object.
    */
-  public function greaterThan(CanCompare $other): bool
+  public function getRenderer(): Renderer
   {
-    return $this->compareTo($other) > 0;
+    return $this->renderer;
   }
 
   /**
@@ -252,7 +132,8 @@ class GameObject implements GameObjectInterface
    */
   public function compareTo(CanCompare $other): int
   {
-    if (!$other instanceof GameObject) {
+    if (!$other instanceof GameObject)
+    {
       throw new InvalidArgumentException('Cannot compare a game object with a non-game object.');
     }
 
@@ -262,9 +143,9 @@ class GameObject implements GameObjectInterface
   /**
    * @inheritDoc
    */
-  public function getHash(): string
+  public function greaterThan(CanCompare $other): bool
   {
-    return $this->hash;
+    return $this->compareTo($other) > 0;
   }
 
   /**
@@ -294,6 +175,14 @@ class GameObject implements GameObjectInterface
   /**
    * @inheritDoc
    */
+  public function equals(CanEquate $equatable): bool
+  {
+    return $this->getHash() === $equatable->getHash();
+  }
+
+  /**
+   * @inheritDoc
+   */
   public function notEquals(CanEquate $equatable): bool
   {
     return !$this->equals($equatable);
@@ -302,9 +191,9 @@ class GameObject implements GameObjectInterface
   /**
    * @inheritDoc
    */
-  public function equals(CanEquate $equatable): bool
+  public function getHash(): string
   {
-    return $this->getHash() === $equatable->getHash();
+    return $this->hash;
   }
 
   /**
@@ -315,14 +204,6 @@ class GameObject implements GameObjectInterface
     if ($this->isActive() && $this->renderer->isEnabled()) {
       $this->renderer->render();
     }
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function isActive(): bool
-  {
-    return $this->active;
   }
 
   /**
@@ -456,6 +337,14 @@ class GameObject implements GameObjectInterface
   }
 
   /**
+   * @inheritDoc
+   */
+  public function isActive(): bool
+  {
+    return $this->active;
+  }
+
+  /**
    * Calls the method named $methodName on every component in this game object and its children.
    *
    * @param string $methodName The name of the method to call.
@@ -472,16 +361,16 @@ class GameObject implements GameObjectInterface
   }
 
   /**
-   * Adds a component class of type $componentType to the game object.
-   *
-   * @param class-string<Component> $componentType
-   *
-   * @return Component The component that was added.
+   * @inheritDoc
    */
   public function addComponent(string $componentType): Component
   {
-    if (!class_exists($componentType)) {
+    if (! class_exists($componentType) ) {
       throw new InvalidArgumentException('The component type ' . $componentType . ' does not exist.');
+    }
+
+    if (! is_subclass_of($componentType, Component::class)) {
+      throw new InvalidArgumentException('The component type ' . $componentType . ' is not a subclass of ' . Component::class);
     }
 
     $component = new $componentType($this);
@@ -521,7 +410,7 @@ class GameObject implements GameObjectInterface
    */
   public function getComponent(string $componentClass): ?ComponentInterface
   {
-    if (!class_exists($componentClass) && !interface_exists($componentClass)) {
+    if (! class_exists($componentClass) && ! interface_exists($componentClass) ) {
       throw new InvalidArgumentException('The component type ' . $componentClass . ' does not exist.');
     }
 
@@ -551,7 +440,7 @@ class GameObject implements GameObjectInterface
    */
   public function getUIElement(string $uiElementClass): ?UIElementInterface
   {
-    if (!class_exists($uiElementClass) && !interface_exists($uiElementClass)) {
+    if (! class_exists($uiElementClass) && ! interface_exists($uiElementClass) ) {
       throw new InvalidArgumentException('The ui element type ' . $uiElementClass . ' does not exist.');
     }
 
@@ -577,6 +466,62 @@ class GameObject implements GameObjectInterface
   }
 
   /**
+   * Clones the original game object and returns the clone.
+   *
+   * @param GameObject $original The original game object to clone.
+   * @param Vector2|null $position The position of the clone.
+   * @param Vector2|null $rotation The rotation of the clone.
+   * @param Vector2|null $scale The scale of the clone.
+   * @param Transform|null $parent The parent of the clone.
+   * @return GameObject The clone of the original game object.
+   */
+  public static function instantiate(
+    GameObject $original,
+    ?Vector2 $position = null,
+    ?Vector2 $rotation = null,
+    ?Vector2 $scale = null,
+    ?Transform $parent = null
+  ): GameObject
+  {
+    $clone = clone $original;
+
+    if ($position) {
+      $clone->transform->setPosition($position);
+    }
+
+    if ($rotation) {
+      $clone->transform->setRotation($rotation);
+    }
+
+    if ($scale) {
+      $clone->transform->setScale($scale);
+    }
+
+    if ($parent) {
+      $clone->transform->setParent($parent);
+    }
+
+    return $clone;
+  }
+
+  /**
+   * Destroys the game object after the specified delay. This removes the game object from the scene.
+   *
+   * @param GameObject $gameObject The game object to destroy.
+   * @param float $delay The delay before destroying the game object.
+   * @return void
+   */
+  public static function destroy(GameObject $gameObject, float $delay = 0.0): void
+  {
+    if ($activeScene = SceneManager::getInstance()->getActiveScene()) {
+      // Wait for the delay before destroying the game object.
+
+      $activeScene->remove($gameObject);
+      unset($gameObject);
+    }
+  }
+
+  /**
    * @inheritDoc
    */
   public function setSprite(Texture2D|array|string $texture, Vector2 $position, Vector2 $size): void
@@ -593,20 +538,105 @@ class GameObject implements GameObjectInterface
   }
 
   /**
-   * Returns the renderer for the game object.
-   *
-   * @return Renderer The renderer for the game object.
-   */
-  public function getRenderer(): Renderer
-  {
-    return $this->renderer;
-  }
-
-  /**
    * @inheritDoc
    */
   public function getSprite(): Sprite
   {
     return $this->getRenderer()->getSprite();
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function pool(GameObjectInterface $gameObject, int $size): array
+  {
+    $pool = [];
+
+    for ($i = 0; $i < $size; ++$i)
+    {
+      $pool[] = clone $gameObject;
+    }
+
+    return $pool;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function find(string $gameObjectName): ?GameObjectInterface
+  {
+    if ($activeScene = SceneManager::getInstance()->getActiveScene())
+    {
+      foreach ($activeScene->getRootGameObjects() as $gameObject)
+      {
+        if ($gameObject->getName() === $gameObjectName)
+        {
+          return $gameObject;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function findWithTag(string $gameObjectTag): ?GameObjectInterface
+  {
+    if ($activeScene = SceneManager::getInstance()->getActiveScene())
+    {
+      foreach ($activeScene->getRootGameObjects() as $gameObject)
+      {
+        if ($gameObject->getTag() === $gameObjectTag)
+        {
+          return $gameObject;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function findAll(string $gameObjectName): array
+  {
+    $gameObjects = [];
+
+    if ($activeScene = SceneManager::getInstance()->getActiveScene())
+    {
+      foreach ($activeScene->getRootGameObjects() as $gameObject)
+      {
+        if ($gameObject->getName() === $gameObjectName)
+        {
+          $gameObjects[] = $gameObject;
+        }
+      }
+    }
+
+    return $gameObjects;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function findAllWithTag(string $gameObjectTag): array
+  {
+    $gameObjects = [];
+
+    if ($activeScene = SceneManager::getInstance()->getActiveScene())
+    {
+      foreach ($activeScene->getRootGameObjects() as $gameObject)
+      {
+        if ($gameObject->getTag() === $gameObjectTag)
+        {
+          $gameObjects[] = $gameObject;
+        }
+      }
+    }
+
+    return $gameObjects;
   }
 }

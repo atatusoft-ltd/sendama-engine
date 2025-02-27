@@ -114,6 +114,38 @@ abstract class UIElement implements UIElementInterface
   /**
    * @inheritDoc
    */
+  public function getPosition(): Vector2
+  {
+    return $this->position;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function setPosition(Vector2 $position): void
+  {
+    $this->position = $position;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getSize(): Vector2
+  {
+    return $this->size;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function setSize(Vector2 $size): void
+  {
+    $this->size = $size;
+  }
+
+  /**
+   * @inheritDoc
+   */
   public static function find(string $uiElementName): ?UIElementInterface
   {
     if ($activeScene = SceneManager::getInstance()->getActiveScene())

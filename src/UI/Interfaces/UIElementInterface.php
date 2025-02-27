@@ -8,7 +8,7 @@ use Sendama\Engine\Core\Interfaces\CanRender;
 use Sendama\Engine\Core\Interfaces\CanResume;
 use Sendama\Engine\Core\Interfaces\CanStart;
 use Sendama\Engine\Core\Interfaces\CanUpdate;
-use Sendama\Engine\UI\UIElement;
+use Sendama\Engine\Core\Vector2;
 
 /**
  * Interface UIElementInterface. Represents a UI element.
@@ -30,6 +30,34 @@ interface UIElementInterface extends CanUpdate, CanRender, CanStart, CanResume, 
    * @param string $name The name of the UI element.
    */
   public function setName(string $name): void;
+
+  /**
+   * Returns the screen position of the UI element.
+   *
+   * @return Vector2 The screen position of the UI element.
+   */
+  public function getPosition(): Vector2;
+
+  /**
+   * Sets the screen position of the UI element.
+   *
+   * @param Vector2 $position The screen position of the UI element.
+   */
+  public function setPosition(Vector2 $position): void;
+
+  /**
+   * Returns the size of the UI element.
+   *
+   * @return Vector2 The size of the UI element.
+   */
+  public function getSize(): Vector2;
+
+  /**
+   * Sets the size of the UI element.
+   *
+   * @param Vector2 $size The size of the UI element.
+   */
+  public function setSize(Vector2 $size): void;
 
   /**
    * Finds a UI element by its name.
