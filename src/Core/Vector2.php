@@ -13,10 +13,7 @@ class Vector2 implements CanEquate, Stringable
    * @param int $x The x coordinate.
    * @param int $y The y coordinate.
    */
-  public function __construct(
-    protected int $x = 0,
-    protected int $y = 0
-  )
+  public function __construct(protected int $x = 0, protected int $y = 0)
   {
   }
 
@@ -29,16 +26,6 @@ class Vector2 implements CanEquate, Stringable
     [$x, $y] = $vector;
 
     return new Vector2($x, $y);
-  }
-
-  /**
-   * Gets the string representation of this vector.
-   *
-   * @return string The string representation of this vector.
-   */
-  public function __toString(): string
-  {
-    return "($this->x, $this->y)";
   }
 
   /**
@@ -101,51 +88,186 @@ class Vector2 implements CanEquate, Stringable
     return new Vector2(0, -1);
   }
 
+  /**
+   * Gets a clone of the given vector.
+   *
+   * @param Vector2 $original The original vector.
+   * @return self The clone.
+   */
+  public static function getClone(Vector2 $original): self
+  {
+    return new Vector2($original->getX(), $original->getY());
+  }
+
   /* Getters and Setters */
+
   /**
-   * Gets the x coordinate.
+   * Calculates the sum of the given vectors. The first vector is the augend, the rest are the addends.
    *
-   * @return int
+   * @param Vector2 ...$vectors
+   * @return self This vector.
    */
-  public function getX(): int
+  public static function sum(Vector2 ...$vectors): self
   {
-    return $this->x;
+    $result = new Vector2();
+
+    foreach ($vectors as $vector) {
+      $result->add($vector);
+    }
+
+    return $result;
   }
 
   /**
-   * Gets the y coordinate.
+   * Adds the given vector to this vector.
    *
-   * @return int
+   * @param Vector2 $other The vector to add.
+   * @return void
    */
-  public function getY(): int
+  public function add(Vector2 $other): void
   {
-    return $this->y;
+    $this->setX($this->getX() + $other->getX());
+    $this->setY($this->getY() + $other->getY());
   }
 
   /**
-   * Sets the x coordinate.
+   * Calculates the product of the given vectors. The first vector is the multiplicand, the rest are the multipliers.
    *
-   * @param int $x The x coordinate.
-   * @return Vector2
+   * @param Vector2 ...$vectors The vectors to multiply.
+   * @return self The product.
    */
-  public function setX(int $x): self
+  public static function product(Vector2 ...$vectors): self
   {
-    $this->x = $x;
+    $result = new Vector2();
 
-    return $this;
+    foreach ($vectors as $index => $vector) {
+      if ($index === 0) {
+        $result = $vector;
+        continue;
+      }
+      $result->setX($result->getX() * $vector->getX());
+      $result->setY($result->getY() * $vector->getY());
+    }
+
+    return $result;
   }
 
   /**
-   * Sets the y coordinate.
+   * Multiplies a vector by a number. Multiplies each component of the vector by the scalar.
    *
-   * @param int $y The y coordinate.
-   * @return Vector2
+   * @param int|float $scalar The scalar to multiply by.
+   * @return void
    */
-  public function setY(int $y): self
+  public function multiply(int|float $scalar): void
   {
-    $this->y = $y;
+    $this->setX($this->getX() * $scalar);
+    $this->setY($this->getY() * $scalar);
+  }
 
-    return $this;
+  /**
+   * Calculates the quotient of the given vectors. The first vector is the dividend, the rest are the divisors.
+   *
+   * @param Vector2 ...$vectors The vectors to divide.
+   * @return self The quotient.
+   */
+  public static function quotient(Vector2 ...$vectors): self
+  {
+    $result = new Vector2();
+
+    foreach ($vectors as $vector) {
+      $result->setX($result->getX() / $vector->getX());
+      $result->setY($result->getY() / $vector->getY());
+    }
+
+    return $result;
+  }
+
+  /**
+   * Divides a vector by a number. Divides each component of the vector by the scalar.
+   *
+   * @param int|float $scalar The scalar to divide by.
+   * @return void
+   */
+  public function divide(int|float $scalar): void
+  {
+    $this->setX(intval($this->getX() / $scalar));
+    $this->setY(intval($this->getY() / $scalar));
+  }
+
+  /**
+   * Calculates the distance between two vectors. It is the same as ($a - $b).getMagnitude().
+   *
+   * @param Vector2 $a The first vector.
+   * @param Vector2 $b The second vector.
+   * @return float The distance between the two vectors.
+   */
+  public static function distance(Vector2 $a, Vector2 $b): float
+  {
+    return Vector2::difference($a, $b)->getMagnitude();
+  }
+
+  /**
+   * Calculates the difference of the given vectors. The first vector is the minuend, the rest are the subtrahends.
+   *
+   * @param Vector2 ...$vectors The vectors to subtract.
+   * @return self The difference.
+   */
+  public static function difference(Vector2 ...$vectors): self
+  {
+    $result = new Vector2();
+
+    foreach ($vectors as $index => $vector) {
+      if ($index === 0) {
+        $result = $vector;
+        continue;
+      }
+      $result->subtract($vector);
+    }
+
+    return $result;
+  }
+
+  /* Static methods */
+
+  /**
+   * Subtracts the given vector from this vector.
+   *
+   * @param Vector2 $other The vector to subtract.
+   * @return void
+   */
+  public function subtract(Vector2 $other): void
+  {
+    $this->setX($this->getX() - $other->getX());
+    $this->setY($this->getY() - $other->getY());
+  }
+
+  /**
+   * Gets the string representation of this vector.
+   *
+   * @return string The string representation of this vector.
+   */
+  public function __toString(): string
+  {
+    return "($this->x, $this->y)";
+  }
+
+  /**
+   * Returns a new vector that is the normalized version of this vector.
+   *
+   * @return Vector2 The normalized vector.
+   */
+  public function getNormalized(): Vector2
+  {
+    $magnitude = $this->getMagnitude();
+
+    if ($magnitude > PHP_FLOAT_MIN) {
+      return new Vector2(
+        (int) round($this->x / $magnitude),
+        (int) round($this->y / $magnitude)
+      );
+    }
+
+    return new Vector2(0, 0);
   }
 
   /**
@@ -168,188 +290,62 @@ class Vector2 implements CanEquate, Stringable
     return $this->x * $this->x + $this->y * $this->y;
   }
 
-  /**
-   * Returns a new vector that is the normalized version of this vector.
-   *
-   * @return Vector2 The normalized vector.
-   */
-  public function getNormalized(): Vector2
-  {
-    $length = $this->getMagnitude();
-
-    if (abs($length) > PHP_FLOAT_MIN)
-    {
-      return new Vector2($this->x / $length, $this->y / $length);
-    }
-
-    return new Vector2();
-  }
-
   public function normalize(): void
   {
     $length = $this->getMagnitude();
 
-    if (abs($length) > PHP_FLOAT_MIN)
-    {
+    if (abs($length) > PHP_FLOAT_MIN) {
       $this->setX((int)($this->getX() / $length));
       $this->setY((int)($this->getY() / $length));
     }
   }
 
-  /* Static methods */
-  /**
-   * Gets a clone of the given vector.
-   *
-   * @param Vector2 $original The original vector.
-   * @return self The clone.
-   */
-  public static function getClone(Vector2 $original): self
-  {
-    return new Vector2($original->getX(), $original->getY());
-  }
-
-  /**
-   * Calculates the sum of the given vectors. The first vector is the augend, the rest are the addends.
-   *
-   * @param Vector2 ...$vectors
-   * @return self This vector.
-   */
-  public static function sum(Vector2 ...$vectors): self
-  {
-    $result = new Vector2();
-
-    foreach ($vectors as $vector)
-    {
-      $result->add($vector);
-    }
-
-    return $result;
-  }
-
-  /**
-   * Calculates the difference of the given vectors. The first vector is the minuend, the rest are the subtrahends.
-   *
-   * @param Vector2 ...$vectors The vectors to subtract.
-   * @return self The difference.
-   */
-  public static function difference(Vector2 ...$vectors): self
-  {
-    $result = new Vector2();
-
-    foreach ($vectors as $vector)
-    {
-      $result->subtract($vector);
-    }
-
-    return $result;
-  }
-
-  /**
-   * Calculates the product of the given vectors. The first vector is the multiplicand, the rest are the multipliers.
-   *
-   * @param Vector2 ...$vectors The vectors to multiply.
-   * @return self The product.
-   */
-  public static function product(Vector2 ...$vectors): self
-  {
-    $result = new Vector2();
-
-    foreach ($vectors as $vector)
-    {
-      $result->multiply($vector);
-    }
-
-    return $result;
-  }
-
-  /**
-   * Calculates the quotient of the given vectors. The first vector is the dividend, the rest are the divisors.
-   *
-   * @param Vector2 ...$vectors The vectors to divide.
-   * @return self The quotient.
-   */
-  public static function quotient(Vector2 ...$vectors): self
-  {
-    $result = new Vector2();
-
-    foreach ($vectors as $vector)
-    {
-      $result->divide($vector);
-    }
-
-    return $result;
-  }
-
-  /**
-   * Calculates the distance between two vectors. It is the same as ($a - $b).getMagnitude().
-   *
-   * @param Vector2 $a The first vector.
-   * @param Vector2 $b The second vector.
-   * @return float The distance between the two vectors.
-   */
-  public static function distance(Vector2 $a, Vector2 $b): float
-  {
-    return Vector2::difference($a, $b)->getMagnitude();
-  }
-
   /* Operator methods */
+
   /**
-   * Adds the given vector to this vector.
+   * Sets the x coordinate.
    *
-   * @param Vector2 $other The vector to add.
-   * @return void
+   * @param int $x The x coordinate.
+   * @return Vector2
    */
-  public function add(Vector2 $other): void
+  public function setX(int $x): self
   {
-    $this->setX($this->getX() + $other->getX());
-    $this->setY($this->getY() + $other->getY());
+    $this->x = $x;
+
+    return $this;
   }
 
   /**
-   * Subtracts the given vector from this vector.
+   * Gets the x coordinate.
    *
-   * @param Vector2 $other The vector to subtract.
-   * @return void
+   * @return int
    */
-  public function subtract(Vector2 $other): void
+  public function getX(): int
   {
-    $this->setX($this->getX() - $other->getX());
-    $this->setY($this->getY() - $other->getY());
+    return $this->x;
   }
 
   /**
-   * Multiplies the given vector with this vector.
+   * Sets the y coordinate.
    *
-   * @param Vector2 $other The vector to multiply.
-   * @return void
+   * @param int $y The y coordinate.
+   * @return Vector2
    */
-  public function multiply(Vector2 $other): void
+  public function setY(int $y): self
   {
-    $this->setX($this->getX() * $other->getX());
-    $this->setY($this->getY() * $other->getY());
+    $this->y = $y;
+
+    return $this;
   }
 
   /**
-   * Divides the given vector with this vector.
+   * Gets the y coordinate.
    *
-   * @param Vector2 $other The vector to divide.
-   * @return void
+   * @return int
    */
-  public function divide(Vector2 $other): void
+  public function getY(): int
   {
-    $this->setX(intval($this->getX() / $other->getX()));
-    $this->setY(intval($this->getY() / $other->getY()));
-  }
-
-  /**
-   * Returns true if the given equatable is equal to this equatable.
-   *
-   * @param CanEquate $equatable The equatable to compare.
-   * @return bool True if the given equatable is equal to this equatable.
-   */
-  public function equals(CanEquate $equatable): bool
-  {
-    return $this->getHash() === $equatable->getHash();
+    return $this->y;
   }
 
   /**
@@ -361,6 +357,17 @@ class Vector2 implements CanEquate, Stringable
   public function notEquals(CanEquate $equatable): bool
   {
     return !$this->equals($equatable);
+  }
+
+  /**
+   * Returns true if the given equatable is equal to this equatable.
+   *
+   * @param CanEquate $equatable The equatable to compare.
+   * @return bool True if the given equatable is equal to this equatable.
+   */
+  public function equals(CanEquate $equatable): bool
+  {
+    return $this->getHash() === $equatable->getHash();
   }
 
   /**
@@ -382,7 +389,7 @@ class Vector2 implements CanEquate, Stringable
    *
    * @return Vector2 The interpolated vector.
    */
-  public function lerp(Vector2 $a, Vector2 $b, float $t): Vector2
+  public static function lerp(Vector2 $a, Vector2 $b, float $t): Vector2
   {
     $t = clamp($t, 0, 1);
 
@@ -402,5 +409,114 @@ class Vector2 implements CanEquate, Stringable
   {
     $this->setX($this->getX() * $scalar);
     $this->setY($this->getY() * $scalar);
+  }
+
+  /**
+   * Returns the dot product of two vectors. For normalized vectors dot returns 1 if they point in exactly the same
+   * direction, -1 if they point in completely opposite directions and 0 if the vectors are perpendicular.
+   *
+   * For vectors of arbitrary length the Dot return values are similar: they get larger when the angle between
+   * vectors decreases.
+   *
+   * @param Vector2 $lhs The left-hand side vector.
+   * @param Vector2 $rhs The right-hand side vector.
+   * @return float The dot product of the two vectors.
+   */
+  public static function dot(Vector2 $lhs, Vector2 $rhs): float
+  {
+    return $lhs->getX() * $rhs->getX() + $lhs->getY() * $rhs->getY();
+  }
+
+  /**
+   * Returns the angle between two vectors.
+   *
+   * @param Vector2 $from The first vector.
+   * @param Vector2 $to The second vector.
+   * @return float The angle between the two vectors.
+   */
+  public static function angle(Vector2 $from, Vector2 $to): float
+  {
+    $dotProduct = self::dot($from, $to);
+    $magnitudes = $from->getMagnitude() * $to->getMagnitude();
+
+    // Prevent division by zero
+    if ($magnitudes == 0) {
+      return 0.0;
+    }
+
+    $angleInRadians = acos($dotProduct / $magnitudes);
+
+    // Convert radians to degrees
+    return rad2deg($angleInRadians);
+  }
+
+  /**
+   * Returns a vector that is made up of the largest components of two vectors.
+   *
+   * @param Vector2 $lhs The first vector.
+   * @param Vector2 $rhs The second vector.
+   * @return Vector2
+   */
+  public static function max(Vector2 $lhs, Vector2 $rhs): Vector2
+  {
+    return new Vector2(max($lhs->getX(), $rhs->getX()), max($lhs->getY(), $rhs->getY()));
+  }
+
+  /**
+   * Returns a vector that is made up of the largest components of two vectors.
+   *
+   * @param Vector2 $lhs The first vector.
+   * @param Vector2 $rhs The second vector.
+   * @return Vector2
+   */
+  public static function min(Vector2 $lhs, Vector2 $rhs): Vector2
+  {
+    return new Vector2(min($lhs->getX(), $rhs->getX()), min($lhs->getY(), $rhs->getY()));
+  }
+
+  /**
+   * Returns the 2D vector perpendicular to this 2D vector. The result is always rotated 90-degrees
+   * in a counter-clockwise direction for a 2D coordinate system where the positive Y axis goes up.
+   *
+   * @param Vector2 $inDirection The input direction.
+   * @return Vector2
+   */
+  public static function perpendicular(Vector2 $inDirection): Vector2
+  {
+    return new Vector2(-$inDirection->getY(), $inDirection->getX());
+  }
+
+  /**
+   * Reflects a vector off the surface defined by a normal.
+   *
+   * This method calculates a reflected vector using the following formula:
+   * `v = inDirection - 2 * inNormal * dot(inDirection inNormal).`
+   * The inNormal vector defines a surface. A surface's normal is the vector that is perpendicular to its surface.
+   * The inDirection vector is treated as a directional arrow coming into the surface. The returned value is a
+   * vector of equal magnitude to inDirection but with its direction reflected.
+   *
+   * @param Vector2 $inDirection The direction towards the surface.
+   * @param Vector2 $inNormal The normal vector that defines the surface.
+   * @return Vector2
+   */
+  public static function reflect(Vector2 $inDirection, Vector2 $inNormal): Vector2
+  {
+    // Normalize the normal vector, ensuring integer rounding
+    $normalizedNormal = $inNormal->getNormalized();
+
+    // Compute dot product
+    $dotProduct = self::dot($inDirection, $normalizedNormal);
+
+    // Scale the normal vector by (2 * dot product), ensuring integer rounding
+    $scaledNormal = new Vector2(
+      (int) round($normalizedNormal->getX() * (2 * $dotProduct)),
+      (int) round($normalizedNormal->getY() * (2 * $dotProduct))
+    );
+
+    // Compute the reflected vector, ensuring integer rounding
+    return new Vector2(
+      (int) round($inDirection->x - $scaledNormal->x),
+      (int) round($inDirection->y - $scaledNormal->y)
+    );
   }
 }
