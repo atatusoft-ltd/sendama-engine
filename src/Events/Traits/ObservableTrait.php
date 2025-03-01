@@ -33,7 +33,7 @@ trait ObservableTrait
   public function addObservers(ObserverInterface|StaticObserverInterface|string ...$observers): void
   {
     if (!$this->observers) {
-      $this->observers = new ItemList(ObservableInterface::class);
+      $this->observers = new ItemList(ObserverInterface::class);
     }
 
     if (!self::$staticObservers) {
