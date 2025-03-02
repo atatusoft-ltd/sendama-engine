@@ -2,8 +2,11 @@
 
 namespace Sendama\Engine\Exceptions;
 
-use Sendama\Engine\Exceptions\GameException;
-
+/**
+ * Class RenderException. Represents an exception that occurs during rendering.
+ *
+ * @package Sendama\Engine\Exceptions
+ */
 class RenderException extends GameException
 {
 }

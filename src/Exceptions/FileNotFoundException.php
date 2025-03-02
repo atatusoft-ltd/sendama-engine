@@ -2,10 +2,10 @@
 
 namespace Sendama\Engine\Exceptions;
 
-use Sendama\Engine\Exceptions\GameException;
-
 /**
  * Represents a file not found exception.
+ *
+ * @package Sendama\Engine\Exceptions
  */
 class FileNotFoundException extends GameException
 {
