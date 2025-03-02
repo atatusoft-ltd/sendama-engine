@@ -24,10 +24,7 @@ class Renderer extends Component implements CanRender
    * @param GameObject $gameObject
    * @param Sprite|null $sprite
    */
-  public function __construct(
-    GameObject $gameObject,
-    protected ?Sprite $sprite = null
-  )
+  public function __construct(GameObject $gameObject, protected ?Sprite $sprite = null)
   {
     parent::__construct($gameObject);
 
@@ -62,8 +59,7 @@ class Renderer extends Component implements CanRender
    */
   public final function render(): void
   {
-    if (!$this->sprite)
-    {
+    if (!$this->sprite) {
       return;
     }
 
@@ -71,15 +67,12 @@ class Renderer extends Component implements CanRender
     $yOffset = $this->getGameObject()->getTransform()->getPosition()->getY();
     $spriteBufferedImage = $this->sprite->getBufferedImage();
 
-    for ($y = 0; $y < $this->sprite->getRect()->getHeight(); $y++)
-    {
-      for ($x = 0; $x < $this->sprite->getRect()->getWidth(); $x++)
-      {
-        $targetX = $xOffset + $x;
-        $targetY = $yOffset + $y;
+    for ($y = 0; $y < $this->sprite->getRect()->getHeight(); $y++) {
+      for ($x = 0; $x < $this->sprite->getRect()->getWidth(); $x++) {
+        $targetX = max(1, $xOffset + $x);
+        $targetY = max(1, $yOffset + $y);
 
-        if ($targetX < 0 || $targetY < 0)
-        {
+        if ($targetX < 0 || $targetY < 0) {
           continue;
         }
 
@@ -105,23 +98,19 @@ class Renderer extends Component implements CanRender
    */
   public final function erase(): void
   {
-    if (!$this->sprite)
-    {
+    if (!$this->sprite) {
       return;
     }
 
     $xOffset = $this->getGameObject()->getTransform()->getPosition()->getX();
     $yOffset = $this->getGameObject()->getTransform()->getPosition()->getY();
 
-    for ($y = 0; $y < $this->sprite->getRect()->getHeight(); $y++)
-    {
-      for ($x = 0; $x < $this->sprite->getRect()->getWidth(); $x++)
-      {
-        $targetX = $xOffset + $x;
-        $targetY = $yOffset + $y;
+    for ($y = 0; $y < $this->sprite->getRect()->getHeight(); $y++) {
+      for ($x = 0; $x < $this->sprite->getRect()->getWidth(); $x++) {
+        $targetX = max(1, $xOffset + $x);
+        $targetY = max(1, $yOffset + $y);
 
-        if ($targetX < 0 || $targetY < 0)
-        {
+        if ($targetX < 0 || $targetY < 0) {
           continue;
         }
 

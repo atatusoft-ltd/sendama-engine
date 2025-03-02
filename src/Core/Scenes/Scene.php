@@ -8,4 +8,8 @@ namespace Sendama\Engine\Core\Scenes;
 class Scene extends AbstractScene
 {
 
+  public function awake(): void
+  {
+    // TODO: Implement awake() method.
+  }
 }

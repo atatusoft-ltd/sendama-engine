@@ -4,6 +4,8 @@ namespace Sendama\Engine\IO\Enumerations;
 
 /**
  * KeyCode is an enumeration of key codes.
+ *
+ * @package Sendama\Engine\IO\Enumerations
  */
 enum KeyCode: string
 {

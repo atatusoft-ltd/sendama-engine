@@ -22,26 +22,6 @@ use Sendama\Engine\Debug\Debug;
 class AnimationController extends Component implements AnimationControllerInterface
 {
   /**
-   * @var AnimationControllerStateInterface The state of the animation controller.
-   */
-  protected AnimationControllerStateInterface $state;
-  /**
-   * @var AnimationClipInterface[] The array of clips.
-   */
-  protected array $clips = [];
-  /**
-   * @var int The current clip index.
-   */
-  protected int $currentClipIndex = 0;
-  /**
-   * @var int|float The time.
-   */
-  protected int|float $time = 0;
-  /**
-   * @var float The speed.
-   */
-  protected float $speed = 1.0;
-  /**
    * @var InitialAnimationControllerState The initial state.
    */
   public readonly InitialAnimationControllerState $initialState;
@@ -61,6 +41,26 @@ class AnimationController extends Component implements AnimationControllerInterf
    * @var PlayStrategy The play strategy. The WrapMode determines which strategy to use.
    */
   public PlayStrategy $playStrategy;
+  /**
+   * @var AnimationControllerStateInterface The state of the animation controller.
+   */
+  protected AnimationControllerStateInterface $state;
+  /**
+   * @var AnimationClipInterface[] The array of clips.
+   */
+  protected array $clips = [];
+  /**
+   * @var int The current clip index.
+   */
+  protected int $currentClipIndex = 0;
+  /**
+   * @var int|float The time.
+   */
+  protected int|float $time = 0;
+  /**
+   * @var float The speed.
+   */
+  protected float $speed = 1.0;
 
   /**
    * AnimationController constructor.
@@ -82,17 +82,17 @@ class AnimationController extends Component implements AnimationControllerInterf
   /**
    * @inheritDoc
    */
-  public function setState(AnimationControllerStateInterface $state): void
+  public function getState(): AnimationControllerStateInterface
   {
-    $this->state = $state;
+    return $this->state;
   }
 
   /**
    * @inheritDoc
    */
-  public function getState(): AnimationControllerStateInterface
+  public function setState(AnimationControllerStateInterface $state): void
   {
-    return $this->state;
+    $this->state = $state;
   }
 
   /**
@@ -124,10 +124,8 @@ class AnimationController extends Component implements AnimationControllerInterf
    */
   public function loadClip(string $name): void
   {
-    foreach ($this->clips as $index => $clip)
-    {
-      if ($clip->getName() === $name)
-      {
+    foreach ($this->clips as $index => $clip) {
+      if ($clip->getName() === $name) {
         $this->currentClipIndex = $index;
         break;
       }
@@ -147,8 +145,7 @@ class AnimationController extends Component implements AnimationControllerInterf
    */
   public function removeClip(string $name): void
   {
-    if (! isset($this->clips[$name]))
-    {
+    if (!isset($this->clips[$name])) {
       Debug::warn("Clip with name $name does not exist.");
       return;
     }

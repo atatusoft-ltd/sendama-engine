@@ -26,8 +26,7 @@ class SimpleQuitListener extends Behaviour
    */
   public function onUpdate(): void
   {
-    if (Input::isAnyKeyPressed($this->quitKeys))
-    {
+    if (Input::isAnyKeyPressed($this->quitKeys)) {
       quitGame();
     }
   }

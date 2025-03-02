@@ -2,7 +2,6 @@
 
 namespace Sendama\Engine\Core\Behaviours;
 
-use Sendama\Engine\Core\Behaviours\Behaviour;
 use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\Exceptions\Scenes\SceneNotFoundException;
 use Sendama\Engine\IO\Enumerations\KeyCode;
@@ -29,12 +28,10 @@ class SimpleBackListener extends Behaviour
    */
   public function onUpdate(): void
   {
-    if (time() > $this->nextPrintTime)
-    {
+    if (time() > $this->nextPrintTime) {
       $this->nextPrintTime = time() + 1;
     }
-    if (Input::isAnyKeyPressed($this->backKeys))
-    {
+    if (Input::isAnyKeyPressed($this->backKeys)) {
       Debug::log('Going back');
       loadPreviousScene();
     }

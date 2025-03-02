@@ -67,7 +67,7 @@ class AnimationClip implements AnimationClipInterface
    */
   public function getLength(): float
   {
-    return count($this->frames) / $this->frameRate;
+    return $this->getTotalFrames() / $this->frameRate;
   }
 
   /**
