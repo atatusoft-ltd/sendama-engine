@@ -7,8 +7,10 @@ use Throwable;
 
 /**
  * Represents a Game Exception.
+ *
+ * @package Sendama\Engine\Exceptions
  */
-class GameException extends Exception
+class GameException extends SendamaException
 {
   /**
    * @inheritDoc

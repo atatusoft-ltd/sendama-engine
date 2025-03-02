@@ -167,4 +167,14 @@ final class Path
 
     return $normalizedPath;
   }
+
+  /**
+   * Returns the current working directory.
+   *
+   * @return string The current working directory.
+   */
+  public static function getCurrentWorkingDirectory(): string
+  {
+    return getcwd() ?: '';
+  }
 }
