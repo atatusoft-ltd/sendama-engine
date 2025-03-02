@@ -106,7 +106,7 @@ function lerp(float $start, float $end, float $amount): float
 }
 
 /**
- * Wraps the given value between the given min and max values.
+ * Wraps the given value between the given min and max (exclusive) values.
  *
  * @param int $value The value to wrap.
  * @param int $min The minimum value.
@@ -117,13 +117,11 @@ function wrap(int $value, int $min, int $max): int
 {
   $range = $max - $min + 1;
 
-  if ($range == 0)
-  {
+  if ($range == 0) {
     return $min;
   }
 
-  if ($value < $min)
-  {
+  if ($value < $min) {
     $value += $range * ceil(($min - $value) / $range);
   }
 
@@ -143,8 +141,7 @@ function wrap_text(string $text, int $width, bool $breakWords = true): string
   $lines = explode("\n", $text);
   $wrappedLines = [];
 
-  foreach ($lines as $line)
-  {
+  foreach ($lines as $line) {
     $wrappedLines = array_merge($wrappedLines, explode("\n", wordwrap($line, $width, "\n", $breakWords)));
   }
 
@@ -187,12 +184,7 @@ function confirm(string $message, string $title = 'Confirm', int $width = DEFAUL
  * @param int $width The width of the dialog. Defaults to 34.
  * @return string The user's input.
  */
-function prompt(
-  string $message,
-  string $title = 'Prompt',
-  string $default = '',
-  int $width = DEFAULT_DIALOG_WIDTH
-): string
+function prompt(string $message, string $title = 'Prompt', string $default = '', int $width = DEFAULT_DIALOG_WIDTH): string
 {
   return Console::prompt($message, $title, $default, $width);
 }
@@ -208,14 +200,7 @@ function prompt(
  * @param int $width The width of the dialog. Defaults to 34.
  * @return int The index of the selected option.
  */
-function select(
-  string $message,
-  array $options,
-  string $title = '',
-  int $default = 0,
-  ?Vector2 $position = null,
-  int $width = DEFAULT_SELECT_DIALOG_WIDTH
-): int
+function select(string $message, array $options, string $title = '', int $default = 0, ?Vector2 $position = null, int $width = DEFAULT_SELECT_DIALOG_WIDTH): int
 {
   return Console::select($message, $options, $title, $default, $position, $width);
 }
@@ -230,13 +215,7 @@ function select(
  * @param float $charactersPerSecond The number of characters to display per second.
  * @return void
  */
-function show_text(
-  string $message,
-  string $title = '',
-  string $help = '',
-  WindowPosition $position = WindowPosition::BOTTOM,
-  float $charactersPerSecond = 1
-): void
+function show_text(string $message, string $title = '', string $help = '', WindowPosition $position = WindowPosition::BOTTOM, float $charactersPerSecond = 1): void
 {
   Console::showText($message, $title, $help, $position, $charactersPerSecond);
 }
@@ -250,12 +229,7 @@ function show_text(
  * @param NotificationDuration|float $duration The duration of the notification.
  * @return void
  */
-function notify(
-  NotificationChannel $channel,
-  string $title,
-  string $text,
-  NotificationDuration|float $duration = NotificationDuration::SHORT
-): void
+function notify(NotificationChannel $channel, string $title, string $text, NotificationDuration|float $duration = NotificationDuration::SHORT): void
 {
   $notification = new Notification($channel, $title, $text, $duration);
   NotificationsManager::getInstance()->notify($notification);
@@ -330,7 +304,7 @@ function within_bounds(Vector2 $point, Vector2 $min, Vector2 $max): bool
   return in_range($point->getX(), $min->getX(), $max->getX()) && in_range($point->getY(), $min->getY(), $max->getY());
 }
 
-if (! function_exists('env') ) {
+if (!function_exists('env')) {
   /**
    * Gets the value of an environment variable.
    *

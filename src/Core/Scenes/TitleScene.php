@@ -11,7 +11,13 @@ use Sendama\Engine\UI\Menus\Interfaces\MenuItemInterface;
 use Sendama\Engine\UI\Menus\Menu;
 use Sendama\Engine\UI\Menus\MenuItems\MenuItem;
 use Sendama\Engine\UI\Text\Text;
+use Sendama\Engine\UI\Windows\Interfaces\BorderPackInterface;
 
+/**
+ * Class TitleScene. Represents a title scene.
+ *
+ * @package Sendama\Engine\Core\Scenes
+ */
 class TitleScene extends AbstractScene
 {
   /**
@@ -69,6 +75,7 @@ class TitleScene extends AbstractScene
 
   /**
    * @inheritDoc
+   * @throws Exception
    */
   public function awake(): void
   {
@@ -91,11 +98,11 @@ class TitleScene extends AbstractScene
 
     $this->menu = new Menu(title: $gameName, description: 'q:quit', dimensions: new Rect(new Vector2($this->getMenuLeftMargin(), $this->getMenuTopMargin()), new Vector2($this->menuWidth, $this->menuHeight)), cancelKey: [KeyCode::Q, KeyCode::q], onCancel: fn() => quitGame());
     $this->menu->addItem(new MenuItem(label: 'New Game', description: 'Start a new game', icon: '🎮', callback: function () {
-        loadScene(1);
-      }));
+      loadScene(1);
+    }));
     $this->menu->addItem(new MenuItem(label: 'Quit', description: 'Quit the game', icon: '🚪', callback: function () {
-        quitGame();
-      }));
+      quitGame();
+    }));
 
     $this->add($this->titleText);
     $this->add($this->menu);
@@ -139,6 +146,18 @@ class TitleScene extends AbstractScene
   }
 
   /**
+   * Sets the default border pack that will be used to render the menu borders.
+   *
+   * @param BorderPackInterface $borderPack The border pack to use.
+   * @return $this
+   */
+  public function setBorderPack(BorderPackInterface $borderPack): self
+  {
+    $this->menu->setBorderPack($borderPack);
+    return $this;
+  }
+
+  /**
    * Sets the index of the new game scene.
    *
    * @param int $newGameSceneIndex The index of the new game scene.
@@ -153,6 +172,28 @@ class TitleScene extends AbstractScene
     return $this;
   }
 
+  /**
+   * Sets the index of the new game scene by the scene name.
+   *
+   * @param string $newGameSceneName The name of the new game scene.
+   * @return TitleScene $this
+   */
+  public function setNewGameSceneIndexBySceneName(string $newGameSceneName): self
+  {
+    $this->menu->getItemByIndex(0)->setCallback(function () use ($newGameSceneName) {
+      loadScene($newGameSceneName);
+    });
+
+    return $this;
+  }
+
+  /**
+   * Sets the screen dimensions.
+   *
+   * @param int|null $width The width of the screen.
+   * @param int|null $height The height of the screen.
+   * @return void
+   */
   public function setScreenDimensions(?int $width = null, ?int $height = null): void
   {
     $this->screenWidth = $width;
