@@ -4,6 +4,8 @@ namespace Sendama\Engine\Events\Enumerations;
 
 /**
  * SceneEventType
+ *
+ * The type of scene event.
  */
 enum SceneEventType
 {
@@ -20,4 +22,5 @@ enum SceneEventType
   case UPDATE;
   case RESUME;
   case SUSPEND;
+  case UPDATE_PHYSICS;
 }
