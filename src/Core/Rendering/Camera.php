@@ -2,6 +2,7 @@
 
 namespace Sendama\Engine\Core\Rendering;
 
+use Sendama\Engine\Core\GameObject;
 use Sendama\Engine\Core\Rect;
 use Sendama\Engine\Core\Rendering\Interfaces\CameraInterface;
 use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
@@ -12,6 +13,8 @@ use Sendama\Engine\IO\Console\Cursor;
 
 /**
  * Represents a camera.
+ *
+ * @package Sendama\Engine\Core\Rendering
  */
 class Camera implements CameraInterface
 {
@@ -37,14 +40,7 @@ class Camera implements CameraInterface
    * @param float $zoom The zoom.
    * @param float $rotation The rotation.
    */
-  public function __construct(
-    protected SceneInterface $scene,
-    protected Vector2 $offset = new Vector2(0, 0),
-    protected float $zoom = 1.0,
-    protected float $rotation = 0.0,
-    protected int $width = DEFAULT_SCREEN_WIDTH,
-    protected int $height = DEFAULT_SCREEN_HEIGHT
-  )
+  public function __construct(protected SceneInterface $scene, protected Vector2 $offset = new Vector2(0, 0), protected float $zoom = 1.0, protected float $rotation = 0.0, protected int $width = DEFAULT_SCREEN_WIDTH, protected int $height = DEFAULT_SCREEN_HEIGHT)
   {
     $this->viewport = new Rect($this->offset, new Vector2($width, $height));
     $this->cursor = Console::cursor();
@@ -109,20 +105,25 @@ class Camera implements CameraInterface
   /**
    * @inheritDoc
    */
+  public function setViewport(Rect $viewport): void
+  {
+    $this->viewport = $viewport;
+  }
+
+  /**
+   * @inheritDoc
+   */
   public function render(): void
   {
-    foreach ($this->scene->getRootGameObjects() as $gameObject)
-    {
-      if ($gameObject->isActive())
-      {
+    /** @var GameObject $gameObject */
+    foreach ($this->scene->getRootGameObjects() as $gameObject) {
+      if ($gameObject->isActive()) {
         $gameObject->render();
       }
     }
 
-    foreach ($this->scene->getUIElements() as $uiElement)
-    {
-      if ($uiElement->isActive())
-      {
+    foreach ($this->scene->getUIElements() as $uiElement) {
+      if ($uiElement->isActive()) {
         $uiElement->render();
       }
     }
@@ -134,18 +135,14 @@ class Camera implements CameraInterface
    */
   public function renderAt(?int $x = null, ?int $y = null): void
   {
-    foreach ($this->scene->getRootGameObjects() as $gameObject)
-    {
-      if ($gameObject->isActive())
-      {
+    foreach ($this->scene->getRootGameObjects() as $gameObject) {
+      if ($gameObject->isActive()) {
         $gameObject->renderAt($x, $y);
       }
     }
 
-    foreach ($this->scene->getUIElements() as $uiElement)
-    {
-      if ($uiElement->isActive())
-      {
+    foreach ($this->scene->getUIElements() as $uiElement) {
+      if ($uiElement->isActive()) {
         $uiElement->renderAt($x, $y);
       }
     }
@@ -156,18 +153,14 @@ class Camera implements CameraInterface
    */
   public function erase(): void
   {
-    foreach ($this->scene->getRootGameObjects() as $gameObject)
-    {
-      if ($gameObject->isActive())
-      {
+    foreach ($this->scene->getRootGameObjects() as $gameObject) {
+      if ($gameObject->isActive()) {
         $gameObject->erase();
       }
     }
 
-    foreach ($this->scene->getUIElements() as $uiElement)
-    {
-      if ($uiElement->isActive())
-      {
+    foreach ($this->scene->getUIElements() as $uiElement) {
+      if ($uiElement->isActive()) {
         $uiElement->erase();
       }
     }
@@ -178,18 +171,14 @@ class Camera implements CameraInterface
    */
   public function eraseAt(?int $x = null, ?int $y = null): void
   {
-    foreach ($this->scene->getRootGameObjects() as $gameObject)
-    {
-      if ($gameObject->isActive())
-      {
+    foreach ($this->scene->getRootGameObjects() as $gameObject) {
+      if ($gameObject->isActive()) {
         $gameObject->eraseAt($x, $y);
       }
     }
 
-    foreach ($this->scene->getUIElements() as $uiElement)
-    {
-      if ($uiElement->isActive())
-      {
+    foreach ($this->scene->getUIElements() as $uiElement) {
+      if ($uiElement->isActive()) {
         $uiElement->eraseAt($x, $y);
       }
     }
@@ -209,14 +198,6 @@ class Camera implements CameraInterface
   public function update(): void
   {
     // TODO: Implement update() method.
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function setViewport(Rect $viewport): void
-  {
-    $this->viewport = $viewport;
   }
 
   /**

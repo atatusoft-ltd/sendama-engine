@@ -29,13 +29,15 @@ use Sendama\Engine\IO\Console\Cursor;
 use Sendama\Engine\IO\Enumerations\KeyCode;
 use Sendama\Engine\IO\InputManager;
 use Sendama\Engine\Messaging\Notifications\NotificationsManager;
-use Sendama\Engine\States\GameState;
 use Sendama\Engine\States\ModalState;
 use Sendama\Engine\States\PausedState;
 use Sendama\Engine\States\SceneState;
 use Sendama\Engine\UI\Modals\ModalManager;
 use Sendama\Engine\UI\UIManager;
 use Sendama\Engine\UI\Windows\Window;
+use Sendama\Engine\Util\Config\AppConfig;
+use Sendama\Engine\Util\Config\ConfigStore;
+use Sendama\Engine\Util\Config\InputConfig;
 use Sendama\Engine\Util\Path;
 use Throwable;
 
@@ -166,6 +168,8 @@ class Game implements ObservableInterface
    */
   protected function initializeConfigStore(): void
   {
+    ConfigStore::put(AppConfig::class, new AppConfig());
+    ConfigStore::put(InputConfig::class, new InputConfig());
   }
 
   /**
