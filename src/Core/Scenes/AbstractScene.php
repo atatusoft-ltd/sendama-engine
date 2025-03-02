@@ -215,8 +215,6 @@ abstract class AbstractScene implements SceneInterface
    */
   public final function update(): void
   {
-    $this->physics->simulate();
-
     foreach ($this->rootGameObjects as $gameObject) {
       if ($gameObject->isActive()) {
         $gameObject->update();
@@ -231,6 +229,11 @@ abstract class AbstractScene implements SceneInterface
 
     // Update the camera
     $this->camera->update();
+  }
+
+  public function updatePhysics(): void
+  {
+    $this->physics->simulate();
   }
 
   /**
@@ -520,5 +523,13 @@ abstract class AbstractScene implements SceneInterface
   public function getSettings(?string $key): mixed
   {
     return $this->settings[$key] ?? $this->settings;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getSceneManager(): SceneManager
+  {
+    return SceneManager::getInstance();
   }
 }
