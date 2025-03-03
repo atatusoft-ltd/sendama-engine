@@ -6,6 +6,11 @@ use Sendama\Engine\Debug\Debug;
 use Sendama\Engine\IO\Storage\Interfaces\StorageInterface;
 use Sendama\Engine\Util\Path;
 
+/**
+ * Represents a file storage.
+ *
+ * @package Sendama\Engine\IO\Storage
+ */
 class FileStorage implements StorageInterface
 {
   /**
@@ -23,15 +28,20 @@ class FileStorage implements StorageInterface
    */
   protected string $path = '';
 
+  /**
+   * FileStorage constructor.
+   */
   private function __construct()
   {
     // This is a singleton.
   }
 
+  /**
+   * @inheritDoc
+   */
   public static function getInstance(): self
   {
-    if (! self::$instance)
-    {
+    if (!self::$instance) {
       self::$instance = new self();
     }
 
@@ -45,9 +55,30 @@ class FileStorage implements StorageInterface
   {
     $this->path = $path;
 
-    if (! file_exists($this->getSaveFilename()) )
-    {
+    if (!file_exists($this->getSaveFilename())) {
       $this->createSaveFile();
+    }
+  }
+
+  /**
+   * Returns the absolute path to the storage.
+   *
+   * @return string The absolute path to the storage.
+   */
+  private function getSaveFilename(): string
+  {
+    return Path::join(Path::getWorkingDirectoryAssetsPath(), $this->path . '.sedata');
+  }
+
+  /**
+   * Creates the save file.
+   */
+  private function createSaveFile(): void
+  {
+    if (!touch($this->getSaveFilename())) {
+      Debug::error("Failed to create the save file {$this->getSaveFilename()}.");
+    } else {
+      Debug::info("Created the save file $this->path.");
     }
   }
 
@@ -59,12 +90,9 @@ class FileStorage implements StorageInterface
     $data = json_encode($this->data);
     $bytes = file_put_contents($this->getSaveFilename(), $data);
 
-    if ($bytes === false)
-    {
+    if ($bytes === false) {
       Debug::error("Failed to save the data to the storage.");
-    }
-    else
-    {
+    } else {
       Debug::info("Saved the data to the storage. ($bytes) bytes");
     }
   }
@@ -74,9 +102,8 @@ class FileStorage implements StorageInterface
    */
   public function get(string $key): mixed
   {
-    if (! isset($this->data[$key] ))
-    {
-      Debug::warn("The key '{$key}' does not exist in the storage.");
+    if (!isset($this->data[$key])) {
+      Debug::warn("The key '$key' does not exist in the storage.");
       return null;
     }
 
@@ -92,39 +119,14 @@ class FileStorage implements StorageInterface
   }
 
   /**
-   * Returns the absolute path to the storage.
-   *
-   * @return string The absolute path to the storage.
+   * @inheritDoc
    */
-  private function getSaveFilename(): string
-  {
-    return Path::join(Path::getWorkingDirectoryAssetsPath(), $this->path . '.sedata');
-  }
-
   public function delete(string $path): void
   {
-    if (! unlink($this->getSaveFilename()) )
-    {
+    if (!unlink($this->getSaveFilename())) {
       Debug::error("Failed to delete the save file {$this->getSaveFilename()}.");
-    }
-    else
-    {
+    } else {
       Debug::info("Deleted the save file $this->path.");
-    }
-  }
-
-  /**
-   * Creates the save file.
-   */
-  private function createSaveFile(): void
-  {
-    if (! touch($this->getSaveFilename()) )
-    {
-      Debug::error("Failed to create the save file {$this->getSaveFilename()}.");
-    }
-    else
-    {
-      Debug::info("Created the save file $this->path.");
     }
   }
 }

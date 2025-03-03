@@ -104,7 +104,7 @@ class GameObject implements GameObjectInterface
    */
   public function getTag(): string
   {
-    return $this->tag;
+    return $this->tag ?? '';
   }
 
   /**

@@ -11,6 +11,7 @@ use Sendama\Engine\Core\Interfaces\CanStart;
 use Sendama\Engine\Core\Interfaces\CanUpdate;
 use Sendama\Engine\Core\Interfaces\GameObjectInterface;
 use Sendama\Engine\Core\Rendering\Interfaces\CameraInterface;
+use Sendama\Engine\Core\Scenes\SceneManager;
 use Sendama\Engine\UI\Interfaces\UIElementInterface;
 use Serializable;
 
@@ -54,6 +55,13 @@ interface SceneInterface extends CanStart, CanUpdate, CanRender, CanResume, CanA
    * @return void
    */
   public function update(): void;
+
+  /**
+   * Updates the physics of the scene.
+   *
+   * @return void
+   */
+  public function updatePhysics(): void;
 
   /**
    * Renders the scene.
@@ -134,4 +142,11 @@ interface SceneInterface extends CanStart, CanUpdate, CanRender, CanResume, CanA
    * @return mixed The setting value.
    */
   public function getSettings(?string $key): mixed;
+
+  /**
+   * Returns the scene manager.
+   *
+   * @return SceneManager The scene manager.
+   */
+  public function getSceneManager(): SceneManager;
 }

@@ -6,6 +6,7 @@ use Exception;
 use Sendama\Engine\Core\Grid;
 use Sendama\Engine\Core\Rect;
 use Sendama\Engine\Core\Vector2;
+use Sendama\Engine\Game;
 use Sendama\Engine\IO\Enumerations\Color;
 use Sendama\Engine\UI\Modals\ModalManager;
 use Sendama\Engine\UI\Windows\Enumerations\WindowPosition;
@@ -18,6 +19,23 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Console
 {
+  /**
+   * @var Game|null $game The game instance.
+   */
+  protected static ?Game $game = null;
+  /**
+   * @var int $width The width of the console
+   */
+  protected static int $width = DEFAULT_SCREEN_WIDTH;
+  /**
+   * @var int $height The height of the console
+   */
+  protected static int $height = DEFAULT_SCREEN_HEIGHT;
+  /**
+   * @var ConsoleOutput|null $output The console output stream
+   */
+  protected static ?ConsoleOutput $output = null;
+
   /**
    * @var Grid<string> $buffer The buffer.
    */
@@ -38,12 +56,56 @@ class Console
   /**
    * Initializes the console.
    *
+   * @param Game $game
+   * @param array $options
    * @return void
    */
-  public static function init(): void
+  public static function init(Game $game, array $options = [
+    'width' => DEFAULT_SCREEN_WIDTH,
+    'height' => DEFAULT_SCREEN_HEIGHT,
+  ]): void
   {
+    self::$game = $game;
     self::clear();
     Console::cursor()->disableBlinking();
+    self::$width = $options['width'] ?? DEFAULT_SCREEN_WIDTH;
+    self::$height = $options['height'] ?? DEFAULT_SCREEN_HEIGHT;
+    self::$output = new ConsoleOutput();
+  }
+
+  /**
+   * Clears the console.
+   *
+   * @return void
+   */
+  public static function clear(): void
+  {
+    self::$buffer = self::getEmptyBuffer();
+    if (PHP_OS_FAMILY === 'Windows') {
+      system('cls');
+    } else {
+      system('clear');
+    }
+  }
+
+  /**
+   * Returns an empty buffer.
+   *
+   * @return Grid<string> The empty buffer.
+   */
+  private static function getEmptyBuffer(): Grid
+  {
+    return new Grid(DEFAULT_SCREEN_HEIGHT, DEFAULT_SCREEN_WIDTH, ' ');
+  }
+
+  /**
+   * Returns the cursor.
+   *
+   * @return Cursor The cursor.
+   */
+  public static function cursor(): Cursor
+  {
+    return Cursor::getInstance();
   }
 
   /**
@@ -53,12 +115,14 @@ class Console
    */
   public static function reset(): void
   {
-    if (false === system('reset') ) {
+    if (false === system('reset')) {
       echo "System reset failed";
       echo "\033c";
       self::cursor()->enableBlinking();
     }
   }
+
+  /* Scrolling */
 
   /**
    * Enables the line wrap.
@@ -81,17 +145,6 @@ class Console
   }
 
   /**
-   * Returns the cursor.
-   *
-   * @return Cursor The cursor.
-   */
-  public static function cursor(): Cursor
-  {
-    return Cursor::getInstance();
-  }
-
-  /* Scrolling */
-  /**
    * Enables scrolling.
    *
    * @param int|null $start The line to start scrolling.
@@ -100,20 +153,13 @@ class Console
    */
   public static function enableScrolling(?int $start = null, ?int $end = null): void
   {
-    if ($start !== null && $end !== null)
-    {
+    if ($start !== null && $end !== null) {
       echo "\033[$start;{$end}r";
-    }
-    else if ($start !== null)
-    {
+    } else if ($start !== null) {
       echo "\033[{$start}r";
-    }
-    else if ($end !== null)
-    {
+    } else if ($end !== null) {
       echo "\033[;{$end}r";
-    }
-    else
-    {
+    } else {
       echo "\033[r";
     }
   }
@@ -126,24 +172,6 @@ class Console
   public static function disableScrolling(): void
   {
     echo "\033[?7l";
-  }
-
-  /**
-   * Clears the console.
-   *
-   * @return void
-   */
-  public static function clear(): void
-  {
-    self::$buffer = self::getEmptyBuffer();
-    if (PHP_OS_FAMILY === 'Windows')
-    {
-      system('cls');
-    }
-    else
-    {
-      system('clear');
-    }
   }
 
   /**
@@ -241,14 +269,35 @@ class Console
     $x = max(1, $x);
     $y = max(1, $y);
 
-    for ($index = 0; $index < $messageLength; ++$index)
-    {
+    for ($index = 0; $index < $messageLength; ++$index) {
       self::$buffer->set($x + $index, $y, $message[$index]);
       $cursor->moveTo($x + $index, $y);
       echo self::$buffer->toArray()[$y][$x + $index];
     }
 
     $cursor->moveTo($x + $messageLength, $y);
+  }
+
+  /**
+   * Writes text to the console at the specified position.
+   *
+   * @param array<string> $linesOfText The lines of text to write.
+   * @param int $x The x position.
+   * @param int $y The y position.
+   * @return void
+   */
+  public static function writeLines(array $linesOfText, int $x, int $y): void
+  {
+    $cursor = self::cursor();
+
+    $x = max(1, $x);
+    $y = max(1, $y);
+
+    foreach ($linesOfText as $rowIndex => $text) {
+      self::writeLine($text, $x, $y + $rowIndex);
+    }
+
+    $cursor->moveTo(0, $y);
   }
 
   /**
@@ -270,37 +319,13 @@ class Console
     $columnStart = $x;
     $columnEnd = $x + $messageLength;
 
-    for ($i = $columnStart; $i < $columnEnd; $i++)
-    {
+    for ($i = $columnStart; $i < $columnEnd; $i++) {
       self::$buffer->set($i, $y, $message[$i - $columnStart]);
     }
 
     $cursor->moveTo(0, $y);
     echo implode(self::$buffer->toArray()[$y]);
     $cursor->moveTo(0, $y + 1);
-  }
-
-  /**
-   * Writes text to the console at the specified position.
-   *
-   * @param array<string> $linesOfText The lines of text to write.
-   * @param int $x The x position.
-   * @param int $y The y position.
-   * @return void
-   */
-  public static function writeLines(array $linesOfText, int $x, int $y): void
-  {
-    $cursor = self::cursor();
-
-    $x = max(1, $x);
-    $y = max(1, $y);
-
-    foreach ($linesOfText as $rowIndex => $text)
-    {
-      self::writeLine($text, $x, $y + $rowIndex);
-    }
-
-    $cursor->moveTo(0, $y);
   }
 
   /**
@@ -350,23 +375,12 @@ class Console
    */
   public static function charAt(int $x, int $y): string
   {
-    if ($x < 0 || $x > DEFAULT_SCREEN_WIDTH || $y < 1 || $y > DEFAULT_SCREEN_HEIGHT)
-    {
+    if ($x < 0 || $x > DEFAULT_SCREEN_WIDTH || $y < 1 || $y > DEFAULT_SCREEN_HEIGHT) {
       return '';
     }
 
     $char = substr(self::$buffer[$y], $x, 1);
     return ord($char) === 0 ? ' ' : $char;
-  }
-
-  /**
-   * Returns an empty buffer.
-   *
-   * @return Grid<string> The empty buffer.
-   */
-  private static function getEmptyBuffer(): Grid
-  {
-    return new Grid(DEFAULT_SCREEN_HEIGHT, DEFAULT_SCREEN_WIDTH, ' ');
   }
 
   /**
@@ -435,13 +449,7 @@ class Console
    * @param float $charactersPerSecond The number of characters to show per second.
    * @return void
    */
-  public static function showText(
-    string $message,
-    string $title = '',
-    string $help = '',
-    WindowPosition $position = WindowPosition::BOTTOM,
-    float $charactersPerSecond = 1
-  ): void
+  public static function showText(string $message, string $title = '', string $help = '', WindowPosition $position = WindowPosition::BOTTOM, float $charactersPerSecond = 1): void
   {
     ModalManager::getInstance()->showText($message, $title, $help, $position, $charactersPerSecond);
   }
@@ -451,11 +459,7 @@ class Console
    *
    * @return OutputInterface The output stream.
    */
-  public static function output(
-    int $verbosity = OutputInterface::VERBOSITY_NORMAL,
-    ?bool $decorated = null,
-    ?OutputFormatterInterface $formatter = null
-  ): OutputInterface
+  public static function output(int $verbosity = OutputInterface::VERBOSITY_NORMAL, ?bool $decorated = null, ?OutputFormatterInterface $formatter = null): OutputInterface
   {
     return new ConsoleOutput($verbosity, $decorated, $formatter);
   }

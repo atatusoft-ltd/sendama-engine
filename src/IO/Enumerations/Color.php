@@ -4,6 +4,8 @@ namespace Sendama\Engine\IO\Enumerations;
 
 /**
  * Represents a color.
+ *
+ * @package Sendama\Engine\IO\Enumerations
  */
 enum Color: string
 {

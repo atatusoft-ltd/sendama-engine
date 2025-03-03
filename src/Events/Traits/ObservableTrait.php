@@ -16,7 +16,7 @@ use Sendama\Engine\Events\Interfaces\StaticObserverInterface;
 trait ObservableTrait
 {
   /**
-   * @var ItemList<ObservableInterface>|null $observers The observers to notify for events.
+   * @var ItemList<ObserverInterface>|null $observers The observers to notify for events.
    */
   protected ?ItemList $observers = null;
   /**
@@ -33,7 +33,7 @@ trait ObservableTrait
   public function addObservers(ObserverInterface|StaticObserverInterface|string ...$observers): void
   {
     if (!$this->observers) {
-      $this->observers = new ItemList(ObservableInterface::class);
+      $this->observers = new ItemList(ObserverInterface::class);
     }
 
     if (!self::$staticObservers) {
@@ -79,14 +79,17 @@ trait ObservableTrait
   public function notify(EventInterface $event): void
   {
     if ($this->observers) {
+      /** @var ObserverInterface $observer */
       foreach ($this->observers as $observer) {
-        $observer->update($event);
+        assert($this instanceof ObservableInterface);
+        $observer->onNotify($this, $event);
       }
     }
 
     if (self::$staticObservers) {
+      /** @var StaticObserverInterface $observer */
       foreach (self::$staticObservers as $observer) {
-        $observer::update($event);
+        $observer::onNotify($this, $event);
       }
     }
   }

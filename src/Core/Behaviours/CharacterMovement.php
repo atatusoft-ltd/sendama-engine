@@ -48,6 +48,7 @@ class CharacterMovement extends Behaviour
   {
     $this->speed = $speed;
   }
+
   /**
    * Sets the sprites for the character movement.
    *

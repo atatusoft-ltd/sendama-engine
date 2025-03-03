@@ -12,6 +12,7 @@ use Serializable;
 class Sprite implements Serializable
 {
   protected Rect $rect;
+
   /**
    * Sprite constructor. Creates a new sprite.
    *
@@ -19,11 +20,7 @@ class Sprite implements Serializable
    * @param Rect|array{x: int, y: int, width: int, height: int} $rect The rectangle of the sprite.
    * @param Vector2 $pivot The pivot of the sprite.
    */
-  public function __construct(
-    protected Texture2D $texture,
-    Rect|array $rect,
-    protected Vector2 $pivot = new Vector2(0, 0),
-  )
+  public function __construct(protected Texture2D $texture, Rect|array $rect, protected Vector2 $pivot = new Vector2(0, 0))
   {
     $this->rect = is_array($rect) ? Rect::fromArray($rect) : $rect;
   }
@@ -105,14 +102,13 @@ class Sprite implements Serializable
     $height = $this->rect->getHeight();
     $pixels = $this->texture->getPixels();
 
-    for ($y = 0; $y < $height; $y++)
-    {
+    for ($y = 0; $y < $height; $y++) {
       $buffer[$y] = [];
-      for ($x = 0; $x < $width; $x++)
-      {
+      for ($x = 0; $x < $width; $x++) {
         $buffer[$y][$x] = $pixels[$rectY + $y][$rectX + $x];
       }
     }
+
     return $buffer;
   }
 
@@ -121,11 +117,7 @@ class Sprite implements Serializable
    */
   public function serialize(): string
   {
-    return json_encode([
-      'texture' => $this->texture,
-      'rect' => $this->rect,
-      'pivot' => $this->pivot,
-    ]);
+    return json_encode(['texture' => $this->texture, 'rect' => $this->rect, 'pivot' => $this->pivot,]);
   }
 
   /**
@@ -144,11 +136,7 @@ class Sprite implements Serializable
    */
   public function __serialize(): array
   {
-    return [
-      'texture' => $this->texture,
-      'rect' => $this->rect,
-      'pivot' => $this->pivot,
-    ];
+    return ['texture' => $this->texture, 'rect' => $this->rect, 'pivot' => $this->pivot,];
   }
 
   /**

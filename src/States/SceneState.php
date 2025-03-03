@@ -2,6 +2,7 @@
 
 namespace Sendama\Engine\States;
 
+use Sendama\Engine\Core\Enumerations\SettingsKey;
 use Sendama\Engine\IO\Input;
 
 /**
@@ -24,7 +25,7 @@ class SceneState extends GameState
    */
   public function update(): void
   {
-    if (Input::isKeyDown($this->context->getSettings('pause_key'))) {
+    if (Input::isKeyDown($this->context->getSettings(SettingsKey::PAUSE_KEY->value))) {
       $this->suspend();
     }
 

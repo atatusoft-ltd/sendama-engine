@@ -96,7 +96,7 @@ class Collider extends Component implements ColliderInterface
    */
   public function simulate(): void
   {
-    if (method_exists($this->getGameObject())) {
+    if (method_exists($this->getGameObject(), 'fixedUpdate')) {
       $this->getGameObject()->fixedUpdate();
     }
   }

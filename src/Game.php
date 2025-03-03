@@ -7,6 +7,7 @@ use Dotenv\Dotenv;
 use Error;
 use Exception;
 use Sendama\Engine\Core\Enumerations\ChronoUnit;
+use Sendama\Engine\Core\Enumerations\SettingsKey;
 use Sendama\Engine\Core\Scenes\Interfaces\SceneInterface;
 use Sendama\Engine\Core\Scenes\SceneManager;
 use Sendama\Engine\Core\Time;
@@ -28,13 +29,15 @@ use Sendama\Engine\IO\Console\Cursor;
 use Sendama\Engine\IO\Enumerations\KeyCode;
 use Sendama\Engine\IO\InputManager;
 use Sendama\Engine\Messaging\Notifications\NotificationsManager;
-use Sendama\Engine\States\GameState;
 use Sendama\Engine\States\ModalState;
 use Sendama\Engine\States\PausedState;
 use Sendama\Engine\States\SceneState;
 use Sendama\Engine\UI\Modals\ModalManager;
 use Sendama\Engine\UI\UIManager;
 use Sendama\Engine\UI\Windows\Window;
+use Sendama\Engine\Util\Config\AppConfig;
+use Sendama\Engine\Util\Config\ConfigStore;
+use Sendama\Engine\Util\Config\InputConfig;
 use Sendama\Engine\Util\Path;
 use Throwable;
 
@@ -47,13 +50,27 @@ class Game implements ObservableInterface
 {
   const int DEBUG_WINDOW_HEIGHT = 5;
   /**
-   * @var array<string|Throwable|Exception|Error>
+   * @var SceneState $sceneState
    */
-  private array $errors = [];
+  protected SceneState $sceneState;
+  /**
+   * @var ModalState $modalState
+   */
+  protected ModalState $modalState;
+  /**
+   * @var PausedState $pausedState
+   */
+  protected PausedState $pausedState;
+  /**
+   * @var GameStateInterface|null $previousState The previous state of the game.
+   */
+  protected ?GameStateInterface $previousState = null;
   /**
    * @var array<string, mixed>
    */
   private array $settings = [];
+
+  /* == Managers == */
   /**
    * @var ItemList<ObserverInterface>
    */
@@ -70,8 +87,6 @@ class Game implements ObservableInterface
    * @var int The frame rate of the game.
    */
   private int $frameRate = 0;
-
-  /* == Managers == */
   /**
    * @var SceneManager $sceneManager
    */
@@ -84,6 +99,8 @@ class Game implements ObservableInterface
    * @var ModalManager $modalManager
    */
   private ModalManager $modalManager;
+
+  /* Sentinel properties */
   /**
    * @var NotificationsManager $notificationsManager
    */
@@ -96,13 +113,10 @@ class Game implements ObservableInterface
    * @var Cursor $consoleCursor
    */
   private Cursor $consoleCursor;
-
   /**
    * @var Window $debugWindow
    */
   private Window $debugWindow;
-
-  /* Sentinel properties */
   /**
    * @var bool Determines if the game engine is running.
    */
@@ -115,22 +129,6 @@ class Game implements ObservableInterface
    * @var GameStateInterface $state
    */
   private GameStateInterface $state;
-  /**
-   * @var SceneState $sceneState
-   */
-  protected SceneState $sceneState;
-  /**
-   * @var ModalState $modalState
-   */
-  protected ModalState $modalState;
-  /**
-   * @var PausedState $pausedState
-   */
-  protected PausedState $pausedState;
-  /**
-   * @var GameState|null $previousState The previous state of the game.
-   */
-  protected ?GameState $previousState = null;
 
   /**
    * Game constructor.
@@ -140,12 +138,218 @@ class Game implements ObservableInterface
    * @param int $screenHeight The height of the game screen.
    * @throws Exception
    */
-  public function __construct(
-    private readonly string $name,
-    private readonly int $screenWidth = DEFAULT_SCREEN_WIDTH,
-    private readonly int $screenHeight = DEFAULT_SCREEN_HEIGHT,
-    private readonly ?string $workingDirectory = null
-  )
+  public function __construct(private readonly string $name, private readonly int $screenWidth = DEFAULT_SCREEN_WIDTH, private readonly int $screenHeight = DEFAULT_SCREEN_HEIGHT, private readonly ?string $workingDirectory = null)
+  {
+    try {
+      $this->initializeObservers();
+      $this->configureErrorAndExceptionHandlers();
+      $this->initializeConsole();
+      $this->initializeConfigStore();
+      $this->initializeManagers();
+      $this->initializeSettings();
+      $this->initializeGameStates();
+      $this->configureWindowChangeSignalHandler();
+    } catch (Error|Exception|Throwable $exception) {
+      $this->handleException($exception);
+    }
+  }
+
+  /**
+   * @return void
+   */
+  protected function initializeObservers(): void
+  {
+    $this->observers = new ItemList(ObserverInterface::class);
+    $this->staticObservers = new ItemList(StaticObserverInterface::class);
+  }
+
+  /**
+   * @return void
+   */
+  protected function initializeConfigStore(): void
+  {
+    ConfigStore::put(AppConfig::class, new AppConfig());
+    ConfigStore::put(InputConfig::class, new InputConfig());
+  }
+
+  /**
+   * Configure error and exception handlers.
+   *
+   * @return void
+   */
+  protected function configureErrorAndExceptionHandlers(): void
+  {
+    error_reporting(E_ALL);
+
+    set_exception_handler(function (Throwable|Exception|Error $exception) {
+      $this->handleException($exception);
+    });
+
+    // Handle errors
+    set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+      $this->handleError($errno, $errstr, $errfile, $errline);
+    });
+
+    $this->debugWindow = new Window();
+  }
+
+  /**
+   * Handle game exceptions.
+   *
+   * @param Exception|Throwable|Error $exception The exception to be handled.
+   * @return never
+   */
+  private function handleException(Exception|Throwable|Error $exception): never
+  {
+    Debug::error($exception);
+//    Console::reset();
+    $this->stop();
+
+    if ($this->getSettings('debug')) {
+      exit($exception);
+    }
+
+    exit("$exception\n");
+  }
+
+  /**
+   * Stop the game.
+   *
+   * @return void
+   */
+  public function stop(): void
+  {
+    Debug::info("Stopping game");
+
+    // Disable non-blocking input mode
+    InputManager::disableNonBlockingMode();
+
+    // Enable echo
+    InputManager::enableEcho();
+
+    // Show cursor
+    $this->consoleCursor->show();
+
+    // Restore the terminal settings
+    Console::restoreSettings();
+
+    // Remove observers
+    $this->removeObservers();
+
+    // Stop the game
+    $this->isRunning = false;
+
+    // Notify listeners that the game has stopped
+    $this->notify(new GameEvent(GameEventType::STOP));
+
+    Debug::info("Game stopped");
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function removeObservers(ObserverInterface|StaticObserverInterface|string|null ...$observers): void
+  {
+    if (is_null($observers)) {
+      $this->observers->clear();
+      $this->staticObservers->clear();
+      return;
+    }
+
+    foreach ($observers as $observer) {
+      if ($observer instanceof ObserverInterface) {
+        $this->observers->remove($observer);
+      } else {
+        $this->staticObservers->remove($observer);
+      }
+    }
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function notify(EventInterface $event): void
+  {
+    try {
+      /** @var ObserverInterface $observer */
+      foreach ($this->observers as $observer) {
+        $observer->onNotify($this, $event);
+      }
+
+      /** @var StaticObserverInterface $observer */
+      foreach ($this->staticObservers as $observer) {
+        $observer::onNotify($this, $event);
+      }
+    } catch (Exception $exception) {
+      $this->handleException($exception);
+    }
+  }
+
+  /**
+   * Retrieve game settings.
+   *
+   * @param string|SettingsKey|null $key The key of the setting to retrieve.
+   * @return mixed The game settings.
+   */
+  public function getSettings(string|SettingsKey|null $key = null): mixed
+  {
+    $key = match (true) {
+      is_null($key) => null,
+      is_string($key) => $key,
+      default => $key->value
+    };
+    return $this->settings[$key] ?? $this->settings;
+  }
+
+  /**
+   * Handles game errors.
+   *
+   * @param int $errno
+   * @param string $errstr
+   * @param string $errfile
+   * @param int $errline
+   * @return never
+   */
+  private function handleError(int $errno, string $errstr, string $errfile, int $errline): never
+  {
+    $errorMessage = "[$errno] $errstr in $errfile on line $errline";
+    Debug::error($errorMessage);
+    $this->stop();
+
+    if ($this->getSettings('debug')) {
+      exit($errorMessage);
+    }
+
+    exit($errno);
+  }
+
+  /**
+   * @return void
+   */
+  protected function initializeConsole(): void
+  {
+    $this->consoleCursor = Console::cursor();
+    Console::init($this, []);
+  }
+
+  /**
+   * @return void
+   */
+  protected function initializeManagers(): void
+  {
+    $this->sceneManager = SceneManager::getInstance();
+    $this->eventManager = EventManager::getInstance();
+    $this->modalManager = ModalManager::getInstance();
+    $this->notificationsManager = NotificationsManager::getInstance();
+    $this->uiManager = UIManager::getInstance();
+  }
+
+  /**
+   * Initialize game settings.
+   *
+   * @return void
+   */
+  private function initializeSettings(): void
   {
     // Load environment variables
     if (file_exists($this->workingDirectory ?? getcwd() . '/.env')) {
@@ -153,91 +357,41 @@ class Game implements ObservableInterface
       $dotenv->load();
     }
 
-    // Initialize console
-    Console::init();
+    $this->settings[SettingsKey::GAME_NAME->value] = $_ENV['GAME_NAME'] ?? $this->name;
+    $this->settings[SettingsKey::SCREEN_WIDTH->value] = $this->screenWidth;
+    $this->settings[SettingsKey::SCREEN_HEIGHT->value] = $this->screenHeight;
+    $this->settings[SettingsKey::FPS->value] = DEFAULT_FPS;
+    $this->settings[SettingsKey::ASSETS_DIR->value] = Path::join(getcwd(), DEFAULT_ASSETS_PATH);
 
-    // Initialize managers
-    $this->consoleCursor        = Console::cursor();
-    $this->sceneManager         = SceneManager::getInstance();
-    $this->eventManager         = EventManager::getInstance();
-    $this->modalManager         = ModalManager::getInstance();
-    $this->notificationsManager = NotificationsManager::getInstance();
-    $this->uiManager            = UIManager::getInstance();
+    $this->settings[SettingsKey::INITIAL_SCENE->value] = null;
 
-    $this->debugWindow          = new Window();
+    // Load environment settings
+    $this->settings[SettingsKey::DEBUG->value] = $_ENV['DEBUG_MODE'] ?? false;
+    $this->settings[SettingsKey::DEBUG_INFO->value] = $_ENV['SHOW_DEBUG_INFO'] ?? false;
+    $this->settings[SettingsKey::LOG_LEVEL->value] = $_ENV['LOG_LEVEL'] ?? 'info';
+    Debug::setLogLevel(LogLevel::tryFrom($this->getSettings('log_level')) ?? LogLevel::DEBUG);
 
-    // Initialize observers
-    $this->observers            = new ItemList(ObserverInterface::class);
-    $this->staticObservers      = new ItemList(StaticObserverInterface::class);
+    $this->settings[SettingsKey::LOG_DIR->value] = Path::join(getcwd(), DEFAULT_LOGS_DIR);
+    Debug::info("Log directory initialized: {$this->settings[SettingsKey::LOG_DIR->value]}");
 
-    // Load default settings
-    $this->initializeSettings();
+    // Debug settings
+    Debug::setLogDirectory($this->getSettings(SettingsKey::LOG_DIR->value));
+    $this->debugWindow->setPosition([0, $this->settings[SettingsKey::SCREEN_HEIGHT->value] - self::DEBUG_WINDOW_HEIGHT]);
 
-    $this->sceneState           = new SceneState(
-      $this,
-      $this->sceneManager,
-      $this->eventManager,
-      $this->modalManager,
-      $this->notificationsManager,
-      $this->uiManager
-    );
-    $this->modalState           = new ModalState(
-      $this,
-      $this->sceneManager,
-      $this->eventManager,
-      $this->modalManager,
-      $this->notificationsManager,
-      $this->uiManager
-    );
-    $this->pausedState          = new PausedState(
-      $this,
-      $this->sceneManager,
-      $this->eventManager,
-      $this->modalManager,
-      $this->notificationsManager,
-      $this->uiManager
-    );
-    $this->state = $this->sceneState;
+    // Input settings
+    $this->settings[SettingsKey::BUTTONS->value] = [];
+    $this->settings[SettingsKey::PAUSE_KEY->value] = $_ENV['PAUSE_KEY'] ?? KeyCode::ESCAPE;
 
-    // Handle Signals
-    pcntl_signal(SIGWINCH, function () {
-      $terminalSize             = Console::getSize();
-      $currentScreenWidth       = $terminalSize->getWidth();
-      $currentScreenHeight      = $terminalSize->getHeight();
+    // Splash screen settings
+    $this->settings[SettingsKey::SPLASH_TEXTURE->value] = Path::join($this->settings[SettingsKey::ASSETS_DIR->value], basename(DEFAULT_SPLASH_TEXTURE_PATH));
+    Debug::info("Splash screen texture init: {$this->settings[SettingsKey::SPLASH_TEXTURE->value]}");
+    $this->settings[SettingsKey::SPLASH_DURATION->value] = DEFAULT_SPLASH_SCREEN_DURATION;
 
-      $this->screenWidth        = min($currentScreenWidth, $this->screenWidth, DEFAULT_SCREEN_WIDTH);
-      $this->screenHeight       = min($currentScreenHeight, $this->screenHeight, DEFAULT_SCREEN_HEIGHT);
+    // UI Settings
+    $this->settings[SettingsKey::BORDER_PACK->value] = null;
 
-      Debug::info("SIGWINCH received");
-    });
-
-    // Handle exceptions
-    set_exception_handler(function (Throwable|Exception|Error $exception) {
-      Console::reset();
-      $this->handleException($exception);
-    });
-
-    // Handle errors
-    set_error_handler(function ($errno, $errstr, $errfile, $errline) {
-      Console::reset();
-      $this->handleError($errno, $errstr, $errfile, $errline);
-    });
-  }
-
-  /**
-   * Destruct the game engine.
-   */
-  public function __destruct()
-  {
-    Console::restoreSettings();
-
-    if (!empty($this->errors)) {
-      foreach ($this->errors as $error) {
-        echo $error . PHP_EOL;
-      }
-    } else {
-      Console::reset();
-    }
+    $this->sceneManager->loadSettings($this->settings);
+    Debug::info("Game settings initialized");
   }
 
   /**
@@ -251,35 +405,39 @@ class Game implements ObservableInterface
     try {
       Debug::info("Loading environment settings");
       // Environment
-      $this->settings['debug']                  = $_ENV['DEBUG_MODE'] ?? false;
-      $this->settings['debug_info']             = $_ENV['SHOW_DEBUG_INFO'] ?? false;
-      $this->settings['log_level']              = $_ENV['LOG_LEVEL'] ?? DEFAULT_LOG_LEVEL;
-      $this->settings['log_dir']                = $_ENV['LOG_DIR'] ?? Path::join(getcwd(), DEFAULT_LOGS_DIR);
+      $this->settings[SettingsKey::DEBUG->value] = $_ENV['DEBUG_MODE'] ?? false;
+      $this->settings[SettingsKey::DEBUG_INFO->value] = $_ENV['SHOW_DEBUG_INFO'] ?? false;
+      $this->settings[SettingsKey::LOG_LEVEL->value] = $_ENV['LOG_LEVEL'] ?? DEFAULT_LOG_LEVEL;
+      $this->settings[SettingsKey::LOG_DIR->value] = $_ENV['LOG_DIR'] ?? Path::join(getcwd(), DEFAULT_LOGS_DIR);
 
       Debug::info("Loading game settings");
       // Game
-      $this->settings['game_name']              = $settings['game_name'] ?? $this->name;
-      $this->settings['screen_width']           = $settings['screen_width'] ?? $this->screenWidth;
-      $this->settings['screen_height']          = $settings['screen_height'] ?? $this->screenHeight;
-      $this->settings['fps']                    = $settings['fps'] ?? DEFAULT_FPS;
-      $this->settings['assets_path']            = $settings['assets_path'] ?? getcwd() . DEFAULT_ASSETS_PATH;
+      $this->settings[SettingsKey::GAME_NAME->value] = $settings[SettingsKey::GAME_NAME->value] ?? $this->name;
+      $this->settings[SettingsKey::SCREEN_WIDTH->value] = $settings[SettingsKey::SCREEN_WIDTH->value] ?? $this->screenWidth;
+      $this->settings[SettingsKey::SCREEN_HEIGHT->value] = $settings[SettingsKey::SCREEN_HEIGHT->value] ?? $this->screenHeight;
+      $this->settings[SettingsKey::FPS->value] = $settings[SettingsKey::FPS->value] ?? DEFAULT_FPS;
+      $this->settings[SettingsKey::ASSETS_DIR->value] = $settings[SettingsKey::ASSETS_DIR->value] ?? getcwd() . DEFAULT_ASSETS_PATH;
 
       Debug::info('Loading scene settings');
       // Scene
-      $this->settings['initial_scene']          = 0 ?? throw new InitializationException("Initial scene not found");
+      $this->settings[SettingsKey::INITIAL_SCENE->value] = 0 ?? throw new InitializationException("Initial scene not found");
 
       Debug::info('Loading splash screen settings');
-      if (isset($settings['splash_texture'])) {
-        $this->settings['splash_texture'] = Path::join(getcwd(), $settings['splash_texture']);
+      if (isset($settings[SettingsKey::SPLASH_TEXTURE->value])) {
+        $this->settings[SettingsKey::SPLASH_TEXTURE->value] = Path::join(getcwd(), $settings[SettingsKey::SPLASH_TEXTURE->value]);
       }
 
-      $this->settings['splash_screen_duration'] = $settings['splash_screen_duration'] ?? DEFAULT_SPLASH_SCREEN_DURATION;
+      $this->settings[SettingsKey::SPLASH_DURATION->value] = $settings[SettingsKey::SPLASH_DURATION->value] ?? DEFAULT_SPLASH_SCREEN_DURATION;
 
       // Debug settings
       Debug::info('Loading debug settings');
       Debug::setLogDirectory($this->getSettings('log_dir'));
       Debug::setLogLevel(LogLevel::tryFrom($this->getSettings('log_level')) ?? LogLevel::DEBUG);
-      $this->debugWindow->setPosition([0, $this->settings['screen_height'] - self::DEBUG_WINDOW_HEIGHT]);
+      $this->debugWindow->setPosition([0, $this->settings[SettingsKey::SCREEN_HEIGHT->value] - self::DEBUG_WINDOW_HEIGHT]);
+
+      // Input settings
+      $this->settings[SettingsKey::BUTTONS->value] = $settings[SettingsKey::BUTTONS->value] ?? $this->settings[SettingsKey::BUTTONS->value] ?? [];
+      $this->settings[SettingsKey::PAUSE_KEY->value] = $settings[SettingsKey::PAUSE_KEY->value] ?? $_ENV['PAUSE_KEY'] ?? KeyCode::ESCAPE;
 
       $this->sceneManager->loadSettings($this->settings);
       Debug::info("Game settings loaded");
@@ -291,14 +449,61 @@ class Game implements ObservableInterface
   }
 
   /**
-   * Retrieve game settings.
+   * Initialize game states.
    *
-   * @param string|null $key The key of the setting to retrieve.
-   * @return mixed The game settings.
+   * @return void
    */
-  public function getSettings(?string $key = null): mixed
+  protected function initializeGameStates(): void
   {
-    return $this->settings[$key] ?? $this->settings;
+    $this->sceneState = new SceneState($this, $this->sceneManager, $this->eventManager, $this->modalManager, $this->notificationsManager, $this->uiManager);
+    $this->modalState = new ModalState($this, $this->sceneManager, $this->eventManager, $this->modalManager, $this->notificationsManager, $this->uiManager);
+    $this->pausedState = new PausedState($this, $this->sceneManager, $this->eventManager, $this->modalManager, $this->notificationsManager, $this->uiManager);
+    $this->state = $this->sceneState;
+  }
+
+  /**
+   * Configure the window change signal handler.
+   *
+   * @return void
+   * @throws Exception
+   */
+  protected function configureWindowChangeSignalHandler(): void
+  {
+    pcntl_signal(SIGWINCH, function () {
+      $terminalSize = Console::getSize();
+      $currentScreenWidth = $terminalSize->getWidth();
+      $currentScreenHeight = $terminalSize->getHeight();
+
+      $this->screenWidth = min($currentScreenWidth, $this->screenWidth, DEFAULT_SCREEN_WIDTH);
+      $this->screenHeight = min($currentScreenHeight, $this->screenHeight, DEFAULT_SCREEN_HEIGHT);
+
+      Debug::info("SIGWINCH received");
+    });
+  }
+
+  /**
+   * Quit the game.
+   *
+   * @return void
+   */
+  public static function quit(): void
+  {
+    if (confirm("Are you sure you want to quit?", "", 40)) {
+      EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::QUIT));
+    }
+  }
+
+  /**
+   * Destruct the game engine.
+   */
+  public function __destruct()
+  {
+    Console::restoreSettings();
+    Console::reset();
+
+    if ($lastError = error_get_last()) {
+      $this->handleError($lastError['type'], $lastError['message'], $lastError['file'], $lastError['line']);
+    }
   }
 
   /**
@@ -386,220 +591,6 @@ class Game implements ObservableInterface
   }
 
   /**
-   * Stop the game.
-   *
-   * @return void
-   */
-  public function stop(): void
-  {
-    Debug::info("Stopping game");
-
-    // Disable non-blocking input mode
-    InputManager::disableNonBlockingMode();
-
-    // Enable echo
-    InputManager::enableEcho();
-
-    // Show cursor
-    $this->consoleCursor->show();
-
-    // Restore the terminal settings
-    Console::restoreSettings();
-
-    // Remove observers
-    $this->removeObservers();
-
-    // Stop the game
-    $this->isRunning = false;
-
-    // Notify listeners that the game has stopped
-    $this->notify(new GameEvent(GameEventType::STOP));
-
-    Debug::info("Game stopped");
-  }
-
-  /**
-   * Handle game input.
-   *
-   * @return void
-   */
-  private function handleInput(): void
-  {
-    InputManager::handleInput();
-  }
-
-  /**
-   * Update the game state.
-   *
-   * @return void
-   */
-  private function update(): void
-  {
-    $this->state->update();
-
-    $this->uiManager->update();
-
-    $this->notify(new GameEvent(GameEventType::UPDATE));
-  }
-
-  /**
-   * Render the game.
-   *
-   * @return void
-   */
-  private function render(): void
-  {
-    $this->frameCount++;
-
-    $this->state->render();
-
-    $this->uiManager->render();
-
-    $this->renderDebugInfo();
-
-    $this->notify(new GameEvent(GameEventType::RENDER));
-  }
-
-  /**
-   * Handles game errors.
-   *
-   * @param int $errno
-   * @param string $errstr
-   * @param string $errfile
-   * @param int $errline
-   * @return never
-   */
-  private function handleError(int $errno, string $errstr, string $errfile, int $errline): never
-  {
-    $errorMessage = "[$errno] $errstr in $errfile on line $errline";
-    Debug::error($errorMessage);
-    $this->stop();
-
-    if ($this->getSettings('debug')) {
-      exit($errorMessage);
-    }
-
-    exit($errno);
-  }
-
-
-  /**
-   * Handle game exceptions.
-   *
-   * @param Exception|Throwable|Error $exception The exception to be handled.
-   * @return never
-   */
-  private function handleException(Exception|Throwable|Error $exception): never
-  {
-    $this->errors[] = $exception;
-    Debug::error($exception);
-    $this->stop();
-
-    if ($this->getSettings('debug')) {
-      exit($exception);
-    }
-
-    exit($exception->getCode());
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function addObservers(ObserverInterface|StaticObserverInterface|string ...$observers): void
-  {
-    foreach ($observers as $observer) {
-      if ($observer instanceof ObserverInterface) {
-        $this->observers->add($observer);
-      } else {
-        $this->staticObservers->add($observer);
-      }
-    }
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function removeObservers(ObserverInterface|StaticObserverInterface|string|null ...$observers): void
-  {
-    if (is_null($observers)) {
-      $this->observers->clear();
-      $this->staticObservers->clear();
-      return;
-    }
-
-    foreach ($observers as $observer) {
-      if ($observer instanceof ObserverInterface) {
-        $this->observers->remove($observer);
-      } else {
-        $this->staticObservers->remove($observer);
-      }
-    }
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function notify(EventInterface $event): void
-  {
-    try {
-      /** @var ObserverInterface $observer */
-      foreach ($this->observers as $observer) {
-        $observer->onNotify($this, $event);
-      }
-
-      /** @var StaticObserverInterface $observer */
-      foreach ($this->staticObservers as $observer) {
-        $observer::onNotify($this, $event);
-      }
-    } catch (Exception $exception) {
-      $this->handleException($exception);
-    }
-  }
-
-  /**
-   * Add scenes to the game.
-   *
-   * @param SceneInterface ...$scenes The scenes to add.
-   * @return $this
-   */
-  public function addScenes(SceneInterface ...$scenes): self
-  {
-    foreach ($scenes as $scene) {
-      $this->sceneManager->addScene($scene);
-    }
-
-    return $this;
-  }
-
-  /**
-   * Set the current game state.
-   *
-   * @param GameStateInterface $state The game state to set.
-   * @return void
-   */
-  public function setState(GameStateInterface $state): void
-  {
-    $this->previousState = $this->state;
-    $this->state = $state;
-  }
-
-  /**
-   * Retrieve a game state.
-   *
-   * @param string $stateName The name of the state to retrieve.
-   * @return GameStateInterface|null The game state or null if not found.
-   */
-  public function getState(string $stateName): ?GameStateInterface
-  {
-    return match ($stateName) {
-      'scene' => $this->sceneState,
-      'modal' => $this->modalState,
-      'paused' => $this->pausedState,
-      default => null
-    };
-  }
-
-  /**
    * Display the splash screen.
    *
    * @return void
@@ -612,8 +603,8 @@ class Game implements ObservableInterface
 
       // Check if a splash texture can be loaded
       if (!file_exists($this->getSettings('splash_texture'))) {
-        Debug::warn("Splash screen texture not found: {$this->settings['splash_texture']}");
-        $this->settings['splash_texture'] = Path::join(Path::getVendorAssetsDirectory(), DEFAULT_SPLASH_TEXTURE_PATH);
+        Debug::warn("Splash screen texture not found: {$this->settings[SettingsKey::SPLASH_TEXTURE->value]}");
+        $this->settings[SettingsKey::SPLASH_TEXTURE->value] = Path::join(Path::getVendorAssetsDirectory(), DEFAULT_SPLASH_TEXTURE_PATH);
       }
 
       Debug::info("Loading splash screen texture");
@@ -625,7 +616,7 @@ class Game implements ObservableInterface
       $splashScreenRows[] = sprintf("%s%s", str_repeat(' ', $splashScreenWidth - 12), "powered by");
       $splashScreenRows[] = sprintf("%s%s", str_repeat(' ', $splashScreenWidth - strlen($splashByLine)), $splashByLine);
 
-      $leftMargin = (MAX_SCREEN_WIDTH  / 2) - ($splashScreenWidth / 2);
+      $leftMargin = (MAX_SCREEN_WIDTH / 2) - ($splashScreenWidth / 2);
       $topMargin = (MAX_SCREEN_HEIGHT / 2) - ($splashScreenHeight / 2);
 
       Debug::info("Rendering splash screen texture");
@@ -634,7 +625,7 @@ class Game implements ObservableInterface
         Console::output()->write($row);
       }
 
-      $duration = (int) ($this->getSettings('splash_screen_duration') * 1000000);
+      $duration = (int)($this->getSettings('splash_screen_duration') * 1000000);
       usleep($duration);
 
       Console::setSize($this->getSettings('screen_width'), $this->getSettings('screen_height'));
@@ -655,8 +646,7 @@ class Game implements ObservableInterface
       // Handle game events
       $this->eventManager->addEventListener(EventType::GAME, function (GameEvent $event) {
         Debug::info("Game event received");
-        switch ($event->gameEventType)
-        {
+        switch ($event->gameEventType) {
           case GameEventType::QUIT:
             Debug::info("Game quit event received");
             $this->notify(new GameEvent(GameEventType::QUIT));
@@ -674,6 +664,56 @@ class Game implements ObservableInterface
   }
 
   /**
+   * @inheritDoc
+   */
+  public function addObservers(ObserverInterface|StaticObserverInterface|string ...$observers): void
+  {
+    foreach ($observers as $observer) {
+      if ($observer instanceof ObserverInterface) {
+        $this->observers->add($observer);
+      } else {
+        $this->staticObservers->add($observer);
+      }
+    }
+  }
+
+  /**
+   * Handle game input.
+   *
+   * @return void
+   */
+  private function handleInput(): void
+  {
+    InputManager::handleInput();
+  }
+
+  /**
+   * Update the game state.
+   *
+   * @return void
+   */
+  private function update(): void
+  {
+    $this->state->update();
+    $this->uiManager->update();
+    $this->notify(new GameEvent(GameEventType::UPDATE));
+  }
+
+  /**
+   * Render the game.
+   *
+   * @return void
+   */
+  private function render(): void
+  {
+    $this->frameCount++;
+    $this->state->render();
+    $this->uiManager->render();
+    $this->renderDebugInfo();
+    $this->notify(new GameEvent(GameEventType::RENDER));
+  }
+
+  /**
    * Renders Debug Info.
    *
    * @return void
@@ -681,72 +721,10 @@ class Game implements ObservableInterface
   private function renderDebugInfo(): void
   {
     if ($this->isDebug() && $this->showDebugInfo()) {
-      $content = [
-        "FPS: $this->frameRate",
-        "Delta: " . round(Time::getDeltaTime(), 2),
-        "Time: " . Time::getPrettyTime(ChronoUnit::SECONDS)
-      ];
+      $content = ["FPS: $this->frameRate", "Delta: " . round(Time::getDeltaTime(), 2), "Time: " . Time::getPrettyTime(ChronoUnit::SECONDS)];
 
       $this->debugWindow->setContent($content);
       $this->debugWindow->render();
-    }
-  }
-
-  /**
-   * Initialize game settings.
-   *
-   * @return void
-   */
-  private function initializeSettings(): void
-  {
-    $this->settings['game_name']              = $_ENV['GAME_NAME'] ?? $this->name;
-    $this->settings['screen_width']           = $this->screenWidth;
-    $this->settings['screen_height']          = $this->screenHeight;
-    $this->settings['fps']                    = DEFAULT_FPS;
-    $this->settings['assets_path']            = Path::join(getcwd(), DEFAULT_ASSETS_PATH);
-
-    $this->settings['initial_scene']          = null;
-
-    // Load environment settings
-    $this->settings['debug']                  = $_ENV['DEBUG_MODE'] ?? false;
-    $this->settings['debug_info']             = $_ENV['SHOW_DEBUG_INFO'] ?? false;
-    $this->settings['log_level']              = $_ENV['LOG_LEVEL'] ?? 'info';
-    Debug::setLogLevel(LogLevel::tryFrom($this->getSettings('log_level')) ?? LogLevel::DEBUG);
-
-    $this->settings['log_dir']                = Path::join(getcwd(), DEFAULT_LOGS_DIR);
-    Debug::info("Log directory initialized: {$this->settings['log_dir']}");
-
-    // Debug settings
-    Debug::setLogDirectory($this->getSettings('log_dir'));
-    $this->debugWindow->setPosition([0, $this->settings['screen_height'] - self::DEBUG_WINDOW_HEIGHT]);
-
-    // Input settings
-    $this->settings['buttons']                = [];
-    $this->settings['pause_key']              = $_ENV['PAUSE_KEY'] ?? KeyCode::ESCAPE;
-
-    // Splash screen settings
-    $this->settings['splash_texture']         = Path::join($this->settings['assets_path'], basename(DEFAULT_SPLASH_TEXTURE_PATH));
-    Debug::info("Splash screen texture init: {$this->settings['splash_texture']}");
-    $this->settings['splash_screen_duration'] = DEFAULT_SPLASH_SCREEN_DURATION;
-
-    $this->sceneManager->loadSettings($this->settings);
-    Debug::info("Game settings initialized");
-  }
-
-  public function getPreviousState(): GameState
-  {
-    return $this->previousState;
-  }
-
-  /**
-   * Quit the game.
-   *
-   * @return void
-   */
-  public static function quit(): void
-  {
-    if (confirm("Are you sure you want to quit?", "", 40)) {
-      EventManager::getInstance()->dispatchEvent(new GameEvent(GameEventType::QUIT));
     }
   }
 
@@ -759,9 +737,9 @@ class Game implements ObservableInterface
   {
     return match (gettype($this->getSettings('debug'))) {
       'boolean' => $this->getSettings('debug'),
-      'string'  => strtolower($this->getSettings('debug')) === 'true',
+      'string' => strtolower($this->getSettings('debug')) === 'true',
       'integer' => $this->getSettings('debug') === 1,
-      default   => false
+      default => false
     };
   }
 
@@ -769,9 +747,62 @@ class Game implements ObservableInterface
   {
     return match (gettype($this->getSettings('debug_info'))) {
       'boolean' => $this->getSettings('debug_info'),
-      'string'  => strtolower($this->getSettings('debug_info')) === 'true',
+      'string' => strtolower($this->getSettings('debug_info')) === 'true',
       'integer' => $this->getSettings('debug_info') === 1,
-      default   => false
+      default => false
     };
+  }
+
+  /**
+   * Add scenes to the game.
+   *
+   * @param SceneInterface ...$scenes The scenes to add.
+   * @return $this
+   */
+  public function addScenes(SceneInterface ...$scenes): self
+  {
+    foreach ($scenes as $scene) {
+      $this->sceneManager->addScene($scene);
+    }
+
+    return $this;
+  }
+
+  /**
+   * Retrieve a game state.
+   *
+   * @param string $stateName The name of the state to retrieve.
+   * @return GameStateInterface|null The game state or null if not found.
+   */
+  public function getState(string $stateName): ?GameStateInterface
+  {
+    return match ($stateName) {
+      'scene' => $this->sceneState,
+      'modal' => $this->modalState,
+      'paused' => $this->pausedState,
+      default => null
+    };
+  }
+
+  /**
+   * Set the current game state.
+   *
+   * @param GameStateInterface $state The game state to set.
+   * @return void
+   */
+  public function setState(GameStateInterface $state): void
+  {
+    $this->previousState = $this->state;
+    $this->state = $state;
+  }
+
+  /**
+   * Get the previous game state.
+   *
+   * @return GameStateInterface|null The previous game state or null if not found.
+   */
+  public function getPreviousState(): GameStateInterface|null
+  {
+    return $this->previousState;
   }
 }

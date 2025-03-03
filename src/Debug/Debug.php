@@ -8,6 +8,8 @@ use Sendama\Engine\Util\Path;
 
 /**
  * Class Debug. A class for logging debug messages.
+ *
+ * @package Sendama\Engine\Debug
  */
 class Debug
 {
