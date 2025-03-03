@@ -34,7 +34,7 @@ class InputConfig extends AbstractConfig
    */
   protected function getFilename(): string
   {
-    $filename = Path::join(Path::getCurrentWorkingDirectory(), 'input.php');
+    $filename = Path::join(Path::getCurrentWorkingDirectory(), 'config/input.php');
 
     if (!file_exists($filename)) {
       throw new NotFoundException($filename);

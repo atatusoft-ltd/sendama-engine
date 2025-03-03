@@ -16,23 +16,31 @@ use Sendama\Engine\Events\EventManager;
 use Sendama\Engine\Events\SceneEvent;
 use Sendama\Engine\Exceptions\Scenes\SceneNotFoundException;
 
+/**
+ * Class SceneManager. Manages the scenes of the game.
+ *
+ * @package Sendama\Engine\Core\Scenes
+ */
 final class SceneManager implements SingletonInterface, CanStart, CanResume, CanUpdate, CanRender
 {
+  /**
+   * @var SceneManager|null $instance The instance of the SceneManager.
+   */
   protected static ?SceneManager $instance = null;
   /**
-   * @var ItemList<SceneInterface>
+   * @var ItemList<SceneInterface> $scenes The list of scenes.
    */
   protected ItemList $scenes;
   /**
-   * @var array<string, mixed>
+   * @var array<string, mixed> $settings The settings for the SceneManager.
    */
   protected array $settings = [];
   /**
-   * @var SceneNodeInterface|null $activeScene
+   * @var SceneNodeInterface|null $activeScene The currently active scene.
    */
   protected ?SceneNodeInterface $activeScene = null;
   /**
-   * @var EventManager $eventManager
+   * @var EventManager $eventManager The event manager.
    */
   protected EventManager $eventManager;
 
@@ -70,9 +78,11 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
   }
 
   /**
-   * @param SceneInterface $scene
-   * @param mixed|null $data
-   * @return $this
+   * Adds a scene to the SceneManager.
+   *
+   * @param SceneInterface $scene The scene to add.
+   * @param mixed|null $data The data to associate with the scene.
+   * @return $this The SceneManager instance.
    */
   public function addScene(SceneInterface $scene, mixed $data = null): self
   {
@@ -82,7 +92,10 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
   }
 
   /**
-   * @return $this
+   * Removes a scene from the SceneManager.
+   *
+   * @param SceneInterface $scene The scene to remove.
+   * @return $this The SceneManager instance.
    */
   public function removeScene(SceneInterface $scene): self
   {

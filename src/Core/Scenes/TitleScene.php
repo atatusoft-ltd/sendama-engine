@@ -11,7 +11,13 @@ use Sendama\Engine\UI\Menus\Interfaces\MenuItemInterface;
 use Sendama\Engine\UI\Menus\Menu;
 use Sendama\Engine\UI\Menus\MenuItems\MenuItem;
 use Sendama\Engine\UI\Text\Text;
+use Sendama\Engine\UI\Windows\Interfaces\BorderPackInterface;
 
+/**
+ * Class TitleScene. Represents a title scene.
+ *
+ * @package Sendama\Engine\Core\Scenes
+ */
 class TitleScene extends AbstractScene
 {
   /**
@@ -69,62 +75,54 @@ class TitleScene extends AbstractScene
 
   /**
    * @inheritDoc
+   * @throws Exception
    */
   public function awake(): void
   {
     $this->sceneManager = SceneManager::getInstance();
     $gameName = getGameName() ?? $this->name;
-    if (!$this->title)
-    {
+    if (!$this->title) {
       $this->title = $gameName;
     }
 
-    $this->titleText = new Text(
-      scene: $this,
-      name: $gameName,
-      position: new Vector2(0, 4),
-      size: new Vector2(DEFAULT_SCREEN_WIDTH, 5)
-    );
+    $this->titleText = new Text(scene: $this, name: $gameName, position: new Vector2(0, 4), size: new Vector2(DEFAULT_SCREEN_WIDTH, 5));
     $this->titleText->setFontName(FontName::BIG->value);
     $this->titleText->setText($gameName);
     $this->titleLeftMargin = round(($this->sceneManager->getSettings('screen_width') / 2) - ($this->titleText->getWidth() / 2));
     $this->titleTopMargin = 4;
     $this->titleText->setPosition(new Vector2(round($this->titleLeftMargin), round($this->titleTopMargin)));
 
-    if (is_array($gameName))
-    {
+    if (is_array($gameName)) {
       $gameName = $_ENV['GAME_NAME'] ?? $this->name;
     }
 
-    $this->menu = new Menu(
-      title: $gameName,
-      description: 'q:quit',
-      dimensions: new Rect(
-        new Vector2($this->getMenuLeftMargin(), $this->getMenuTopMargin()),
-        new Vector2($this->menuWidth, $this->menuHeight)
-      ),
-      cancelKey: [KeyCode::Q, KeyCode::q],
-      onCancel: fn() => quitGame()
-    );
-    $this->menu->addItem(new MenuItem(
-      label: 'New Game',
-      description: 'Start a new game',
-      icon: '🎮',
-      callback: function () {
-        loadScene( 1);
-      }
-    ));
-    $this->menu->addItem(new MenuItem(
-      label: 'Quit',
-      description: 'Quit the game',
-      icon: '🚪',
-      callback: function () {
-        quitGame();
-      }
-    ));
+    $this->menu = new Menu(title: $gameName, description: 'q:quit', dimensions: new Rect(new Vector2($this->getMenuLeftMargin(), $this->getMenuTopMargin()), new Vector2($this->menuWidth, $this->menuHeight)), cancelKey: [KeyCode::Q, KeyCode::q], onCancel: fn() => quitGame());
+    $this->menu->addItem(new MenuItem(label: 'New Game', description: 'Start a new game', icon: '🎮', callback: function () {
+      loadScene(1);
+    }));
+    $this->menu->addItem(new MenuItem(label: 'Quit', description: 'Quit the game', icon: '🚪', callback: function () {
+      quitGame();
+    }));
 
     $this->add($this->titleText);
     $this->add($this->menu);
+  }
+
+  /**
+   * @return int
+   */
+  private function getMenuLeftMargin(): int
+  {
+    $screenWidth = $this->screenWidth ?? $this->sceneManager->getSettings('screen_width');
+    return ($screenWidth / 2) - ($this->menuWidth / 2);
+  }
+
+  /**
+   * @return int
+   */
+  private function getMenuTopMargin(): int
+  {
+    return ($this->titleTopMargin + $this->titleText->getHeight() + 1);
   }
 
   /**
@@ -148,6 +146,18 @@ class TitleScene extends AbstractScene
   }
 
   /**
+   * Sets the default border pack that will be used to render the menu borders.
+   *
+   * @param BorderPackInterface $borderPack The border pack to use.
+   * @return $this
+   */
+  public function setBorderPack(BorderPackInterface $borderPack): self
+  {
+    $this->menu->setBorderPack($borderPack);
+    return $this;
+  }
+
+  /**
    * Sets the index of the new game scene.
    *
    * @param int $newGameSceneIndex The index of the new game scene.
@@ -162,30 +172,32 @@ class TitleScene extends AbstractScene
     return $this;
   }
 
-  public function setScreenDimensions(
-    ?int $width = null,
-    ?int $height = null,
-  ): void
+  /**
+   * Sets the index of the new game scene by the scene name.
+   *
+   * @param string $newGameSceneName The name of the new game scene.
+   * @return TitleScene $this
+   */
+  public function setNewGameSceneIndexBySceneName(string $newGameSceneName): self
+  {
+    $this->menu->getItemByIndex(0)->setCallback(function () use ($newGameSceneName) {
+      loadScene($newGameSceneName);
+    });
+
+    return $this;
+  }
+
+  /**
+   * Sets the screen dimensions.
+   *
+   * @param int|null $width The width of the screen.
+   * @param int|null $height The height of the screen.
+   * @return void
+   */
+  public function setScreenDimensions(?int $width = null, ?int $height = null): void
   {
     $this->screenWidth = $width;
     $this->screenHeight = $height;
-  }
-
-  /**
-   * @return int
-   */
-  private function getMenuLeftMargin(): int
-  {
-    $screenWidth = $this->screenWidth ?? $this->sceneManager->getSettings('screen_width');
-    return ($screenWidth / 2) - ($this->menuWidth / 2);
-  }
-
-  /**
-   * @return int
-   */
-  private function getMenuTopMargin(): int
-  {
-    return ($this->titleTopMargin + $this->titleText->getHeight() + 1);
   }
 
   /**
@@ -200,8 +212,7 @@ class TitleScene extends AbstractScene
     $quitItem = $this->menu->getItemByIndex($lastItemIndex);
     $this->menu->removeItemByIndex($lastItemIndex);
 
-    foreach ($item as $menuItem)
-    {
+    foreach ($item as $menuItem) {
       $this->menu->addItem($menuItem);
     }
 
