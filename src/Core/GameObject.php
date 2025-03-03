@@ -54,14 +54,7 @@ class GameObject implements GameObjectInterface
    * @param Vector2 $scale The scale of the game object.
    * @param Sprite|null $sprite The sprite of the game object.
    */
-  public function __construct(
-    protected string  $name,
-    protected ?string $tag = null,
-    protected Vector2 $position = new Vector2(),
-    protected Vector2 $rotation = new Vector2(),
-    protected Vector2 $scale = new Vector2(),
-    protected ?Sprite $sprite = null
-  )
+  public function __construct(protected string $name, protected ?string $tag = null, protected Vector2 $position = new Vector2(), protected Vector2 $rotation = new Vector2(), protected Vector2 $scale = new Vector2(), protected ?Sprite $sprite = null)
   {
     $this->hash = md5(__CLASS__) . '-' . uniqid($this->name, true);
     $this->transform = new Transform($this, $position, $scale, $rotation);
@@ -208,8 +201,7 @@ class GameObject implements GameObjectInterface
    */
   public function render(): void
   {
-    if ($this->isActive() && $this->renderer->isEnabled())
-    {
+    if ($this->isActive() && $this->renderer->isEnabled()) {
       $this->renderer->render();
     }
   }
@@ -219,8 +211,7 @@ class GameObject implements GameObjectInterface
    */
   public function renderAt(?int $x = null, ?int $y = null): void
   {
-    if ($this->isActive() && $this->renderer->isEnabled())
-    {
+    if ($this->isActive() && $this->renderer->isEnabled()) {
       $this->renderer->renderAt($x, $y);
     }
   }
@@ -230,8 +221,7 @@ class GameObject implements GameObjectInterface
    */
   public function erase(): void
   {
-    if ($this->isActive() && $this->renderer->isEnabled())
-    {
+    if ($this->isActive() && $this->renderer->isEnabled()) {
       $this->renderer->erase();
     }
   }
@@ -241,8 +231,7 @@ class GameObject implements GameObjectInterface
    */
   public function eraseAt(?int $x = null, ?int $y = null): void
   {
-    if ($this->isActive() && $this->renderer->isEnabled())
-    {
+    if ($this->isActive() && $this->renderer->isEnabled()) {
       $this->renderer->eraseAt($x, $y);
     }
   }

@@ -358,7 +358,7 @@ if (! function_exists('within_bounds') ) {
   }
 }
 
-if (! function_exists('env') ) {
+if (!function_exists('env')) {
   /**
    * Gets the value of an environment variable.
    *
