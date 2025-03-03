@@ -143,8 +143,8 @@ class Game implements ObservableInterface
     try {
       $this->initializeObservers();
       $this->configureErrorAndExceptionHandlers();
-      $this->initializeConfigStore();
       $this->initializeConsole();
+      $this->initializeConfigStore();
       $this->initializeManagers();
       $this->initializeSettings();
       $this->initializeGameStates();

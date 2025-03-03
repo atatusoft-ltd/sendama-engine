@@ -28,8 +28,8 @@ abstract class AbstractConfig implements ConfigInterface
    */
   public function __construct(protected array $options = [])
   {
-    $this->config = $this->load();
     $this->filename = $this->getFilename();
+    $this->config = $this->load();
   }
 
   /**
