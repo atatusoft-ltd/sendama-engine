@@ -216,6 +216,7 @@ abstract class AbstractScene implements SceneInterface
   public final function update(): void
   {
     foreach ($this->rootGameObjects as $gameObject) {
+      Debug::log($gameObject->getHash() . ' update!');
       if ($gameObject->isActive()) {
         $gameObject->update();
       }
@@ -257,6 +258,7 @@ abstract class AbstractScene implements SceneInterface
    */
   public final function suspend(): void
   {
+    Debug::info('Scene suspended: ' . $this->name);
     foreach ($this->rootGameObjects as $gameObject) {
       if ($gameObject->isActive()) {
         $gameObject->suspend();
@@ -275,6 +277,7 @@ abstract class AbstractScene implements SceneInterface
    */
   public final function resume(): void
   {
+    Debug::info('Scene resumed: ' . $this->name);
     $this->camera->renderWorldSpace();
 
     foreach ($this->rootGameObjects as $gameObject) {
@@ -366,6 +369,7 @@ abstract class AbstractScene implements SceneInterface
    */
   private function createWordsSpace(): void
   {
+    Debug::info('Creating world space for ' . $this->name);
     $width = $this->settings['screen_width'];
     $height = $this->settings['screen_height'];
 
@@ -418,6 +422,7 @@ abstract class AbstractScene implements SceneInterface
    */
   public function add(GameObjectInterface|UIElementInterface $object): void
   {
+    Debug::info('Adding game object ' . $object->getName());
     if ($object instanceof GameObjectInterface) {
       $this->rootGameObjects[] = $object;
       if ($collider = $object->getComponent(ColliderInterface::class)) {
@@ -437,6 +442,7 @@ abstract class AbstractScene implements SceneInterface
    */
   public function remove(UIElementInterface|GameObjectInterface $object): void
   {
+    Debug::info('Removing game object ' . $object->getName());
     if ($object instanceof GameObjectInterface) {
       $this->rootGameObjects = array_filter($this->rootGameObjects, fn($item) => $item !== $object, $this->rootGameObjects);
       if ($collider = $object->getComponent('Collider')) {
@@ -494,6 +500,7 @@ abstract class AbstractScene implements SceneInterface
    */
   private function loadEnvironmentTileMapData(?string $path = null): void
   {
+    Debug::info("Loading environment tile map data: $path");
     // Check if the file exists
     if (! file_exists($this->getAbsoluteEnvironmentTileMapPath()) ) {
       throw new FileNotFoundException($this->getAbsoluteEnvironmentTileMapPath());

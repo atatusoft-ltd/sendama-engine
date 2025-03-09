@@ -38,7 +38,7 @@ class Level01 extends AbstractScene
     $playerStartingX = 4;
     $playerStartingY = $screenHeight / 2;
     $playerTexture = new Texture2D('Textures/player.texture');
-    $player->setSprite($playerTexture, new Vector2(0, 1), new Vector2(5, 3));
+    $player->setSpriteFromTexture($playerTexture, new Vector2(0, 1), new Vector2(5, 3));
     $player->getTransform()->setPosition(new Vector2($playerStartingX, $playerStartingY));
     /**
      * @var CharacterMovement $playerMovementController

@@ -32,7 +32,7 @@ class ExampleScene extends AbstractScene
 
     # Set up the player
     $playerTexture = new Texture2D('Textures/player.texture');
-    $player->setSprite($playerTexture, Vector2::zero(), Vector2::one());
+    $player->setSpriteFromTexture($playerTexture, Vector2::zero(), Vector2::one());
     /**
      * @var CharacterMovement $characterMovement
      */

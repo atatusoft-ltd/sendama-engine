@@ -70,13 +70,13 @@ class Level01 extends AbstractScene
       new Sprite($playerTexture, ['x' => 3, 'y' => 0, 'width' => 1, 'height' => 1]),
     );
     $playerMovementController->setSpeed(1);
-    $player->setSprite($playerTexture, Vector2::zero(), Vector2::one());
+    $player->setSpriteFromTexture($playerTexture, Vector2::zero(), Vector2::one());
 
     // Set up the apple
     $appleTexture = new Texture2D('Textures/apple.texture');
     $apple->addComponent(CollectableController::class);
     $apple->addComponent(Collider::class);
-    $apple->setSprite($appleTexture, Vector2::zero(), Vector2::one());
+    $apple->setSpriteFromTexture($appleTexture, Vector2::zero(), Vector2::one());
 
     // Add the game objects to the scene
     $this->add($levelManager);

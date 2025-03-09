@@ -24,14 +24,22 @@ interface GameObjectInterface extends CanCompare, CanResume, CanUpdate, CanStart
   public function getScene(): SceneInterface;
 
   /**
-   * Sets the sprite of the game object
+   * Sets the sprite of the game object from a texture.
    *
    * @param Texture2D|array{path: string, width: ?int, height: ?int}|string $texture The path to the sprite texture.
    * @param Vector2 $position The position of the sprite
    * @param Vector2 $size
    * @return void
    */
-  public function setSprite(Texture2D|array|string $texture, Vector2 $position, Vector2 $size): void;
+  public function setSpriteFromTexture(Texture2D|array|string $texture, Vector2 $position, Vector2 $size): void;
+
+  /**
+   * Sets the sprite of the game object
+   *
+   * @param Sprite $sprite The sprite to set.
+   * @return void
+   */
+  public function setSprite(Sprite $sprite): void;
 
   /**
    * Return the sprite set in the object's renderer.

@@ -6,13 +6,14 @@ use InvalidArgumentException;
 use Sendama\Engine\Core\Traits\DimensionTrait;
 use Sendama\Engine\IO\Enumerations\Color;
 use Sendama\Engine\Util\Path;
+use Stringable;
 
 /**
  * Represents a 2D texture.
  *
  * @package Sendama\Engine\Core
  */
-class Texture2D
+class Texture2D implements Stringable
 {
   use DimensionTrait;
 
@@ -149,5 +150,19 @@ class Texture2D
   private function getAbsolutePath(): string
   {
     return Path::join(Path::getWorkingDirectoryAssetsPath(), $this->path);
+  }
+
+  public function __toString(): string
+  {
+    $output = '';
+    foreach ($this->getPixels() as $row => $pixel) {
+      if (is_array($row)) {
+        $output .= implode('', $pixel) . PHP_EOL;
+      } else {
+        $output .= $pixel . PHP_EOL;
+      }
+    }
+
+    return $output;
   }
 }
