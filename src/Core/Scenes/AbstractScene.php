@@ -216,7 +216,6 @@ abstract class AbstractScene implements SceneInterface
   public final function update(): void
   {
     foreach ($this->rootGameObjects as $gameObject) {
-      Debug::log($gameObject->getHash() . ' update!');
       if ($gameObject->isActive()) {
         $gameObject->update();
       }
