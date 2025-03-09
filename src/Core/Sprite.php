@@ -2,6 +2,7 @@
 
 namespace Sendama\Engine\Core;
 
+use Sendama\Engine\Debug\Debug;
 use Serializable;
 
 /**
@@ -105,7 +106,25 @@ class Sprite implements Serializable
     for ($y = 0; $y < $height; $y++) {
       $buffer[$y] = [];
       for ($x = 0; $x < $width; $x++) {
-        $buffer[$y][$x] = $pixels[$rectY + $y][$rectX + $x];
+        $row = $rectY + $y;
+        $column = $rectX + $x;
+
+        if (!isset($pixels[$row])) {
+          $pixels[$row] = [];
+          Debug::warn("Pixel row $row does not exist.");
+        }
+
+        if (!isset($pixels[$row][$column])) {
+          $pixels[$row][$column] = ' ';
+          Debug::warn("Pixel column $column does not exist - "  . json_encode($pixels[$row], JSON_PRETTY_PRINT));
+        }
+
+        if (!isset($buffer[$y])) {
+          $buffer[$y] = [];
+          Debug::warn("Buffered image row $row does not exist.");
+        }
+
+        $buffer[$y][$x] = $pixels[$row][$column];
       }
     }
 
