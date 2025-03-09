@@ -16,6 +16,7 @@ use Sendama\Engine\Messaging\Notifications\NotificationsManager;
 use Sendama\Engine\UI\Windows\Enumerations\WindowPosition;
 use Sendama\Engine\Util\Config\AppConfig;
 use Sendama\Engine\Util\Config\ConfigStore;
+use Sendama\Engine\Util\Config\PlayerPreferences;
 
 
 /* Application */
@@ -409,5 +410,31 @@ if (! function_exists('get_screen_height') ) {
   function get_screen_height(): int
   {
     return config(AppConfig::class, 'player.screen.height', DEFAULT_SCREEN_HEIGHT);
+  }
+}
+
+if (! function_exists('get_player_pref') ) {
+  /**
+   * Gets the player preference with the given key.
+   *
+   * @param string $key The key of the player preference.
+   * @param mixed|null $default The default value to return if the player preference is not set.
+   * @return mixed The value of the player preference.
+   */
+  function get_player_pref(string $key, mixed $default = null): mixed {
+    return ConfigStore::get(PlayerPreferences::class)->get($key, $default);
+  }
+}
+
+if (! function_exists('set_player_pref') ) {
+  /**
+   * Sets the player preference with the given key to the given value.
+   *
+   * @param string $key The key of the player preference.
+   * @param mixed $value The value to set the player preference to.
+   * @return void
+   */
+  function set_player_pref(string $key, mixed $value): void {
+    ConfigStore::get(PlayerPreferences::class)->set($key, $value);
   }
 }

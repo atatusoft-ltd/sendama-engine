@@ -38,6 +38,7 @@ use Sendama\Engine\UI\Windows\Window;
 use Sendama\Engine\Util\Config\AppConfig;
 use Sendama\Engine\Util\Config\ConfigStore;
 use Sendama\Engine\Util\Config\InputConfig;
+use Sendama\Engine\Util\Config\PlayerPreferences;
 use Sendama\Engine\Util\Path;
 use Throwable;
 
@@ -170,6 +171,7 @@ class Game implements ObservableInterface
   {
     ConfigStore::put(AppConfig::class, new AppConfig());
     ConfigStore::put(InputConfig::class, new InputConfig());
+    ConfigStore::put(PlayerPreferences::class, new PlayerPreferences());
   }
 
   /**
