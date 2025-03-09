@@ -36,9 +36,9 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   protected array $settings = [];
   /**
-   * @var SceneNodeInterface|null $activeScene The currently active scene.
+   * @var SceneNodeInterface|null $activeSceneNode The currently active scene node.
    */
-  protected ?SceneNodeInterface $activeScene = null;
+  protected ?SceneNodeInterface $activeSceneNode = null;
   /**
    * @var EventManager $eventManager The event manager.
    */
@@ -74,7 +74,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function getActiveScene(): ?SceneInterface
   {
-    return $this->activeScene?->getScene();
+    return $this->activeSceneNode?->getScene();
   }
 
   /**
@@ -128,7 +128,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function getPreviousSceneNode(): ?SceneNodeInterface
   {
-    return $this->activeScene?->getPreviousNode();
+    return $this->activeSceneNode?->getPreviousNode();
   }
 
   /**
@@ -168,7 +168,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
     }
 
     $this->stop();
-    $this->activeScene = new SceneNode($sceneToBeLoaded->loadSceneSettings($this->settings), $this->activeScene);
+    $this->activeSceneNode = new SceneNode($sceneToBeLoaded->loadSceneSettings($this->settings), $this->activeSceneNode);
 
     $this->eventManager->dispatchEvent(new SceneEvent(SceneEventType::LOAD_END));
 
@@ -181,7 +181,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function stop(): void
   {
-    $this->activeScene?->getScene()->stop();
+    $this->activeSceneNode?->getScene()->stop();
   }
 
   /**
@@ -189,7 +189,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function start(): void
   {
-    $this->activeScene?->getScene()->start();
+    $this->activeSceneNode?->getScene()->start();
   }
 
   /**
@@ -197,7 +197,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function render(): void
   {
-    $this->activeScene?->getScene()->render();
+    $this->activeSceneNode?->getScene()->render();
   }
 
   /**
@@ -205,7 +205,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function renderAt(?int $x = null, ?int $y = null): void
   {
-    $this->activeScene?->getScene()->renderAt($x, $y);
+    $this->activeSceneNode?->getScene()->renderAt($x, $y);
   }
 
   /**
@@ -213,7 +213,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function erase(): void
   {
-    $this->activeScene?->getScene()->erase();
+    $this->activeSceneNode?->getScene()->erase();
   }
 
   /**
@@ -221,7 +221,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function eraseAt(?int $x = null, ?int $y = null): void
   {
-    $this->activeScene?->getScene()->eraseAt($x, $y);
+    $this->activeSceneNode?->getScene()->eraseAt($x, $y);
   }
 
   /**
@@ -229,7 +229,7 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function resume(): void
   {
-    $this->activeScene?->getScene()->resume();
+    $this->activeSceneNode?->getScene()->resume();
   }
 
   /**
@@ -237,14 +237,14 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function suspend(): void
   {
-    $this->activeScene?->getScene()->suspend();
+    $this->activeSceneNode?->getScene()->suspend();
   }
 
   public function updatePhysics(): void
   {
-    if ($this->activeScene) {
-      $this->activeScene->getScene()->updatePhysics();
-      $this->eventManager->dispatchEvent(new SceneEvent(SceneEventType::UPDATE_PHYSICS, $this->activeScene->getScene()));
+    if ($this->activeSceneNode) {
+      $this->activeSceneNode->getScene()->updatePhysics();
+      $this->eventManager->dispatchEvent(new SceneEvent(SceneEventType::UPDATE_PHYSICS, $this->activeSceneNode->getScene()));
     }
   }
 
@@ -253,9 +253,9 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function update(): void
   {
-    if ($this->activeScene) {
-      $this->activeScene->getScene()->update();
-      $this->eventManager->dispatchEvent(new SceneEvent(SceneEventType::UPDATE, $this->activeScene->getScene()));
+    if ($this->activeSceneNode) {
+      $this->activeSceneNode->getScene()->update();
+      $this->eventManager->dispatchEvent(new SceneEvent(SceneEventType::UPDATE, $this->activeSceneNode->getScene()));
     }
   }
 
