@@ -17,12 +17,15 @@ class Texture2D implements Stringable
 {
   use DimensionTrait;
 
+  /**
+   * The texture extension.
+   */
   const string TEXTURE_EXTENSION = '.texture';
 
   /**
    * The pixels of the texture.
    *
-   * @var string[] The pixels of the texture.
+   * @var string[][] The pixels of the texture.
    */
   protected array $pixels = [];
 
@@ -33,12 +36,7 @@ class Texture2D implements Stringable
    * @param int $width The width of the texture.
    * @param int $height The height of the texture.
    */
-  public function __construct(
-    private readonly string $path,
-    int $width = -1,
-    int $height = -1,
-    private ?Color $color = null
-  )
+  public function __construct(private readonly string $path, int $width = -1, int $height = -1, private ?Color $color = null, protected array $options = [])
   {
     if (!str_ends_with($this->getAbsolutePath(), self::TEXTURE_EXTENSION)) {
       throw new InvalidArgumentException("The file '" . $this->getAbsolutePath() . "' is not a valid texture file.");
@@ -61,6 +59,10 @@ class Texture2D implements Stringable
    */
   private function getAbsolutePath(): string
   {
+    if (str_starts_with($this->path, '/')) {
+      return $this->path;
+    }
+
     return Path::join(Path::getWorkingDirectoryAssetsPath(), $this->path);
   }
 
@@ -78,11 +80,23 @@ class Texture2D implements Stringable
 
     // Convert the image to an array of pixels.
     $imageMatrix = explode("\n", $image);
+    $height = 0;
+    $longestRow = 0;
 
     foreach ($imageMatrix as $row) {
       $width = $this->width < 1 ? strlen($row) : $this->width;
       $chunks = str_split(substr($row, 0, $width));
       $this->pixels[] = $chunks;
+      $longestRow = max($longestRow, $width);
+      $height++;
+    }
+
+    if ($this->width < 1) {
+      $this->setWidth($longestRow);
+    }
+
+    if ($this->height < 1) {
+      $this->setHeight($height);
     }
   }
 
@@ -95,6 +109,16 @@ class Texture2D implements Stringable
   public function setColor(?Color $color): void
   {
     $this->color = $color;
+  }
+
+  /**
+   * Returns the color of the texture.
+   *
+   * @return Color|null The color of the texture.
+   */
+  public function getColor(): ?Color
+  {
+    return $this->color;
   }
 
   /**
@@ -123,7 +147,7 @@ class Texture2D implements Stringable
   public function setPixel(int $x, int $y, string $pixel): void
   {
     if ($x < 0 || $x >= $this->width || $y < 0 || $y >= $this->height) {
-      throw new InvalidArgumentException("The pixel at ($x, $y) does not exist.");
+      throw new InvalidArgumentException("The pixel at ($x, $y) does not fall within range (0, 0) to ($this->width, $this->height).");
     }
 
     $output = $pixel;
@@ -135,27 +159,26 @@ class Texture2D implements Stringable
     $this->pixels[$y][$x] = substr($output, 0, 1);
   }
 
-  public function __toString(): string
-  {
-    $output = '';
-    foreach ($this->getPixels() as $row => $pixel) {
-      if (is_array($row)) {
-        $output .= implode('', $pixel) . PHP_EOL;
-      } else {
-        $output .= $pixel . PHP_EOL;
-      }
-    }
-
-    return $output;
-  }
-
   /**
    * Returns the pixels of the texture.
    *
-   * @return string[] The pixels of the texture.
+   * @return string[][] The pixels of the texture.
    */
   public function getPixels(): array
   {
     return $this->pixels;
+  }
+
+  public function __toString(): string
+  {
+    $output = '';
+
+    foreach ($this->getPixels() as $pixel) {
+      if (is_array($pixel)) {
+        $output .= implode($pixel);
+      }
+    }
+
+    return $output;
   }
 }
