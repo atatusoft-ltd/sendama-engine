@@ -455,6 +455,7 @@ class GameObject implements GameObjectInterface
   public function activate(): void
   {
     $this->active = true;
+    $this->getRenderer()->render();
   }
 
   /**
@@ -463,6 +464,7 @@ class GameObject implements GameObjectInterface
   public function deactivate(): void
   {
     $this->active = false;
+    $this->getRenderer()->erase();
   }
 
   /**
