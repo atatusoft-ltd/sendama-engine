@@ -5,6 +5,7 @@ namespace Sendama\Engine\Core\Scenes\Interfaces;
 use Sendama\Engine\Core\GameObject;
 use Sendama\Engine\Core\Grid;
 use Sendama\Engine\Core\Interfaces\CanAwake;
+use Sendama\Engine\Core\Interfaces\CanLoad;
 use Sendama\Engine\Core\Interfaces\CanRender;
 use Sendama\Engine\Core\Interfaces\CanResume;
 use Sendama\Engine\Core\Interfaces\CanStart;
@@ -20,7 +21,7 @@ use Serializable;
  *
  * @package Sendama\Engine\Core\Interfaces
  */
-interface SceneInterface extends CanStart, CanUpdate, CanRender, CanResume, CanAwake, Serializable
+interface SceneInterface extends CanStart, CanUpdate, CanRender, CanResume, CanAwake, Serializable, CanLoad
 {
   /**
    * @return string The name of the scene.

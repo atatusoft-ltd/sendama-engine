@@ -98,6 +98,22 @@ abstract class AbstractScene implements SceneInterface
   /**
    * @inheritDoc
    */
+  public function load(): void
+  {
+    // Do nothing. This method is meant to be overridden.
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function unload(): void
+  {
+    // Do nothing. This method is meant to be overridden.
+  }
+
+  /**
+   * @inheritDoc
+   */
   public function getName(): string
   {
     return $this->name;
@@ -231,8 +247,16 @@ abstract class AbstractScene implements SceneInterface
     $this->camera->update();
   }
 
+  /**
+   * @inheritDoc
+   */
   public function updatePhysics(): void
   {
+    foreach ($this->rootGameObjects as $gameObject) {
+      if ($gameObject->isActive()) {
+        $gameObject->fixedUpdate();
+      }
+    }
     $this->physics->simulate();
   }
 

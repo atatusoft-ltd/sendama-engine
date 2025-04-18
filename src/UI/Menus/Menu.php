@@ -7,6 +7,7 @@ use Closure;
 use Sendama\Engine\Core\Rect;
 use Sendama\Engine\Core\Scenes\SceneManager;
 use Sendama\Engine\Core\Vector2;
+use Sendama\Engine\Events\Enumerations\MenuEventType;
 use Sendama\Engine\Events\Interfaces\EventInterface;
 use Sendama\Engine\Events\Interfaces\ObservableInterface;
 use Sendama\Engine\Events\Interfaces\ObserverInterface;
@@ -272,6 +273,7 @@ class Menu implements MenuInterface
     }
 
     $this->window->setContent($content);
+    $this->notify(new MenuEvent(MenuEventType::UPDATE_CONTENT));
   }
 
   /**

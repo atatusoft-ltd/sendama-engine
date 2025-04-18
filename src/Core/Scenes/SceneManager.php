@@ -3,6 +3,7 @@
 namespace Sendama\Engine\Core\Scenes;
 
 use Assegai\Collections\ItemList;
+use Sendama\Engine\Core\Interfaces\CanLoad;
 use Sendama\Engine\Core\Interfaces\CanRender;
 use Sendama\Engine\Core\Interfaces\CanResume;
 use Sendama\Engine\Core\Interfaces\CanStart;
@@ -21,7 +22,7 @@ use Sendama\Engine\Exceptions\Scenes\SceneNotFoundException;
  *
  * @package Sendama\Engine\Core\Scenes
  */
-final class SceneManager implements SingletonInterface, CanStart, CanResume, CanUpdate, CanRender
+final class SceneManager implements SingletonInterface, CanStart, CanResume, CanUpdate, CanRender, CanLoad
 {
   /**
    * @var SceneManager|null $instance The instance of the SceneManager.
@@ -168,9 +169,9 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
     }
 
     $this->stop();
+    $this->unload();
     $this->activeSceneNode = new SceneNode($sceneToBeLoaded->loadSceneSettings($this->settings), $this->activeSceneNode);
-
-    $this->eventManager->dispatchEvent(new SceneEvent(SceneEventType::LOAD_END));
+    $this->load();
 
     $this->start();
     return $this;
@@ -253,6 +254,8 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
    */
   public function update(): void
   {
+    $this->updatePhysics();
+
     if ($this->activeSceneNode) {
       $this->activeSceneNode->getScene()->update();
       $this->eventManager->dispatchEvent(new SceneEvent(SceneEventType::UPDATE, $this->activeSceneNode->getScene()));
@@ -280,5 +283,22 @@ final class SceneManager implements SingletonInterface, CanStart, CanResume, Can
   public function getSettings(?string $key = null): mixed
   {
     return $this->settings[$key] ?? $this->settings;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function load(): void
+  {
+    $this->activeSceneNode->getScene()->load();
+    $this->eventManager->dispatchEvent(new SceneEvent(SceneEventType::LOAD_END));
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function unload(): void
+  {
+    $this->activeSceneNode?->getScene()->unload();
   }
 }
